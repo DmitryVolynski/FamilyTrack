@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "994450542296",
+    "firebase_url": "https://familytrack-volynsky-1.firebaseio.com",
+    "project_id": "familytrack-volynsky-1",
+    "storage_bucket": "familytrack-volynsky-1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:994450542296:android:19b605741f6b213c",
+        "android_client_info": {
+          "package_name": "com.volynski.familytrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "994450542296-cnp3qee96s737dbggug542af6dssih2m.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "994450542296-eh0e82efe8ghlrnhb0rug3tsch4j07l0.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "994450542296-n127l0a7la62hqe2m8t682ap7ls2mssd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.volynski.familytrack",
+            "certificate_hash": "12dd54a0a206fd7ecf561f7c6d46eb167ec2fc01"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb3BGSiewrxF9bfgox7vs06BN2FpV2mmU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "994450542296-cnp3qee96s737dbggug542af6dssih2m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
