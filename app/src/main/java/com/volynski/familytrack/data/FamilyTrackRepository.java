@@ -16,8 +16,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.volynski.familytrack.data.model.firebase.Group;
-import com.volynski.familytrack.data.model.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.User;
 
 /**
  * Created by DmitryVolynski on 17.08.2017.

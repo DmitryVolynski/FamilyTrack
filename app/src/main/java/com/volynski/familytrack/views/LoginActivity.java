@@ -27,7 +27,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
-import com.volynski.familytrack.data.model.firebase.User;
+import com.volynski.familytrack.data.models.firebase.User;
 
 public class LoginActivity extends AppCompatActivity implements
         ConnectionCallbacks,
@@ -44,6 +44,7 @@ public class LoginActivity extends AppCompatActivity implements
     private Button mSignOutButton;
     private Button mRevokeButton;
     private Button mCheckUserExistsButton;
+    private Button mMainActivityButton;
     
     private TextView mStatus;
     private GoogleApiClient mGoogleApiClient;
@@ -60,7 +61,8 @@ public class LoginActivity extends AppCompatActivity implements
         mSignOutButton = (Button) findViewById(R.id.sign_out_button);
         mRevokeButton = (Button) findViewById(R.id.revoke_access_button);
         mCheckUserExistsButton = (Button) findViewById(R.id.check_user_exists_button);
-        
+        mMainActivityButton = (Button) findViewById(R.id.button_login_goto_main_activity);
+
         mStatus = (TextView) findViewById(R.id.statuslabel);
 
         // Add click listeners for the buttons
@@ -71,7 +73,8 @@ public class LoginActivity extends AppCompatActivity implements
         mSignOutButton.setOnClickListener(this);
         mRevokeButton.setOnClickListener(this);
         mCheckUserExistsButton.setOnClickListener(this);
-        
+        mMainActivityButton.setOnClickListener(this);
+
         mStatus = (TextView) findViewById(R.id.statuslabel);
 
         GoogleSignInOptions gso = new
@@ -168,7 +171,15 @@ public class LoginActivity extends AppCompatActivity implements
                 //String a = UUID.randomUUID().toString();
                 checkUserExists();
                 break;
+            case R.id.button_login_goto_main_activity:
+                proceedToMainActivity();
+                break;
         }
+    }
+
+    private void proceedToMainActivity() {
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
     }
 
     private void checkUserExists() {

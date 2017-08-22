@@ -46,6 +46,12 @@
             android:layout_height="wrap_content"
             android:text="CHECK USER" />
 
+        <Button
+            android:id="@+id/button_login_goto_main_activity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="MAIN" />
+
         <TextView
             android:id="@+id/statuslabel"
             android:layout_width="wrap_content"

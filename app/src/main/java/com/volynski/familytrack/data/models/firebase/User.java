@@ -1,4 +1,4 @@
-package com.volynski.familytrack.data.model.firebase;
+package com.volynski.familytrack.data.models.firebase;
 
 import com.google.firebase.database.Exclude;
 

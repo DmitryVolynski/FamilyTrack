@@ -1,4 +1,4 @@
-package com.volynski.familytrack.data.model.firebase;
+package com.volynski.familytrack.data.models.firebase;
 
 /**
  * Created by DmitryVolynski on 21.08.2017.

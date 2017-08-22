@@ -2,8 +2,8 @@ package com.volynski.familytrack.data;
 
 import android.support.annotation.NonNull;
 
-import com.volynski.familytrack.data.model.firebase.Group;
-import com.volynski.familytrack.data.model.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.User;
 
 /**
  * Created by DmitryVolynski on 16.08.2017.

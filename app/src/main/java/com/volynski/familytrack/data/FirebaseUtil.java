@@ -1,7 +1,7 @@
 package com.volynski.familytrack.data;
 
 import com.google.firebase.database.DataSnapshot;
-import com.volynski.familytrack.data.model.firebase.User;
+import com.volynski.familytrack.data.models.firebase.User;
 
 /**
  * Created by DmitryVolynski on 21.08.2017.
