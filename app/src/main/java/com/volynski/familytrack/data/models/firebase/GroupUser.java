@@ -1,14 +1,17 @@
 package com.volynski.familytrack.data.models.firebase;
 
+import com.google.firebase.database.Exclude;
+
 /**
  * Created by DmitryVolynski on 21.08.2017.
  */
 
-public class Membership {
+public class GroupUser {
     private String mUserUuid;
     private int mRoleId;
     private int mStatusId;
 
+    @Exclude
     public String getUserUuid() {
         return mUserUuid;
     }
@@ -31,5 +34,11 @@ public class Membership {
 
     public void setStatusId(int mStatusId) {
         this.mStatusId = mStatusId;
+    }
+
+    public GroupUser(String userUuid, int roleId, int statusId) {
+        mUserUuid = userUuid;
+        mRoleId = roleId;
+        mStatusId = statusId;
     }
 }

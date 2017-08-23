@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -28,6 +29,7 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.AuthUtil;
 
 public class LoginActivity extends AppCompatActivity implements
         ConnectionCallbacks,
@@ -139,6 +141,8 @@ public class LoginActivity extends AppCompatActivity implements
             mGoogleSignInAccount = result.getSignInAccount();
             mStatus.setText(mGoogleSignInAccount.getDisplayName());
             mSignInButton.setEnabled(false);
+
+            AuthUtil.saveCurrentUserInPrefs(this, mGoogleSignInAccount);
         } else {
             // Signed out, show unauthenticated UI.
             //updateUI(false);
@@ -178,8 +182,28 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void proceedToMainActivity() {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
+        final FamilyTrackDataSource dataSource = new FamilyTrackRepository(mGoogleSignInAccount);
+        dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(), new FamilyTrackDataSource.GetUserByEmailCallback() {
+            @Override
+            public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
+                if (result.getData() == null) {
+                    User user = new User(mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
+                            mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(), "4838437", null);
+                    dataSource.createUser(user, new FamilyTrackDataSource.CreateUserCallback() {
+                        @Override
+                        public void onCreateUserCallback(FirebaseResult<User> result) {
+                            if (result.getData() != null) {
+                                // TODO Continue here
+                                // AuthUtil.saveCurrentUserInPrefs(getApplicationContext(), result.getData());
+                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                                startActivity(intent);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
     }
 
     private void checkUserExists() {
@@ -211,16 +235,19 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
-        if (result.getResult() == null) {
+        if (result.getData() == null) {
             createNewUser();
         }
     }
 
     private void createNewUser() {
-        FamilyTrackDataSource dataSource = new FamilyTrackRepository(mGoogleSignInAccount);
+        /*
+        FamilyTrackDataSource dataSource =
+                new FamilyTrackRepository(mGoogleSignInAccount);
 
         User user = new User(mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
-                mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(), "4838437", 1, "1");
+                mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(), "4838437", null);
         dataSource.createUser(user);
+        */
     }
 }

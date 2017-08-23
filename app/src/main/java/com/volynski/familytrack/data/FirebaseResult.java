@@ -5,16 +5,16 @@ package com.volynski.familytrack.data;
  */
 
 public class FirebaseResult<T> {
-    private T mResult;
+    private T mData;
     private int mResultCode;
     private Exception mException;
 
-    public T getResult() {
-        return mResult;
+    public T getData() {
+        return mData;
     }
 
-    public void setResult(T mResult) {
-        this.mResult = mResult;
+    public void setData(T mResult) {
+        this.mData = mResult;
     }
 
     public Exception getException() {
@@ -33,14 +33,14 @@ public class FirebaseResult<T> {
         this.mResultCode = mResultCode;
     }
 
-    public FirebaseResult(T result) {
-        this.mResult = result;
+    public FirebaseResult(T data) {
+        this.mData = data;
         this.mResultCode = 0;
         this.mException = null;
     }
 
     public FirebaseResult(int resultCode, Exception e) {
-        this.mResult = null;
+        this.mData = null;
         this.mResultCode = resultCode;
         this.mException = e;
     }

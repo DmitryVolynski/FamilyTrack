@@ -1,5 +1,6 @@
 package com.volynski.familytrack.views.fragments;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -24,9 +25,9 @@ public class UsersOnMapFragment extends Fragment {
 
     FragmentUsersOnMapBinding mBinding;
 
-    public static UsersOnMapFragment newInstance() {
+    public static UsersOnMapFragment newInstance(Context context) {
         UsersOnMapFragment result = new UsersOnMapFragment();
-        result.setViewModel(new UsersOnMapViewModel());
+        result.setViewModel(new UsersOnMapViewModel(context));
         return result;
     }
 

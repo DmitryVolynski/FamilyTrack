@@ -1,6 +1,7 @@
 package com.volynski.familytrack.data.models.firebase;
 
 import com.google.firebase.database.Exclude;
+import com.google.gson.Gson;
 
 /**
  * Created by DmitryVolynski on 16.08.2017.
@@ -14,44 +15,40 @@ public class User {
     public static final int USER_INVITED = 1;
     public static final int USER_JOINED = 2;
 
-    private String mGroupUuid;
     private String mFamilyName;
     private String mGivenName;
     private String mPhotoUrl;
     private String mEmail;
     private String mPhone;
     private String mUserUuid;
-    private int mRoleId;
-    private int mStatusId;
+    private GroupUser mUserGroup;
 
     public static User getTestUser() {
-        return new User("Volynsky", "Dmitry", "http://someurl", "volynski@hotmail.com", "1234567", ADMIN_ROLE, "");
+        return new User("Volynsky", "Dmitry", "http://someurl", "volynski@hotmail.com", "1234567", null);
     }
 
     public User() {}
 
     public User(String familyName, String givenName, String photoUrl,
-                String email, String phone, int roleId, String groupUuid) {
+                String email, String phone, GroupUser groupUser) {
         //this.mUserUuid = UUID.randomUUID().toString();
         this.mFamilyName = familyName;
         this.mGivenName = givenName;
         this.mPhotoUrl = photoUrl;
         this.mEmail = email;
         this.mPhone = phone;
-        this.mRoleId = roleId;
-        this.mGroupUuid = groupUuid;
+        this.mUserGroup = groupUser;
     }
 
     public User(String uuid, String familyName, String givenName, String photoUrl,
-                String email, String phone, int roleId, String groupUuid) {
+                String email, String phone, GroupUser groupUser) {
         this.mUserUuid = uuid;
         this.mFamilyName = familyName;
         this.mGivenName = givenName;
         this.mPhotoUrl = photoUrl;
         this.mEmail = email;
         this.mPhone = phone;
-        this.mRoleId = roleId;
-        this.mGroupUuid = groupUuid;
+        this.mUserGroup = groupUser;
     }
 
     @Exclude
@@ -103,30 +100,19 @@ public class User {
         this.mPhone = phone;
     }
 
-    @Exclude
-    public int getRoleId() {
-        return mRoleId;
+    public GroupUser getUserGroup() {
+        return mUserGroup;
     }
 
-    public void setRoleId(int roleId) {
-        this.mRoleId = roleId;
+    public void setUserGroup(GroupUser mUserGroup) {
+        this.mUserGroup = mUserGroup;
     }
 
-    @Exclude
-    public String getGroupUuid() {
-        return mGroupUuid;
+    public String ToJson() {
+        return (new Gson()).toJson(this);
     }
 
-    public void setGroupUuid(String mGroupUuid) {
-        this.mGroupUuid = mGroupUuid;
-    }
-
-    @Exclude
-    public int getStatusId() {
-        return mStatusId;
-    }
-
-    public void setStatusId(int mStatusId) {
-        this.mStatusId = mStatusId;
+    public static User getInstanceFromJson(String jsonUser) {
+        return (new Gson()).fromJson(jsonUser, User.class);
     }
 }

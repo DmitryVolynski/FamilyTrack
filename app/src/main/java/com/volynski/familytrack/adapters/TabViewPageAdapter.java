@@ -32,10 +32,10 @@ public class TabViewPageAdapter extends FragmentPagerAdapter {
         Fragment result = null;
         switch (position) {
             case 0:
-                result = UsersListFragment.newInstance();
+                result = UsersListFragment.newInstance(context);
                 break;
             case 1:
-                result = UsersOnMapFragment.newInstance();
+                result = UsersOnMapFragment.newInstance(context);
                 break;
         }
         return result;

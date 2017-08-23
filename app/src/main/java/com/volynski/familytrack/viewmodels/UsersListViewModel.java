@@ -1,6 +1,7 @@
 package com.volynski.familytrack.viewmodels;
 
 
+import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
@@ -10,12 +11,19 @@ import android.util.Log;
 import android.view.View;
 
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.data.FamilyTrackDataSource;
+import com.volynski.familytrack.data.FamilyTrackRepository;
+import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.ui.UsersListItemModel;
+import com.volynski.familytrack.utils.AuthUtil;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+
+import timber.log.Timber;
 
 /**
  * Created by DmitryVolynski on 22.08.2017.
@@ -26,11 +34,13 @@ public class UsersListViewModel
         implements View.OnClickListener {
 
     private final static String TAG = UsersListViewModel.class.getSimpleName();
+    private final Context mContext;
 
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
     public final ObservableList<UsersListItemModel> items = new ObservableArrayList<>();
 
-    public UsersListViewModel() {
+    public UsersListViewModel(Context context) {
+        mContext = context.getApplicationContext();
     }
 
     @Override
@@ -81,6 +91,15 @@ public class UsersListViewModel
      * Current user (who created the group) becomes an Admin of this group
      */
     private void createGroup() {
-        Log.v(TAG, "createGroup started");
+        Timber.v("createGroup started");
+
+    }
+
+    public void createNewGroup(String groupName) {
+        Timber.v("Create group: " + groupName);
+        User currentUser = AuthUtil.getCurrentUserFromPrefs(mContext);
+
+        FamilyTrackDataSource dataSource = new FamilyTrackRepository(null);
+        dataSource.createGroup(new Group(groupName), currentUser.getUserUuid());
     }
 }

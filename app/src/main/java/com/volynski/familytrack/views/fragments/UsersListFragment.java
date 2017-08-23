@@ -1,5 +1,6 @@
 package com.volynski.familytrack.views.fragments;
 
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
@@ -30,9 +32,9 @@ public class UsersListFragment
 
     FragmentUsersListBinding mBinding;
 
-    public static UsersListFragment newInstance() {
+    public static UsersListFragment newInstance(Context context) {
         UsersListFragment result = new UsersListFragment();
-        result.setViewModel(new UsersListViewModel());
+        result.setViewModel(new UsersListViewModel(context));
         return result;
     }
 
@@ -67,28 +69,34 @@ public class UsersListFragment
 
         // inflate the layout of the popup window
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
-        View popupView = inflater.inflate(R.layout.dialog_create_group, null);
+        final View popupView = inflater.inflate(R.layout.dialog_create_group, null);
 
         // create the popup window
-        int width = LinearLayout.LayoutParams.MATCH_PARENT;
-        int height = LinearLayout.LayoutParams.MATCH_PARENT;
+        int width =  (int) Math.round(0.8 * mainLayout.getWidth());  //LinearLayout.LayoutParams.WRAP_CONTENT;
+        int height = (int) Math.round(0.8 * mainLayout.getHeight());  //LinearLayout.LayoutParams.WRAP_CONTENT;
 
         boolean focusable = true; // lets taps outside the popup also dismiss it
         final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
 
         // show the popup window
         popupWindow.showAtLocation(mainLayout, Gravity.CENTER, 0, 0);
-
-        // dismiss the popup window when touched
-        /*
-        popupView.setOnTouchListener(new View.OnTouchListener() {
+        popupView.findViewById(R.id.button_dialogcreategroup_cancel)
+                .setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public void onClick(View v) {
                 popupWindow.dismiss();
-                return true;
             }
         });
-        */
+
+        popupView.findViewById(R.id.button_dialogcreategroup_create)
+                .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        EditText editText = (EditText) popupView.findViewById(R.id.edittext_dialogcreategroup_groupname);
+                        mViewModel.createNewGroup(editText.getText().toString());
+                        popupWindow.dismiss();
+                    }
+                });
     }
 
     public void setViewModel(UsersListViewModel mViewModel) {

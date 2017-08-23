@@ -17,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.GroupUser;
 import com.volynski.familytrack.data.models.firebase.User;
 
 /**
@@ -42,34 +43,44 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         Log.d(TAG, "firebaseAuthWithGooogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+        if (mFirebaseAuth.getCurrentUser() == null) {
+            mFirebaseAuth.signInWithCredential(credential)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (!task.isSuccessful()) {
+                                Log.w(TAG, "signInWithCredential", task.getException());
+                            }
                         }
-                    }
-                });
+                    });
+        }
     }
+
 
     private FirebaseDatabase getFirebaseConnection() {
         if (mFirebaseDatabase == null) {
-            firebaseAuthWithGoogle(mGoogleSignInAccount);
+            //firebaseAuthWithGoogle(mGoogleSignInAccount);
             mFirebaseDatabase = FirebaseDatabase.getInstance();
         }
         return mFirebaseDatabase;
     }
 
     @Override
-    public void createUser(@NonNull User user) {
+    public void createUser(@NonNull User user, final CreateUserCallback callback) {
         DatabaseReference ref = getFirebaseConnection().getReference("users");
-        ref.push().setValue(user);
+        DatabaseReference newUserRef = ref.push();
+
+        newUserRef.setValue(user);
+        if (callback != null) {
+            // TODO Check this. Don't like it
+            user.setUserUuid(newUserRef.getKey());
+            callback.onCreateUserCallback(new FirebaseResult<User>(user));
+        }
     }
 
     @Override
@@ -83,8 +94,25 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void getUserByUuid(@NonNull String userUuid) {
+    public void getUserByUuid(@NonNull String userUuid, @NonNull final GetUserByUuidCallback callback) {
+        DatabaseReference ref = getFirebaseConnection().getReference("users");
+        Query query = ref.orderByKey().equalTo(userUuid).limitToFirst(1);
 
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = null;
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    user = FirebaseUtil.getUserFromSnapshot(dataSnapshot.getChildren().iterator().next());
+                };
+                callback.onGetUserByUuidCompleted(new FirebaseResult<User>(user));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
@@ -110,8 +138,18 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void createGroup(@NonNull Group group) {
-
+    public void createGroup(@NonNull final Group group, String adminUuid) {
+        getUserByUuid(adminUuid, new GetUserByUuidCallback() {
+            @Override
+            public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                if (result.getData() != null) {
+                    group.getMembers().put(result.getData().getUserUuid(),
+                            new GroupUser(result.getData().getUserUuid(), User.ADMIN_ROLE, User.USER_JOINED));
+                    DatabaseReference ref = getFirebaseConnection().getReference("groups");
+                    ref.push().setValue(group);
+                }
+            }
+        });
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.volynski.familytrack.viewmodels;
 
+import android.content.Context;
 import android.databinding.BaseObservable;
 
 /**
@@ -7,4 +8,9 @@ import android.databinding.BaseObservable;
  */
 
 public class UsersOnMapViewModel extends BaseObservable {
+    private final Context mContext;
+
+    public UsersOnMapViewModel(Context context) {
+        mContext = context.getApplicationContext();
+    }
 }

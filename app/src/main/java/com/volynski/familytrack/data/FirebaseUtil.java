@@ -8,6 +8,12 @@ import com.volynski.familytrack.data.models.firebase.User;
  */
 
 public class FirebaseUtil {
+
+    /**
+     *
+     * @param snapshot
+     * @return
+     */
     public static User getUserFromSnapshot(DataSnapshot snapshot) {
         User user = (User)snapshot.getValue(User.class);
         user.setUserUuid(snapshot.getKey());
