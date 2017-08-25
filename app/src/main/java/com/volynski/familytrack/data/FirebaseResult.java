@@ -2,6 +2,11 @@ package com.volynski.familytrack.data;
 
 /**
  * Created by DmitryVolynski on 21.08.2017.
+ *
+ * Universal class to return result from db
+ *      If operation succeed getData will return the result of T type
+ *      If operation failed getResultCode returns an error code and getException return Exception
+ *
  */
 
 public class FirebaseResult<T> {

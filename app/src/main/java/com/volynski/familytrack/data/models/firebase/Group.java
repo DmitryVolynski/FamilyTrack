@@ -1,5 +1,7 @@
 package com.volynski.familytrack.data.models.firebase;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,10 +11,12 @@ import java.util.Map;
  */
 
 public class Group {
+    public static final String REGISTERED_USERS_GROUP_KEY = "registered_users";
     private String mGroupUuid;
     private String mName;
-    private Map<String, GroupUser> mMembers;
+    private Map<String, User> mMembers;
 
+    @Exclude
     public String getGroupUuid() {
         return mGroupUuid;
     }
@@ -44,17 +48,17 @@ public class Group {
 
     public Group() {}
 
-    public Group(String groupUuid, String name, Map<String, GroupUser> members) {
+    public Group(String groupUuid, String name, Map<String, User> members) {
         this.mGroupUuid = groupUuid;
         this.mName = name;
         this.mMembers = members;
     }
 
-    public Map<String, GroupUser> getMembers() {
+    public Map<String, User> getMembers() {
         return mMembers;
     }
 
-    public void setMembers(Map<String, GroupUser> mMembers) {
+    public void setMembers(Map<String, User> mMembers) {
         this.mMembers = mMembers;
     }
 }

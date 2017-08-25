@@ -16,7 +16,10 @@ import android.widget.PopupWindow;
 
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.data.FamilyTrackRepository;
+import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentUsersListBinding;
+import com.volynski.familytrack.utils.AuthUtil;
 import com.volynski.familytrack.viewmodels.UsersListViewModel;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
@@ -29,13 +32,22 @@ public class UsersListFragment
         extends Fragment {
     private UsersListViewModel mViewModel;
     private static final String TAG = UsersListFragment.class.getSimpleName();
+    private User mCurrentUser;
 
     FragmentUsersListBinding mBinding;
 
     public static UsersListFragment newInstance(Context context) {
         UsersListFragment result = new UsersListFragment();
-        result.setViewModel(new UsersListViewModel(context));
+
+        // TODO проверить это место. может быть создание модели именно здесь неверно.
+        result.setViewModel(new UsersListViewModel(context, new FamilyTrackRepository(null)));
         return result;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mViewModel.start(mCurrentUser);
     }
 
     @Override
@@ -48,6 +60,8 @@ public class UsersListFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        mCurrentUser = AuthUtil.getCurrentUserFromPrefs(getContext());
+
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_users_list,
                 container,

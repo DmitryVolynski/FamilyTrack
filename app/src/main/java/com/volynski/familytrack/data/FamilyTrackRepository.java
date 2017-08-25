@@ -17,8 +17,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.data.models.firebase.Group;
-import com.volynski.familytrack.data.models.firebase.GroupUser;
 import com.volynski.familytrack.data.models.firebase.User;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import timber.log.Timber;
 
 /**
  * Created by DmitryVolynski on 17.08.2017.
@@ -31,14 +36,11 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     private GoogleSignInAccount mGoogleSignInAccount;
     private FirebaseAuth mFirebaseAuth;
 
+    // TODO проверить необходимость передачи GoogleSignInAccount в конструктор
     public FamilyTrackRepository(GoogleSignInAccount account) {
         mGoogleSignInAccount = account;
     }
 
-    /***
-     *
-     * @param acct
-     */
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGooogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
@@ -61,7 +63,6 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         }
     }
 
-
     private FirebaseDatabase getFirebaseConnection() {
         if (mFirebaseDatabase == null) {
             //firebaseAuthWithGoogle(mGoogleSignInAccount);
@@ -72,14 +73,15 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     @Override
     public void createUser(@NonNull User user, final CreateUserCallback callback) {
-        DatabaseReference ref = getFirebaseConnection().getReference("users");
+
+        DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
         DatabaseReference newUserRef = ref.push();
 
         newUserRef.setValue(user);
         if (callback != null) {
             // TODO Check this. Don't like it
             user.setUserUuid(newUserRef.getKey());
-            callback.onCreateUserCallback(new FirebaseResult<User>(user));
+            callback.onCreateUserCompleted(new FirebaseResult<User>(user));
         }
     }
 
@@ -95,7 +97,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     @Override
     public void getUserByUuid(@NonNull String userUuid, @NonNull final GetUserByUuidCallback callback) {
-        DatabaseReference ref = getFirebaseConnection().getReference("users");
+        DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
         Query query = ref.orderByKey().equalTo(userUuid).limitToFirst(1);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -117,7 +119,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     @Override
     public void getUserByEmail(@NonNull String userEmail, @NonNull final GetUserByEmailCallback callback) {
-        DatabaseReference ref = getFirebaseConnection().getReference("users");
+        DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
         Query query = ref.orderByChild("email").equalTo(userEmail).limitToFirst(1);
 
         query.addValueEventListener(new ValueEventListener() {
@@ -138,15 +140,40 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void createGroup(@NonNull final Group group, String adminUuid) {
+    public void createGroup(@NonNull final Group group, String adminUuid, final CreateGroupCallback callback) {
         getUserByUuid(adminUuid, new GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() != null) {
-                    group.getMembers().put(result.getData().getUserUuid(),
-                            new GroupUser(result.getData().getUserUuid(), User.ADMIN_ROLE, User.USER_JOINED));
                     DatabaseReference ref = getFirebaseConnection().getReference("groups");
-                    ref.push().setValue(group);
+                    String groupKey = ref.push().getKey();
+                    group.setGroupUuid(groupKey);
+
+                    User newAdmin = result.getData().clone();
+                    newAdmin.setRoleId(User.ROLE_ADMIN);
+                    newAdmin.setStatusId(User.USER_JOINED);
+                    newAdmin.setGroupUuid(groupKey);
+                    newAdmin.setLastKnownLocation(null);
+
+                    group.getMembers().put(newAdmin.getUserUuid(), newAdmin);
+
+
+                    // create new group at /groups/groupKey and at /users/userKey/group
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put("/groups/" + groupKey, group);
+                    childUpdates.put(Group.REGISTERED_USERS_GROUP_KEY + "/" + newAdmin.getUserUuid(), newAdmin);
+                    mFirebaseDatabase.getReference()
+                            .updateChildren(childUpdates)
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (callback != null) {
+                                callback.onCreateGroupCompleted(new FirebaseResult<Group>(group));
+                            }
+                        }
+                    });
+                } else {
+                    Timber.v("null");
                 }
             }
         });
@@ -160,5 +187,32 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     @Override
     public void removeUser(@NonNull String groupUuid, @NonNull String userUuid) {
 
+    }
+
+
+    @Override
+    public void getUsersByGroupUuid(@NonNull String groupUuid, @NonNull GetUsersByGroupUuidCallback callback) {
+        DatabaseReference ref = getFirebaseConnection().getReference("groups");
+        Query query = ref.orderByKey().equalTo(groupUuid).limitToFirst(1);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                // get Group object with all members
+                Group group = FirebaseUtil.getGroupFromSnapshot(dataSnapshot.getChildren().iterator().next());
+
+                final ArrayList<User> users = new ArrayList<User>();
+                //
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void checkObject(Object o) {
+        int i = 0;
     }
 }

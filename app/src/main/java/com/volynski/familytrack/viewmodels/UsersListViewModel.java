@@ -13,6 +13,7 @@ import android.view.View;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
+import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.ui.UsersListItemModel;
@@ -35,12 +36,17 @@ public class UsersListViewModel
 
     private final static String TAG = UsersListViewModel.class.getSimpleName();
     private final Context mContext;
+    private User mCurrentUser;
+    private boolean mIsDataLoading;
+    private FamilyTrackDataSource mRepository;
 
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
     public final ObservableList<UsersListItemModel> items = new ObservableArrayList<>();
 
-    public UsersListViewModel(Context context) {
+    public UsersListViewModel(Context context,
+                              FamilyTrackDataSource dataSource) {
         mContext = context.getApplicationContext();
+        mRepository = dataSource;
     }
 
     @Override
@@ -100,6 +106,32 @@ public class UsersListViewModel
         User currentUser = AuthUtil.getCurrentUserFromPrefs(mContext);
 
         FamilyTrackDataSource dataSource = new FamilyTrackRepository(null);
-        dataSource.createGroup(new Group(groupName), currentUser.getUserUuid());
+        dataSource.createGroup(new Group(groupName), currentUser.getUserUuid(), null);
+    }
+
+    /**
+     * Starts loading data according to group membership of the user
+     * ViewModel will populate the view if current user is member of any group
+     * @param user - User object representing current user
+     */
+    public void start(User user) {
+        mCurrentUser = user;
+        if (mCurrentUser.getStatusId() != User.USER_JOINED) {
+            return;
+        }
+
+        mIsDataLoading = true;
+        loadUsersList();
+    }
+
+    private void loadUsersList() {
+        mRepository.getUsersByGroupUuid(mCurrentUser.getGroupUuid(),
+                new FamilyTrackDataSource.GetUsersByGroupUuidCallback() {
+                    @Override
+                    public void onGetUsersByGroupUuidCompleted(FirebaseResult<List<User>> result) {
+                        int i = 0;
+                    }
+                });
+
     }
 }

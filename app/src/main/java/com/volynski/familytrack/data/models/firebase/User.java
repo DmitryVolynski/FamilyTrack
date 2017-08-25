@@ -9,11 +9,14 @@ import com.google.gson.Gson;
  */
 
 public class User {
-    public static final int ADMIN_ROLE = 1;
-    public static final int MEMBER_ROLE = 2;
+    public static final int ROLE_ADMIN = 1;
+    public static final int ROLE_MEMBER = 2;
+    public static final int ROLE_UNDEFINED = 3;
 
     public static final int USER_INVITED = 1;
     public static final int USER_JOINED = 2;
+    public static final int USER_CREATED = 3;
+
 
     private String mFamilyName;
     private String mGivenName;
@@ -21,34 +24,25 @@ public class User {
     private String mEmail;
     private String mPhone;
     private String mUserUuid;
-    private GroupUser mUserGroup;
-
-    public static User getTestUser() {
-        return new User("Volynsky", "Dmitry", "http://someurl", "volynski@hotmail.com", "1234567", null);
-    }
+    private int mRoleId;
+    private int mStatusId;
+    private String mGroupUuid;
+    private UserLocation mLastKnownLocation;
 
     public User() {}
 
-    public User(String familyName, String givenName, String photoUrl,
-                String email, String phone, GroupUser groupUser) {
-        //this.mUserUuid = UUID.randomUUID().toString();
-        this.mFamilyName = familyName;
-        this.mGivenName = givenName;
-        this.mPhotoUrl = photoUrl;
-        this.mEmail = email;
-        this.mPhone = phone;
-        this.mUserGroup = groupUser;
-    }
-
     public User(String uuid, String familyName, String givenName, String photoUrl,
-                String email, String phone, GroupUser groupUser) {
+                String email, String phone, int roleId, int statusId, String groupUuid, UserLocation location) {
         this.mUserUuid = uuid;
         this.mFamilyName = familyName;
         this.mGivenName = givenName;
         this.mPhotoUrl = photoUrl;
         this.mEmail = email;
         this.mPhone = phone;
-        this.mUserGroup = groupUser;
+        this.mRoleId = roleId;
+        this.mStatusId = statusId;
+        this.mGroupUuid = groupUuid;
+        this.mLastKnownLocation = location;
     }
 
     @Exclude
@@ -100,14 +94,6 @@ public class User {
         this.mPhone = phone;
     }
 
-    public GroupUser getUserGroup() {
-        return mUserGroup;
-    }
-
-    public void setUserGroup(GroupUser mUserGroup) {
-        this.mUserGroup = mUserGroup;
-    }
-
     public String ToJson() {
         return (new Gson()).toJson(this);
     }
@@ -115,4 +101,43 @@ public class User {
     public static User getInstanceFromJson(String jsonUser) {
         return (new Gson()).fromJson(jsonUser, User.class);
     }
+
+    public User clone() {
+        return new User(mUserUuid, mFamilyName,
+                mGivenName, mPhotoUrl, mEmail, mPhone,
+                mRoleId, mStatusId, mGroupUuid, mLastKnownLocation);
+    }
+
+    public UserLocation getLastKnownLocation() {
+        return mLastKnownLocation;
+    }
+
+    public void setLastKnownLocation(UserLocation mLastKnownLocation) {
+        this.mLastKnownLocation = mLastKnownLocation;
+    }
+
+    public int getRoleId() {
+        return mRoleId;
+    }
+
+    public void setRoleId(int mRoleId) {
+        this.mRoleId = mRoleId;
+    }
+
+    public int getStatusId() {
+        return mStatusId;
+    }
+
+    public void setStatusId(int mStatusId) {
+        this.mStatusId = mStatusId;
+    }
+
+    public String getGroupUuid() {
+        return mGroupUuid;
+    }
+
+    public void setGroupUuid(String groupUuid) {
+        this.mGroupUuid = groupUuid;
+    }
+
 }

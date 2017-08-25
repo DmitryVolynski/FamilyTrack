@@ -31,6 +31,8 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.AuthUtil;
 
+import timber.log.Timber;
+
 public class LoginActivity extends AppCompatActivity implements
         ConnectionCallbacks,
         OnConnectionFailedListener,
@@ -142,7 +144,7 @@ public class LoginActivity extends AppCompatActivity implements
             mStatus.setText(mGoogleSignInAccount.getDisplayName());
             mSignInButton.setEnabled(false);
 
-            AuthUtil.saveCurrentUserInPrefs(this, mGoogleSignInAccount);
+            //AuthUtil.saveCurrentUserInPrefs(this, mGoogleSignInAccount);
         } else {
             // Signed out, show unauthenticated UI.
             //updateUI(false);
@@ -182,28 +184,42 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void proceedToMainActivity() {
-        final FamilyTrackDataSource dataSource = new FamilyTrackRepository(mGoogleSignInAccount);
-        dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(), new FamilyTrackDataSource.GetUserByEmailCallback() {
+        final FamilyTrackDataSource dataSource =
+                new FamilyTrackRepository(mGoogleSignInAccount);
+        dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(),
+                new FamilyTrackDataSource.GetUserByEmailCallback() {
             @Override
             public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
                 if (result.getData() == null) {
-                    User user = new User(mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
-                            mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(), "4838437", null);
+                    // user signed in for the first time and
+                    // doesn't exists in db - register him in db
+                    User user = new User("", mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
+                            mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(), "4838437",
+                            User.ROLE_UNDEFINED, User.USER_CREATED, "", null);
                     dataSource.createUser(user, new FamilyTrackDataSource.CreateUserCallback() {
                         @Override
-                        public void onCreateUserCallback(FirebaseResult<User> result) {
+                        public void onCreateUserCompleted(FirebaseResult<User> result) {
                             if (result.getData() != null) {
-                                // TODO Continue here
-                                // AuthUtil.saveCurrentUserInPrefs(getApplicationContext(), result.getData());
-                                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                startActivity(intent);
+                                AuthUtil.saveCurrentUserInPrefs(getApplicationContext(), result.getData());
+                                startMainActivity();
+                            } else {
+                                Timber.e("Create user failed.", result.getException());
                             }
                         }
                     });
+                } else {
+                    // user already registered in db, just save him in SharedPreferences
+                    AuthUtil.saveCurrentUserInPrefs(getApplicationContext(), result.getData());
+                    startMainActivity();
                 }
             }
         });
 
+    }
+
+    private void startMainActivity() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
     }
 
     private void checkUserExists() {
@@ -241,13 +257,16 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void createNewUser() {
-        /*
+
         FamilyTrackDataSource dataSource =
                 new FamilyTrackRepository(mGoogleSignInAccount);
 
-        User user = new User(mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
-                mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(), "4838437", null);
+        /*
+        User user = new User("", mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
+                mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(),
+                "4838437", User.ROLE_UNDEFINED, User.USER_CREATED, null);
         dataSource.createUser(user);
         */
+
     }
 }
