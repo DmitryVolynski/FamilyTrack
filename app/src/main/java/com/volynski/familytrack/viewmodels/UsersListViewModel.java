@@ -19,10 +19,13 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.ui.UsersListItemModel;
 import com.volynski.familytrack.utils.AuthUtil;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
+import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -41,7 +44,7 @@ public class UsersListViewModel
     private FamilyTrackDataSource mRepository;
 
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
-    public final ObservableList<UsersListItemModel> items = new ObservableArrayList<>();
+    public final ObservableList<User> users = new ObservableArrayList<>();
 
     public UsersListViewModel(Context context,
                               FamilyTrackDataSource dataSource) {
@@ -90,6 +93,10 @@ public class UsersListViewModel
      */
     private void joinGroup() {
         Log.v(TAG, "joinGroup started");
+
+        users.add(User.getFakeUser());
+        users.add(User.getFakeUser());
+        notifyChange();
     }
 
     /**
@@ -125,13 +132,22 @@ public class UsersListViewModel
     }
 
     private void loadUsersList() {
-        mRepository.getUsersByGroupUuid(mCurrentUser.getGroupUuid(),
-                new FamilyTrackDataSource.GetUsersByGroupUuidCallback() {
+        mRepository.getGroupByUuid(mCurrentUser.getGroupUuid(),
+                new FamilyTrackDataSource.GetGroupByUuidCallback() {
                     @Override
-                    public void onGetUsersByGroupUuidCompleted(FirebaseResult<List<User>> result) {
-                        int i = 0;
+                    public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                        checkObject(result);
                     }
                 });
-
     }
+
+    private void checkObject(FirebaseResult<Group> result) {
+        if (result.getData() != null && result.getData().getMembers() != null) {
+            for (User user : result.getData().getMembers().values()) {
+                this.users.add(user);
+            }
+        }
+    }
+
+
 }

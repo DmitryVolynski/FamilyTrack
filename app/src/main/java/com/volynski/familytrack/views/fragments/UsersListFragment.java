@@ -3,9 +3,12 @@ package com.volynski.familytrack.views.fragments;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
+import android.databinding.ObservableArrayList;
+import android.databinding.ObservableList;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.GridLayoutManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +19,14 @@ import android.widget.PopupWindow;
 
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentUsersListBinding;
 import com.volynski.familytrack.utils.AuthUtil;
 import com.volynski.familytrack.viewmodels.UsersListViewModel;
+
+import timber.log.Timber;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -33,8 +39,10 @@ public class UsersListFragment
     private UsersListViewModel mViewModel;
     private static final String TAG = UsersListFragment.class.getSimpleName();
     private User mCurrentUser;
+    private GridLayoutManager mLayoutManager;
 
     FragmentUsersListBinding mBinding;
+    private RecyclerViewListAdapter mAdapter;
 
     public static UsersListFragment newInstance(Context context) {
         UsersListFragment result = new UsersListFragment();
@@ -66,6 +74,18 @@ public class UsersListFragment
                 R.layout.fragment_users_list,
                 container,
                 false);
+        mLayoutManager = new GridLayoutManager(this.getContext(), 1);
+        mBinding.recyclerviewFragmentuserslistUserslist.setLayoutManager(mLayoutManager);
+
+        mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.users,
+                R.layout.users_list_item, BR.viewmodel1);
+
+        ObservableArrayList<User> l = new ObservableArrayList<>();
+        l.add(User.getFakeUser());
+
+        mAdapter.setData(l);
+
+        mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
         mViewModel.showDialog.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
@@ -73,6 +93,7 @@ public class UsersListFragment
                 UsersListFragment.this.startNewGroupDialog();
             }
         });
+
         return mBinding.getRoot();
     }
 

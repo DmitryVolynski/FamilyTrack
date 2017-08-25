@@ -52,7 +52,7 @@ public interface FamilyTrackDataSource {
     /**
      *
      */
-    interface GetUsersByGroupUuidCallback {void onGetUsersByGroupUuidCompleted(FirebaseResult<List<User>> result); }
-    void getUsersByGroupUuid(@NonNull String groupUuid, @NonNull GetUsersByGroupUuidCallback callback);
+    interface GetGroupByUuidCallback {void onGetGroupByUuidCompleted(FirebaseResult<Group> result); }
+    void getGroupByUuid(@NonNull String groupUuid, @NonNull GetGroupByUuidCallback callback);
 
 }

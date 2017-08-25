@@ -45,6 +45,10 @@ public class User {
         this.mLastKnownLocation = location;
     }
 
+    public static User getFakeUser() {
+        return new User("1234567890", "Volynski", "Dmitry", "ddj", "jkdg", "123", 1, 1, "0987654321", null);
+    }
+
     @Exclude
     public String getUserUuid() {
         return mUserUuid;

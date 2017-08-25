@@ -27,8 +27,8 @@ public class FirebaseUtil {
         Group group = (Group)snapshot.getValue(Group.class);
         group.setGroupUuid(snapshot.getKey());
 
-        for (DataSnapshot groupUser : snapshot.child("members").getChildren()) {
-            String userKey = groupUser.getKey();
+        for (DataSnapshot userSnapshot : snapshot.child("members").getChildren()) {
+            String userKey = userSnapshot.getKey();
             group.getMembers().get(userKey).setUserUuid(userKey);
         }
         return group;

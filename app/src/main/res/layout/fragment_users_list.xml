@@ -39,6 +39,7 @@
         </LinearLayout>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview_fragmentuserslist_userslist"
+            app:items="@{viewmodel.users}"
             android:layout_height="match_parent"
             android:layout_width="match_parent">
         </android.support.v7.widget.RecyclerView>
