@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">FamilyTrack</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="popup_menu_item_user_details">Details</string>
+    <string name="popup_menu_item_show_on_map">Show on map</string>
+    <string name="popup_menu_item_remove">Remove</string>
 </resources>

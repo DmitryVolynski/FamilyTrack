@@ -2,8 +2,8 @@ package com.volynski.familytrack.adapters;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
-import android.databinding.ObservableList;
 import android.databinding.ViewDataBinding;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,22 +20,23 @@ import timber.log.Timber;
 
 public class RecyclerViewListAdapter<T>
         extends RecyclerView.Adapter<RecyclerViewListAdapter.RecyclerViewListAdapterViewHolder> {
-    private ObservableList<T> mData;
+    private List<T> mViewModels;
     private int mRowLayoutId;
     private int mBindingId;
     private Context mContext;
     private RecyclerViewListAdapterOnClickHandler mItemClickHandler;
-
+    private int mMenuId = -1;
+    private int mViewToShowPopupId = -1;
     /**
      *
      * @param context
-     * @param data
+     * @param viewModels
      * @param rowLayoutId
      * @param bindingId
      */
-    public RecyclerViewListAdapter(Context context, ObservableList<T> data,
+    public RecyclerViewListAdapter(Context context, List<T> viewModels,
                          int rowLayoutId, int bindingId) {
-        mData = data;
+        mViewModels = viewModels;
         mRowLayoutId = rowLayoutId;
         mBindingId = bindingId;
         mContext = context;
@@ -53,26 +54,41 @@ public class RecyclerViewListAdapter<T>
 
     @Override
     public void onBindViewHolder(RecyclerViewListAdapter.RecyclerViewListAdapterViewHolder holder, int position) {
-        final T rowData = mData.get(position);
-        holder.bind(mBindingId, rowData);
+        final T viewModel = mViewModels.get(position);
+        holder.bind(mBindingId, viewModel);
+
+        if (mViewToShowPopupId != -1) {
+            View v = holder.itemView.findViewById(mViewToShowPopupId);
+            v.setOnClickListener(holder);
+        }
     }
 
     @Override
     public int getItemCount() {
-        if (mData == null) {
+        if (mViewModels == null) {
             return 0;
         } else {
-            return mData.size();
+            return mViewModels.size();
         }
     }
 
-    public void setData(ObservableList<T> mData) {
-        this.mData = mData;
+    public void setViewModels(List<T> viewModels) {
+        this.mViewModels = viewModels;
         notifyDataSetChanged();
     }
 
     public void setItemClickHandler(RecyclerViewListAdapterOnClickHandler mItemClickHandler) {
         this.mItemClickHandler = mItemClickHandler;
+    }
+
+    /**
+     * Enables popup menu with id menuId when user clicks on view with viewId
+     * @param menuId menu Id to show
+     * @param viewId view Id to handle clicks from
+     */
+    public void enablePopupMenu(int menuId, int viewId) {
+        mMenuId = menuId;
+        mViewToShowPopupId = viewId;
     }
 
     public class RecyclerViewListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
@@ -93,10 +109,18 @@ public class RecyclerViewListAdapter<T>
 
         @Override
         public void onClick(View view) {
+            if (view.getId() == mViewToShowPopupId) {
+                PopupMenu popupMenu = new PopupMenu(RecyclerViewListAdapter.this.mContext, view);
+                popupMenu.inflate(mMenuId);
+                popupMenu.show();
+            }
+
             if (mItemClickHandler == null) {
                 Timber.e("mItemClickHandler == null, click event wasn't proceeded");
+                return;
+            } else {
+                mItemClickHandler.onClick(getAdapterPosition(), view);
             }
-            mItemClickHandler.onClick(getAdapterPosition(), view);
         }
     }
 }

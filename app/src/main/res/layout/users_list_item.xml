@@ -5,8 +5,8 @@
 
     <data>
         <variable
-            name="viewmodel1"
-            type="com.volynski.familytrack.data.models.firebase.User"/>
+            name="viewmodel"
+            type="com.volynski.familytrack.viewmodels.UserListItemViewModel"/>
             <!--type="com.volynski.familytrack.viewmodels.UserListItemViewModel" /-->
     </data>
 
@@ -20,7 +20,7 @@
             android:layout_height="40dp"
             android:layout_marginLeft="16dp"
             android:layout_marginTop="20dp"
-            android:src="@mipmap/ic_no_user_photo" />
+            app:imageUrl="@{viewmodel.user.photoUrl}"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -34,7 +34,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                android:text="Dmitry Volynski" />
+                tools:text="Dmitry Volynski"
+                android:text="@{viewmodel.user.givenName}" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -66,6 +67,7 @@
         </LinearLayout>
 
         <ImageView
+            android:id="@+id/imageview_userslistitem_popupsymbol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
@@ -73,5 +75,6 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="20dp"
             android:src="@drawable/ic_user_options" />
+            <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
     </FrameLayout>
 </layout>

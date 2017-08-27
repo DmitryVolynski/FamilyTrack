@@ -8,6 +8,7 @@ import android.databinding.ObservableList;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,9 +23,14 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.ui.UsersListItemModel;
 import com.volynski.familytrack.databinding.FragmentUsersListBinding;
 import com.volynski.familytrack.utils.AuthUtil;
+import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 import com.volynski.familytrack.viewmodels.UsersListViewModel;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -77,13 +83,20 @@ public class UsersListFragment
         mLayoutManager = new GridLayoutManager(this.getContext(), 1);
         mBinding.recyclerviewFragmentuserslistUserslist.setLayoutManager(mLayoutManager);
 
-        mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.users,
-                R.layout.users_list_item, BR.viewmodel1);
+        DividerItemDecoration dividerItemDecoration =
+                new DividerItemDecoration(mBinding.recyclerviewFragmentuserslistUserslist.getContext(),
+                        mLayoutManager.getOrientation());
 
-        ObservableArrayList<User> l = new ObservableArrayList<>();
+        mBinding.recyclerviewFragmentuserslistUserslist.addItemDecoration(dividerItemDecoration);
+        mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.users,
+                R.layout.users_list_item, BR.viewmodel);
+        mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
+        List<User> l = new ArrayList<>();
+        l.add(User.getFakeUser());
+        l.add(User.getFakeUser());
         l.add(User.getFakeUser());
 
-        mAdapter.setData(l);
+        mAdapter.setViewModels(UserListItemViewModel.createViewModels(getContext(), l));
 
         mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);

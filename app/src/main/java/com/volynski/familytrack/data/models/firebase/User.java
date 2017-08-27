@@ -46,7 +46,7 @@ public class User {
     }
 
     public static User getFakeUser() {
-        return new User("1234567890", "Volynski", "Dmitry", "ddj", "jkdg", "123", 1, 1, "0987654321", null);
+        return new User("1234567890", "Volynski", "Dmitry", "", "jkdg",  "123", 1, 1, "0987654321", null);
     }
 
     @Exclude
