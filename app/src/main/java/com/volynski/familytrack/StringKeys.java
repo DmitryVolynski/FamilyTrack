@@ -13,4 +13,5 @@ public class StringKeys {
             = StringKeys.class.getPackage().getName() + ".PREFERENCE_FILE_KEY";
     public static final String SHARED_PREFS_CURRENT_USER_KEY = "CURRENT_USER";
 
+    public static final String SHARED_PREFS_IDTOKEN_KEY = "ID_TOKEN";
 }

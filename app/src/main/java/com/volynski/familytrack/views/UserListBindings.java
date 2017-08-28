@@ -18,13 +18,14 @@ import jp.wasabeef.picasso.transformations.CropCircleTransformation;
  * Created by DmitryVolynski on 25.08.2017.
  */
 
-public class UsersListBindings {
+public class UserListBindings {
     @SuppressWarnings("unchecked")
     @BindingAdapter("app:items")
     public static void setItems(RecyclerView recyclerView, List<User> users) {
         RecyclerViewListAdapter<UserListItemViewModel>
                 adapter = (RecyclerViewListAdapter<UserListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
+            //recyclerView.getv
             adapter.setViewModels(UserListItemViewModel.createViewModels(recyclerView.getContext(), users));
         }
     }

@@ -6,8 +6,11 @@ import android.databinding.ViewDataBinding;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.volynski.familytrack.viewmodels.PopupMenuListener;
 
 import java.util.List;
 
@@ -77,6 +80,10 @@ public class RecyclerViewListAdapter<T>
         notifyDataSetChanged();
     }
 
+    public List<T> getViewModels() {
+        return this.mViewModels;
+    }
+
     public void setItemClickHandler(RecyclerViewListAdapterOnClickHandler mItemClickHandler) {
         this.mItemClickHandler = mItemClickHandler;
     }
@@ -91,7 +98,11 @@ public class RecyclerViewListAdapter<T>
         mViewToShowPopupId = viewId;
     }
 
-    public class RecyclerViewListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
+    public class RecyclerViewListAdapterViewHolder
+            extends RecyclerView.ViewHolder
+            implements
+                View.OnClickListener,
+                PopupMenu.OnMenuItemClickListener
     {
         private final ViewDataBinding binding;
 
@@ -108,18 +119,33 @@ public class RecyclerViewListAdapter<T>
         }
 
         @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            PopupMenuListener listener =
+                    (PopupMenuListener) RecyclerViewListAdapter.this.getViewModels().get(getAdapterPosition());
+
+            if (listener != null) {
+                listener.menuCommand(item);
+            } else {
+                Timber.e("List Item ViewModel couldn't be casted to PopupMenuListener, event lost");
+            }
+            return false;
+        }
+
+        @Override
         public void onClick(View view) {
             if (view.getId() == mViewToShowPopupId) {
                 PopupMenu popupMenu = new PopupMenu(RecyclerViewListAdapter.this.mContext, view);
                 popupMenu.inflate(mMenuId);
+                popupMenu.setOnMenuItemClickListener(this);
                 popupMenu.show();
-            }
-
-            if (mItemClickHandler == null) {
-                Timber.e("mItemClickHandler == null, click event wasn't proceeded");
-                return;
             } else {
-                mItemClickHandler.onClick(getAdapterPosition(), view);
+                // if item view model implements RecyclerViewListAdapterOnClickHandler then
+                // call this method of viewmodel class
+                RecyclerViewListAdapterOnClickHandler handler =
+                        (RecyclerViewListAdapterOnClickHandler) RecyclerViewListAdapter.this.getViewModels().get(getAdapterPosition());
+                if (handler != null) {
+                    handler.onClick(getAdapterPosition(), view);
+                }
             }
         }
     }

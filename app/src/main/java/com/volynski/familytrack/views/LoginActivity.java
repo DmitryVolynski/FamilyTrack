@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -58,6 +57,9 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Timber.plant(new Timber.DebugTree());
+
         setContentView(R.layout.activity_login);
 
         // Get references to all of the UI views
@@ -143,8 +145,7 @@ public class LoginActivity extends AppCompatActivity implements
             mGoogleSignInAccount = result.getSignInAccount();
             mStatus.setText(mGoogleSignInAccount.getDisplayName());
             mSignInButton.setEnabled(false);
-
-            //AuthUtil.saveCurrentUserInPrefs(this, mGoogleSignInAccount);
+            AuthUtil.setGoogleAccountIdToken(this, mGoogleSignInAccount.getIdToken());
         } else {
             // Signed out, show unauthenticated UI.
             //updateUI(false);
@@ -185,7 +186,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void proceedToMainActivity() {
         final FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(mGoogleSignInAccount);
+                new FamilyTrackRepository(AuthUtil.getGoogleAccountIdToken(this));
         dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(),
                 new FamilyTrackDataSource.GetUserByEmailCallback() {
             @Override
@@ -200,7 +201,7 @@ public class LoginActivity extends AppCompatActivity implements
                         @Override
                         public void onCreateUserCompleted(FirebaseResult<User> result) {
                             if (result.getData() != null) {
-                                AuthUtil.saveCurrentUserInPrefs(getApplicationContext(), result.getData());
+                                AuthUtil.setCurrentUser(getApplicationContext(), result.getData());
                                 startMainActivity();
                             } else {
                                 Timber.e("Create user failed.", result.getException());
@@ -209,7 +210,7 @@ public class LoginActivity extends AppCompatActivity implements
                     });
                 } else {
                     // user already registered in db, just save him in SharedPreferences
-                    AuthUtil.saveCurrentUserInPrefs(getApplicationContext(), result.getData());
+                    AuthUtil.setCurrentUser(getApplicationContext(), result.getData());
                     startMainActivity();
                 }
             }
@@ -223,7 +224,8 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void checkUserExists() {
-        FamilyTrackDataSource dataSource = new FamilyTrackRepository(mGoogleSignInAccount);
+        FamilyTrackDataSource dataSource =
+                new FamilyTrackRepository(mGoogleSignInAccount.getIdToken());
         dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(), this);
     }
 
@@ -258,10 +260,10 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void createNewUser() {
 
+        /*
         FamilyTrackDataSource dataSource =
                 new FamilyTrackRepository(mGoogleSignInAccount);
 
-        /*
         User user = new User("", mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
                 mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(),
                 "4838437", User.ROLE_UNDEFINED, User.USER_CREATED, null);

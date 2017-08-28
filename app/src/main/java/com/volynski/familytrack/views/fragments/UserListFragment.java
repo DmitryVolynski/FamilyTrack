@@ -3,8 +3,6 @@ package com.volynski.familytrack.views.fragments;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
-import android.databinding.ObservableArrayList;
-import android.databinding.ObservableList;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -23,16 +21,9 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.data.models.ui.UsersListItemModel;
-import com.volynski.familytrack.databinding.FragmentUsersListBinding;
+import com.volynski.familytrack.databinding.FragmentUserListBinding;
 import com.volynski.familytrack.utils.AuthUtil;
-import com.volynski.familytrack.viewmodels.UserListItemViewModel;
-import com.volynski.familytrack.viewmodels.UsersListViewModel;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import timber.log.Timber;
+import com.volynski.familytrack.viewmodels.UserListViewModel;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -40,21 +31,21 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
  * Created by DmitryVolynski on 22.08.2017.
  */
 
-public class UsersListFragment
+public class UserListFragment
         extends Fragment {
-    private UsersListViewModel mViewModel;
-    private static final String TAG = UsersListFragment.class.getSimpleName();
+    private UserListViewModel mViewModel;
     private User mCurrentUser;
     private GridLayoutManager mLayoutManager;
 
-    FragmentUsersListBinding mBinding;
+    FragmentUserListBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
 
-    public static UsersListFragment newInstance(Context context) {
-        UsersListFragment result = new UsersListFragment();
+    public static UserListFragment newInstance(Context context) {
+        UserListFragment result = new UserListFragment();
 
         // TODO проверить это место. может быть создание модели именно здесь неверно.
-        result.setViewModel(new UsersListViewModel(context, new FamilyTrackRepository(null)));
+        result.setViewModel(new UserListViewModel(context,
+                new FamilyTrackRepository(AuthUtil.getGoogleAccountIdToken(context))));
         return result;
     }
 
@@ -74,10 +65,10 @@ public class UsersListFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mCurrentUser = AuthUtil.getCurrentUserFromPrefs(getContext());
+        mCurrentUser = AuthUtil.getCurrentUser(getContext());
 
         mBinding = DataBindingUtil.inflate(inflater,
-                R.layout.fragment_users_list,
+                R.layout.fragment_user_list,
                 container,
                 false);
         mLayoutManager = new GridLayoutManager(this.getContext(), 1);
@@ -91,19 +82,13 @@ public class UsersListFragment
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.users,
                 R.layout.users_list_item, BR.viewmodel);
         mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
-        List<User> l = new ArrayList<>();
-        l.add(User.getFakeUser());
-        l.add(User.getFakeUser());
-        l.add(User.getFakeUser());
-
-        mAdapter.setViewModels(UserListItemViewModel.createViewModels(getContext(), l));
 
         mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
         mViewModel.showDialog.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                UsersListFragment.this.startNewGroupDialog();
+                UserListFragment.this.startNewGroupDialog();
             }
         });
 
@@ -147,7 +132,7 @@ public class UsersListFragment
                 });
     }
 
-    public void setViewModel(UsersListViewModel mViewModel) {
+    public void setViewModel(UserListViewModel mViewModel) {
         this.mViewModel = mViewModel;
     }
 }

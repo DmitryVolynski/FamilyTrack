@@ -7,12 +7,19 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.TabViewPageAdapter;
+import com.volynski.familytrack.views.navigators.UserListNavigator;
 
-public class MainActivity extends AppCompatActivity {
+import timber.log.Timber;
+
+public class MainActivity
+        extends AppCompatActivity
+        implements UserListNavigator {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,4 +51,28 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
     }
 
+    // ---
+    // UserListNavigator implementation
+    // ---
+
+
+    @Override
+    public void openUserDetails(String userUuid) {
+        Timber.v("Not implemented");
+    }
+
+    @Override
+    public void removeUser(String userUuid) {
+        Timber.v("Not implemented");
+    }
+
+    @Override
+    public void showUserOnMap(String userUuid) {
+        Timber.v("Not implemented");
+    }
+
+    @Override
+    public void inviteUser() {
+        Timber.v("Not implemented");
+    }
 }

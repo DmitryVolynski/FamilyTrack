@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="com.volynski.familytrack.viewmodels.UsersListViewModel"/>
+            type="com.volynski.familytrack.viewmodels.UserListViewModel"/>
     </data>
     <LinearLayout
         android:id="@+id/linearlayout_fragmentuserslist_rootlayout"

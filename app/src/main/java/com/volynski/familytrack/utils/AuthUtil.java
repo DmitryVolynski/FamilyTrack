@@ -23,8 +23,8 @@ public class AuthUtil {
      * @param context
      * @param user - User object of current authenticated user with Firebase-generated uuid
      */
-    public static void saveCurrentUserInPrefs(Context context,
-                                              User user) {
+    public static void setCurrentUser(Context context,
+                                      User user) {
         SharedPreferences preferences =
                 context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
 
@@ -40,7 +40,7 @@ public class AuthUtil {
      * @param context
      * @return User object with current user data
      */
-    public static User getCurrentUserFromPrefs(Context context) {
+    public static User getCurrentUser(Context context) {
         SharedPreferences preferences =
                 context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
         String jsonUser = preferences.getString(StringKeys.SHARED_PREFS_CURRENT_USER_KEY, "");
@@ -52,10 +52,18 @@ public class AuthUtil {
      * @param account - GoogleSignInAccount object of authenticated user
      * @return
      */
-    public static User createUserFromGoogleSignInAccount(GoogleSignInAccount account) {
-        return new User("", account.getFamilyName(), account.getGivenName(),
-                account.getPhotoUrl().toString(), account.getEmail(), "",
-                User.ROLE_UNDEFINED, User.USER_CREATED, "", null);
-        }
+    public static void setGoogleAccountIdToken(Context context, String idToken) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
 
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(StringKeys.SHARED_PREFS_IDTOKEN_KEY, idToken);
+        editor.commit();
+    }
+
+    public static String getGoogleAccountIdToken(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        return preferences.getString(StringKeys.SHARED_PREFS_IDTOKEN_KEY, "");
+    }
 }

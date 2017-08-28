@@ -19,7 +19,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,17 +32,18 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     private static final String TAG = FamilyTrackRepository.class.getSimpleName();
 
     private FirebaseDatabase mFirebaseDatabase;
-    private GoogleSignInAccount mGoogleSignInAccount;
+    private String mGoogleAccountIdToken;
     private FirebaseAuth mFirebaseAuth;
 
     // TODO проверить необходимость передачи GoogleSignInAccount в конструктор
-    public FamilyTrackRepository(GoogleSignInAccount account) {
-        mGoogleSignInAccount = account;
+    public FamilyTrackRepository(String googleAccountIdToken) {
+        Timber.v("FamilyTrackRepository created with idToken=" + googleAccountIdToken);
+        mGoogleAccountIdToken = googleAccountIdToken;
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGooogle:" + acct.getId());
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+    private void firebaseAuthWithGoogle(String idToken) {
+        Log.d(TAG, "firebaseAuthWithGooogle:" + idToken);
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mFirebaseAuth = FirebaseAuth.getInstance();
         if (mFirebaseAuth.getCurrentUser() == null) {
             mFirebaseAuth.signInWithCredential(credential)
@@ -65,7 +65,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     private FirebaseDatabase getFirebaseConnection() {
         if (mFirebaseDatabase == null) {
-            //firebaseAuthWithGoogle(mGoogleSignInAccount);
+            firebaseAuthWithGoogle(mGoogleAccountIdToken);
             mFirebaseDatabase = FirebaseDatabase.getInstance();
         }
         return mFirebaseDatabase;

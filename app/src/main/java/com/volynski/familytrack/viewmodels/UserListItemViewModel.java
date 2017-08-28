@@ -2,8 +2,13 @@ package com.volynski.familytrack.viewmodels;
 
 import android.content.Context;
 import android.databinding.BaseObservable;
+import android.view.MenuItem;
+import android.view.View;
 
+import com.volynski.familytrack.R;
+import com.volynski.familytrack.adapters.RecyclerViewListAdapterOnClickHandler;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,13 +19,16 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 25.08.2017.
  */
 
-public class UserListItemViewModel extends BaseObservable {
+public class UserListItemViewModel extends BaseObservable
+        implements PopupMenuListener, RecyclerViewListAdapterOnClickHandler {
     private Context mContext;
     private User mUser;
+    private UserListNavigator mNavigator;
 
-    public UserListItemViewModel(Context context, User user) {
+    public UserListItemViewModel(Context context, User user, UserListNavigator navigator) {
         mContext = context;
         mUser = user;
+        mNavigator = navigator;
     }
 
     public User getUser() {
@@ -30,6 +38,31 @@ public class UserListItemViewModel extends BaseObservable {
     public void setUser(User mUser) {
         this.mUser = mUser;
         notifyChange();
+    }
+
+    @Override
+    public void onClick(int itemId, View v) {
+        // item click goes to detail screen
+        mNavigator.showUserOnMap(mUser.getUserUuid());
+    }
+
+    @Override
+    public void menuCommand(MenuItem item) {
+        if (mNavigator == null) {
+            Timber.e("mNavigator is null. Navigation is not available");
+            return;
+        }
+        switch (item.getItemId()) {
+            case R.id.menuitem_userpopupmenu_remove:
+                mNavigator.removeUser(mUser.getUserUuid());
+                break;
+            case R.id.menuitem_userpopupmenu_showonmap:
+                mNavigator.showUserOnMap(mUser.getUserUuid());
+                break;
+            case R.id.menuitem_userpopupmenu_userdetails:
+                mNavigator.openUserDetails(mUser.getUserUuid());
+                break;
+        }
     }
 
     /**
@@ -43,14 +76,17 @@ public class UserListItemViewModel extends BaseObservable {
     public static List<UserListItemViewModel> createViewModels(Context context, List<User> users) {
         List<UserListItemViewModel> result = new ArrayList<>();
         if (users != null) {
+            // TODO need to review this code
+            // Here I did silent navigator assignment, this is not good for common cases
+            UserListNavigator navigator = (UserListNavigator)context;
             for (User user : users) {
-                result.add(new UserListItemViewModel(context, user));
+                result.add(new UserListItemViewModel(context, user, navigator));
             }
         }
         return result;
     }
 
-    public void showPopupMenu() {
-        Timber.v("Show popup");
+    public void setNavigator(UserListNavigator mNavigator) {
+        this.mNavigator = mNavigator;
     }
 }

@@ -5,8 +5,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import com.volynski.familytrack.views.fragments.UsersListFragment;
-import com.volynski.familytrack.views.fragments.UsersOnMapFragment;
+import com.volynski.familytrack.views.fragments.UserListFragment;
+import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 
 /**
  * Created by DmitryVolynski on 22.08.2017.
@@ -32,10 +32,10 @@ public class TabViewPageAdapter extends FragmentPagerAdapter {
         Fragment result = null;
         switch (position) {
             case 0:
-                result = UsersListFragment.newInstance(context);
+                result = UserListFragment.newInstance(context);
                 break;
             case 1:
-                result = UsersOnMapFragment.newInstance(context);
+                result = UserOnMapFragment.newInstance(context);
                 break;
         }
         return result;

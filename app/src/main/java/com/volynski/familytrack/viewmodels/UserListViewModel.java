@@ -6,7 +6,6 @@ import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableList;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
@@ -16,16 +15,7 @@ import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.data.models.ui.UsersListItemModel;
 import com.volynski.familytrack.utils.AuthUtil;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Objects;
 
 import timber.log.Timber;
 
@@ -33,11 +23,11 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 22.08.2017.
  */
 
-public class UsersListViewModel
+public class UserListViewModel
         extends BaseObservable
         implements View.OnClickListener {
 
-    private final static String TAG = UsersListViewModel.class.getSimpleName();
+    private final static String TAG = UserListViewModel.class.getSimpleName();
     private final Context mContext;
     private User mCurrentUser;
     private boolean mIsDataLoading;
@@ -46,8 +36,8 @@ public class UsersListViewModel
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
     public final ObservableList<User> users = new ObservableArrayList<>();
 
-    public UsersListViewModel(Context context,
-                              FamilyTrackDataSource dataSource) {
+    public UserListViewModel(Context context,
+                             FamilyTrackDataSource dataSource) {
         mContext = context.getApplicationContext();
         mRepository = dataSource;
     }
@@ -110,7 +100,7 @@ public class UsersListViewModel
 
     public void createNewGroup(String groupName) {
         Timber.v("Create group: " + groupName);
-        User currentUser = AuthUtil.getCurrentUserFromPrefs(mContext);
+        User currentUser = AuthUtil.getCurrentUser(mContext);
 
         FamilyTrackDataSource dataSource = new FamilyTrackRepository(null);
         dataSource.createGroup(new Group(groupName), currentUser.getUserUuid(), null);
