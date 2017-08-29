@@ -43,7 +43,7 @@ public class UserListItemViewModel extends BaseObservable
     @Override
     public void onClick(int itemId, View v) {
         // item click goes to detail screen
-        mNavigator.showUserOnMap(mUser.getUserUuid());
+        mNavigator.showUserOnMap(55.994017, 37.195024);
     }
 
     @Override
@@ -57,8 +57,8 @@ public class UserListItemViewModel extends BaseObservable
                 mNavigator.removeUser(mUser.getUserUuid());
                 break;
             case R.id.menuitem_userpopupmenu_showonmap:
-                mNavigator.showUserOnMap(mUser.getUserUuid());
-                break;
+                //mNavigator.showUserOnMap(mUser.getUserUuid());
+                //break;
             case R.id.menuitem_userpopupmenu_userdetails:
                 mNavigator.openUserDetails(mUser.getUserUuid());
                 break;

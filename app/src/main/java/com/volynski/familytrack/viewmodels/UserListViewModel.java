@@ -15,7 +15,7 @@ import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.utils.AuthUtil;
+import com.volynski.familytrack.utils.SharedPrefsUtil;
 
 import timber.log.Timber;
 
@@ -100,7 +100,7 @@ public class UserListViewModel
 
     public void createNewGroup(String groupName) {
         Timber.v("Create group: " + groupName);
-        User currentUser = AuthUtil.getCurrentUser(mContext);
+        User currentUser = SharedPrefsUtil.getCurrentUser(mContext);
 
         FamilyTrackDataSource dataSource = new FamilyTrackRepository(null);
         dataSource.createGroup(new Group(groupName), currentUser.getUserUuid(), null);
@@ -121,17 +121,25 @@ public class UserListViewModel
         loadUsersList();
     }
 
+    /**
+     *
+     */
     private void loadUsersList() {
         mRepository.getGroupByUuid(mCurrentUser.getGroupUuid(),
                 new FamilyTrackDataSource.GetGroupByUuidCallback() {
                     @Override
                     public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
-                        checkObject(result);
+                        populateUserListFromDbResult(result);
+                        mIsDataLoading = false;
                     }
                 });
     }
 
-    private void checkObject(FirebaseResult<Group> result) {
+    /**
+     *
+     * @param result
+     */
+    private void populateUserListFromDbResult(FirebaseResult<Group> result) {
         if (result.getData() != null && result.getData().getMembers() != null) {
             for (User user : result.getData().getMembers().values()) {
                 this.users.add(user);

@@ -17,7 +17,7 @@ import static android.content.Context.MODE_PRIVATE;
  *
  */
 
-public class AuthUtil {
+public class SharedPrefsUtil {
     /**
      * Saves User object in shared preferences using json format
      * @param context

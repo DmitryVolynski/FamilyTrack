@@ -28,7 +28,7 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.utils.AuthUtil;
+import com.volynski.familytrack.utils.SharedPrefsUtil;
 
 import timber.log.Timber;
 
@@ -145,7 +145,7 @@ public class LoginActivity extends AppCompatActivity implements
             mGoogleSignInAccount = result.getSignInAccount();
             mStatus.setText(mGoogleSignInAccount.getDisplayName());
             mSignInButton.setEnabled(false);
-            AuthUtil.setGoogleAccountIdToken(this, mGoogleSignInAccount.getIdToken());
+            SharedPrefsUtil.setGoogleAccountIdToken(this, mGoogleSignInAccount.getIdToken());
         } else {
             // Signed out, show unauthenticated UI.
             //updateUI(false);
@@ -186,7 +186,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void proceedToMainActivity() {
         final FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(AuthUtil.getGoogleAccountIdToken(this));
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this));
         dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(),
                 new FamilyTrackDataSource.GetUserByEmailCallback() {
             @Override
@@ -201,7 +201,7 @@ public class LoginActivity extends AppCompatActivity implements
                         @Override
                         public void onCreateUserCompleted(FirebaseResult<User> result) {
                             if (result.getData() != null) {
-                                AuthUtil.setCurrentUser(getApplicationContext(), result.getData());
+                                SharedPrefsUtil.setCurrentUser(getApplicationContext(), result.getData());
                                 startMainActivity();
                             } else {
                                 Timber.e("Create user failed.", result.getException());
@@ -210,7 +210,7 @@ public class LoginActivity extends AppCompatActivity implements
                     });
                 } else {
                     // user already registered in db, just save him in SharedPreferences
-                    AuthUtil.setCurrentUser(getApplicationContext(), result.getData());
+                    SharedPrefsUtil.setCurrentUser(getApplicationContext(), result.getData());
                     startMainActivity();
                 }
             }

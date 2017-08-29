@@ -27,12 +27,12 @@ public class User {
     private int mRoleId;
     private int mStatusId;
     private String mGroupUuid;
-    private UserLocation mLastKnownLocation;
+    private Location mLastKnownLocation;
 
     public User() {}
 
     public User(String uuid, String familyName, String givenName, String photoUrl,
-                String email, String phone, int roleId, int statusId, String groupUuid, UserLocation location) {
+                String email, String phone, int roleId, int statusId, String groupUuid, Location location) {
         this.mUserUuid = uuid;
         this.mFamilyName = familyName;
         this.mGivenName = givenName;
@@ -112,11 +112,11 @@ public class User {
                 mRoleId, mStatusId, mGroupUuid, mLastKnownLocation);
     }
 
-    public UserLocation getLastKnownLocation() {
+    public Location getLastKnownLocation() {
         return mLastKnownLocation;
     }
 
-    public void setLastKnownLocation(UserLocation mLastKnownLocation) {
+    public void setLastKnownLocation(Location mLastKnownLocation) {
         this.mLastKnownLocation = mLastKnownLocation;
     }
 

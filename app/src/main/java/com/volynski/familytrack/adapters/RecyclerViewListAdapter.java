@@ -30,6 +30,8 @@ public class RecyclerViewListAdapter<T>
     private RecyclerViewListAdapterOnClickHandler mItemClickHandler;
     private int mMenuId = -1;
     private int mViewToShowPopupId = -1;
+    private boolean mPopupMenuEnabled = false;
+
     /**
      *
      * @param context
@@ -94,6 +96,7 @@ public class RecyclerViewListAdapter<T>
      * @param viewId view Id to handle clicks from
      */
     public void enablePopupMenu(int menuId, int viewId) {
+        mPopupMenuEnabled = true;
         mMenuId = menuId;
         mViewToShowPopupId = viewId;
     }
@@ -133,7 +136,7 @@ public class RecyclerViewListAdapter<T>
 
         @Override
         public void onClick(View view) {
-            if (view.getId() == mViewToShowPopupId) {
+            if (mPopupMenuEnabled && view.getId() == mViewToShowPopupId) {
                 PopupMenu popupMenu = new PopupMenu(RecyclerViewListAdapter.this.mContext, view);
                 popupMenu.inflate(mMenuId);
                 popupMenu.setOnMenuItemClickListener(this);

@@ -22,7 +22,7 @@ import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
-import com.volynski.familytrack.utils.AuthUtil;
+import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
@@ -45,7 +45,7 @@ public class UserListFragment
 
         // TODO проверить это место. может быть создание модели именно здесь неверно.
         result.setViewModel(new UserListViewModel(context,
-                new FamilyTrackRepository(AuthUtil.getGoogleAccountIdToken(context))));
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context))));
         return result;
     }
 
@@ -65,7 +65,7 @@ public class UserListFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mCurrentUser = AuthUtil.getCurrentUser(getContext());
+        mCurrentUser = SharedPrefsUtil.getCurrentUser(getContext());
 
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_list,
@@ -80,7 +80,7 @@ public class UserListFragment
 
         mBinding.recyclerviewFragmentuserslistUserslist.addItemDecoration(dividerItemDecoration);
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.users,
-                R.layout.users_list_item, BR.viewmodel);
+                R.layout.user_list_item, BR.viewmodel);
         mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
 
         mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);

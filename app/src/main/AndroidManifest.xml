@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- TODO заменить ключ на переменную -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyC-Kmoin4s3zyqqgu5NHmDjJxROE_bxWhs"/>

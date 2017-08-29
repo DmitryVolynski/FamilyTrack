@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -13,13 +14,19 @@ import android.view.View;
 
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.TabViewPageAdapter;
+import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+
+import java.util.List;
 
 import timber.log.Timber;
 
 public class MainActivity
         extends AppCompatActivity
         implements UserListNavigator {
+
+    private TabLayout mTabLayout;
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +49,13 @@ public class MainActivity
 
     private void setupTabView() {
         // Get the ViewPager and set it's PagerAdapter so that it can display items
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager_main);
-        viewPager.setAdapter(new TabViewPageAdapter(getSupportFragmentManager(),
+        mViewPager = (ViewPager) findViewById(R.id.viewpager_main);
+        mViewPager.setAdapter(new TabViewPageAdapter(getSupportFragmentManager(),
                 MainActivity.this));
 
         // Give the TabLayout the ViewPager
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs_main);
-        tabLayout.setupWithViewPager(viewPager);
+        mTabLayout = (TabLayout) findViewById(R.id.tabs_main);
+        mTabLayout.setupWithViewPager(mViewPager);
     }
 
     // ---
@@ -67,8 +74,18 @@ public class MainActivity
     }
 
     @Override
-    public void showUserOnMap(String userUuid) {
-        Timber.v("Not implemented");
+    public void showUserOnMap(double latitude, double longitude) {
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+
+        for (Fragment fragment : fragments) {
+            Timber.v(fragment.getClass().getSimpleName() + ":::" + UserOnMapFragment.class.getSimpleName());
+            if (fragment.getClass().getSimpleName().equals(UserOnMapFragment.class.getSimpleName())) {
+                UserOnMapFragment f = (UserOnMapFragment)fragment;
+                mTabLayout.getTabAt(1).select();
+                f.moveCameraTo(latitude, longitude);
+                break;
+            }
+        }
     }
 
     @Override

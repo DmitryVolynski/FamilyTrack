@@ -10,7 +10,7 @@ import java.util.Calendar;
  *
  */
 
-public class UserLocation {
+public class Location {
     private Timestamp mTimestamp;
     private double mLongitude;
     private double mLatitude;
