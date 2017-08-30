@@ -1,8 +1,12 @@
 package com.volynski.familytrack.views;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,18 +34,23 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
+import java.util.List;
+
 import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity implements
         ConnectionCallbacks,
         OnConnectionFailedListener,
-        View.OnClickListener, FamilyTrackDataSource.GetUserByEmailCallback {
+        View.OnClickListener,
+        FamilyTrackDataSource.GetUserByEmailCallback,
+        FamilyTrackDataSource.GetContactsToInvite {
 
     private static final int SIGNED_IN = 0;
     private static final int STATE_SIGNING_IN = 1;
     private static final int STATE_IN_PROGRESS = 2;
     private static final int RC_SIGN_IN = 0;
     private static final String TAG = LoginActivity.class.getSimpleName();
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
 
     private SignInButton mSignInButton;
     private Button mSignOutButton;
@@ -186,7 +195,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void proceedToMainActivity() {
         final FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this));
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this);
         dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(),
                 new FamilyTrackDataSource.GetUserByEmailCallback() {
             @Override
@@ -195,8 +204,8 @@ public class LoginActivity extends AppCompatActivity implements
                     // user signed in for the first time and
                     // doesn't exists in db - register him in db
                     User user = new User("", mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
-                            mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(), "4838437",
-                            User.ROLE_UNDEFINED, User.USER_CREATED, "", null);
+                            mGoogleSignInAccount.getDisplayName(), mGoogleSignInAccount.getPhotoUrl().toString(),
+                            mGoogleSignInAccount.getEmail(), "4838437", User.ROLE_UNDEFINED, User.USER_CREATED, "", null);
                     dataSource.createUser(user, new FamilyTrackDataSource.CreateUserCallback() {
                         @Override
                         public void onCreateUserCompleted(FirebaseResult<User> result) {
@@ -224,9 +233,15 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void checkUserExists() {
+        /**
         FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(mGoogleSignInAccount.getIdToken());
+                new FamilyTrackRepository(mGoogleSignInAccount.getIdToken(), this);
         dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(), this);
+         */
+        getLocationPermission();
+        FamilyTrackDataSource dataSource =
+                new FamilyTrackRepository(mGoogleSignInAccount.getIdToken(), this);
+        dataSource.getContactsToInvite(this);
     }
 
     private void signOut() {
@@ -252,12 +267,33 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result) {
+        int i = 0;
+    }
+
+    @Override
     public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
         if (result.getData() == null) {
             createNewUser();
         }
     }
 
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_GRANTED) {
+            //mLocationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
+    }
     private void createNewUser() {
 
         /*

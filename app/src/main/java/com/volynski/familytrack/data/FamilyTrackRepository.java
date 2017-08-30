@@ -1,5 +1,10 @@
 package com.volynski.familytrack.data;
 
+import android.app.Application;
+import android.content.Context;
+import android.database.Cursor;
+import android.os.Build;
+import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -19,7 +24,9 @@ import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -31,14 +38,26 @@ import timber.log.Timber;
 public class FamilyTrackRepository implements FamilyTrackDataSource {
     private static final String TAG = FamilyTrackRepository.class.getSimpleName();
 
+    // column list for the contacts provider
+    /**
+    private final static String[] CONTACTS_PROJECTION = {
+            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
+            ContactsContract.Contacts.PHOTO_THUMBNAIL_URI,
+            ContactsContract.Contacts.PHOTO_URI,
+            ContactsContract.Contacts.
+    };
+     */
+
     private FirebaseDatabase mFirebaseDatabase;
     private String mGoogleAccountIdToken;
     private FirebaseAuth mFirebaseAuth;
+    private Context mContext;
 
     // TODO проверить необходимость передачи GoogleSignInAccount в конструктор
-    public FamilyTrackRepository(String googleAccountIdToken) {
+    public FamilyTrackRepository(String googleAccountIdToken, Context context) {
         Timber.v("FamilyTrackRepository created with idToken=" + googleAccountIdToken);
         mGoogleAccountIdToken = googleAccountIdToken;
+        mContext = context.getApplicationContext();
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
@@ -210,7 +229,60 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         });
     }
 
+    /**
+     * just to debug anonymous methods
+     * @param o
+     */
     private void checkObject(Object o) {
         int i = 0;
+    }
+
+    @Override
+    public void getContactsToInvite(@NonNull GetContactsToInvite callback) {
+        User user = null;
+        Cursor cursor = mContext.getContentResolver().query(
+                ContactsContract.Data.CONTENT_URI,
+                null,
+                ContactsContract.Data.HAS_PHONE_NUMBER + "!=0 AND (" + ContactsContract.Data.MIMETYPE + "=? OR " + ContactsContract.Data.MIMETYPE + "=?)",
+                new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
+                ContactsContract.Data.CONTACT_ID);
+
+        Map<String, User> contacts = new HashMap<>();
+        while (cursor.moveToNext()) {
+            String key = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID));
+            boolean isNew = !contacts.containsKey(key);
+
+            if (isNew) {
+                String givenName = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
+                user = new User("", "", "", cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)),
+                        "", "", "", User.ROLE_UNDEFINED, User.USER_CREATED, "", null);
+            } else {
+                user = contacts.get(key);
+            }
+
+            String mimeType = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
+            String data = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA1));
+            if (mimeType.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
+                user.setEmail(data);
+            } else {
+                user.setPhone(data);
+            }
+
+            if (isNew) {
+                contacts.put(key, user);
+            } else {
+                contacts.replace(key, user);
+            }
+        }
+
+        List<User> users = new ArrayList<>();
+        for (String key : contacts.keySet()) {
+            User u = contacts.get(key);
+            if (!u.getPhone().equals("") && !u.getEmail().equals("")) {
+                users.add(u);
+            }
+        }
+        FirebaseResult<List<User>> result = new FirebaseResult<List<User>>(users);
+        callback.onGetContactsToInviteCompleted(result);
     }
 }

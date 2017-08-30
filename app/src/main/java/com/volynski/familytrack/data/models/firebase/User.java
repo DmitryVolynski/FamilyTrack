@@ -20,6 +20,7 @@ public class User {
 
     private String mFamilyName;
     private String mGivenName;
+    private String mDisplayName;
     private String mPhotoUrl;
     private String mEmail;
     private String mPhone;
@@ -31,11 +32,12 @@ public class User {
 
     public User() {}
 
-    public User(String uuid, String familyName, String givenName, String photoUrl,
+    public User(String uuid, String familyName, String givenName, String displayName, String photoUrl,
                 String email, String phone, int roleId, int statusId, String groupUuid, Location location) {
         this.mUserUuid = uuid;
         this.mFamilyName = familyName;
         this.mGivenName = givenName;
+        this.mDisplayName = displayName;
         this.mPhotoUrl = photoUrl;
         this.mEmail = email;
         this.mPhone = phone;
@@ -46,7 +48,7 @@ public class User {
     }
 
     public static User getFakeUser() {
-        return new User("1234567890", "Volynski", "Dmitry", "", "jkdg",  "123", 1, 1, "0987654321", null);
+        return new User("1234567890", "Volynski", "Dmitry", "", "", "jkdg",  "123", 1, 1, "0987654321", null);
     }
 
     @Exclude
@@ -108,7 +110,7 @@ public class User {
 
     public User clone() {
         return new User(mUserUuid, mFamilyName,
-                mGivenName, mPhotoUrl, mEmail, mPhone,
+                mGivenName, mDisplayName, mPhotoUrl, mEmail, mPhone,
                 mRoleId, mStatusId, mGroupUuid, mLastKnownLocation);
     }
 
@@ -144,4 +146,11 @@ public class User {
         this.mGroupUuid = groupUuid;
     }
 
+    public String getDisplayName() {
+        return mDisplayName;
+    }
+
+    public void setDisplayName(String mDisplayName) {
+        this.mDisplayName = mDisplayName;
+    }
 }

@@ -11,5 +11,5 @@ public interface UserListNavigator {
     void openUserDetails(String userUuid);
     void removeUser(String userUuid);
     void showUserOnMap(double latitude, double longitude);
-    void inviteUser();
+    void inviteUsers();
 }

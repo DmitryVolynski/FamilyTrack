@@ -25,7 +25,7 @@
                 android:onClick="@{viewmodel.onClick}"
                 android:text="NEW GROUP" />
             <Button
-                android:onClick="@{viewmodel.onClick}"
+                android:onClick="@{() -> viewmodel.inviteUsers()}"
                 android:text="ADD USERS"
                 android:id="@+id/button_fragmentuserslist_addusers"
                 android:layout_width="wrap_content"

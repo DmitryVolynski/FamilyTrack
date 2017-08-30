@@ -42,6 +42,9 @@ public class UserListViewModel
         mRepository = dataSource;
     }
 
+    public void inviteUsers() {
+
+    }
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -102,7 +105,7 @@ public class UserListViewModel
         Timber.v("Create group: " + groupName);
         User currentUser = SharedPrefsUtil.getCurrentUser(mContext);
 
-        FamilyTrackDataSource dataSource = new FamilyTrackRepository(null);
+        FamilyTrackDataSource dataSource = new FamilyTrackRepository(null, mContext);
         dataSource.createGroup(new Group(groupName), currentUser.getUserUuid(), null);
     }
 

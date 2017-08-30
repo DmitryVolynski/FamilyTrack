@@ -14,6 +14,7 @@ import android.view.View;
 
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.TabViewPageAdapter;
+import com.volynski.familytrack.views.fragments.UserListFragment;
 import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
@@ -24,6 +25,9 @@ import timber.log.Timber;
 public class MainActivity
         extends AppCompatActivity
         implements UserListNavigator {
+
+    private static final String USER_LIST_FRAGMENT = UserListFragment.class.getSimpleName();
+    private static final String USER_ON_MAP_FRAGMENT = UserOnMapFragment.class.getSimpleName();
 
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
@@ -58,11 +62,28 @@ public class MainActivity
         mTabLayout.setupWithViewPager(mViewPager);
     }
 
+    /**
+     *
+     * @param fragmentClassName
+     * @return
+     */
+    private Fragment findFragmentByClassName(String fragmentClassName) {
+        Fragment result = null;
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+
+        for (Fragment fragment : fragments) {
+            if (fragment.getClass().getSimpleName().equals(fragmentClassName)) {
+                result = fragment;
+                break;
+            }
+        }
+        return result;
+    }
+
+
     // ---
     // UserListNavigator implementation
     // ---
-
-
     @Override
     public void openUserDetails(String userUuid) {
         Timber.v("Not implemented");
@@ -75,21 +96,16 @@ public class MainActivity
 
     @Override
     public void showUserOnMap(double latitude, double longitude) {
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-
-        for (Fragment fragment : fragments) {
-            Timber.v(fragment.getClass().getSimpleName() + ":::" + UserOnMapFragment.class.getSimpleName());
-            if (fragment.getClass().getSimpleName().equals(UserOnMapFragment.class.getSimpleName())) {
-                UserOnMapFragment f = (UserOnMapFragment)fragment;
-                mTabLayout.getTabAt(1).select();
-                f.moveCameraTo(latitude, longitude);
-                break;
-            }
+        UserOnMapFragment fragment =
+                (UserOnMapFragment)findFragmentByClassName(UserOnMapFragment.class.getSimpleName());
+        if (fragment != null) {
+            mTabLayout.getTabAt(1).select();
+            fragment.moveCameraTo(latitude, longitude);
         }
     }
 
     @Override
-    public void inviteUser() {
-        Timber.v("Not implemented");
+    public void inviteUsers() {
+
     }
 }

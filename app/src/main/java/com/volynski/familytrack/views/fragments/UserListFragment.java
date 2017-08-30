@@ -45,7 +45,7 @@ public class UserListFragment
 
         // TODO проверить это место. может быть создание модели именно здесь неверно.
         result.setViewModel(new UserListViewModel(context,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context))));
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context)));
         return result;
     }
 

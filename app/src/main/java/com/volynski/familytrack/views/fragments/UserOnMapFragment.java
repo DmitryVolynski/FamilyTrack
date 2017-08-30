@@ -63,7 +63,7 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
         UserOnMapFragment result = new UserOnMapFragment();
 
         result.setViewModel(new UserOnMapViewModel(context,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context))));
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context)));
 
         return result;
     }

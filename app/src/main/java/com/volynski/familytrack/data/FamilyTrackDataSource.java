@@ -55,4 +55,17 @@ public interface FamilyTrackDataSource {
     interface GetGroupByUuidCallback {void onGetGroupByUuidCompleted(FirebaseResult<Group> result); }
     void getGroupByUuid(@NonNull String groupUuid, @NonNull GetGroupByUuidCallback callback);
 
+    //
+    // ---------- contact list operations
+    //
+    interface GetContactsToInvite {void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result); }
+
+    /**
+     * reads contacts from phone and returns them as list of available users to invite
+     * list is filtered using these criterias:
+     *      - user from contacts shouldn't be already invited
+     *      - user from contacts should have a gmail address
+     * @param callback
+     */
+    void getContactsToInvite(@NonNull GetContactsToInvite callback);
 }
