@@ -16,6 +16,7 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import timber.log.Timber;
 
@@ -32,6 +33,7 @@ public class UserListViewModel
     private User mCurrentUser;
     private boolean mIsDataLoading;
     private FamilyTrackDataSource mRepository;
+    private UserListNavigator mNavigator;
 
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
     public final ObservableList<User> users = new ObservableArrayList<>();
@@ -42,9 +44,20 @@ public class UserListViewModel
         mRepository = dataSource;
     }
 
+    /**
+     * Shows a dialog with a list of all available users
+     * User list extracted from phone contacts
+     * Set of selected users will be added to current group with state 'Joining'
+     */
     public void inviteUsers() {
-
+        Timber.v("Invite users");
+        if (mNavigator != null) {
+            mNavigator.inviteUsers();
+        } else {
+            Timber.e("mNavigator is null");
+        }
     }
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -52,7 +65,7 @@ public class UserListViewModel
                 createGroup();
                 break;
             case R.id.button_fragmentuserslist_addusers:
-                addUsers();
+                inviteUsers();
                 break;
             case R.id.button_fragmentuserslist_joingroup:
                 joinGroup();
@@ -68,16 +81,6 @@ public class UserListViewModel
         Log.v(TAG, "refreshList started");
     }
 
-    /**
-     * Shows a dialog with a list of all available users
-     * Users extracted from Google+ circles using appropriate API
-     * Set of selected users will be added to current group with state 'Joining'
-     * Every joined user will receive a notification with invitation to join
-     */
-    private void addUsers() {
-        Log.v(TAG, "addUsers started");
-        showDialog.set(true);
-    }
 
     /**
      * Joins users to selected group
@@ -98,7 +101,7 @@ public class UserListViewModel
      */
     private void createGroup() {
         Timber.v("createGroup started");
-
+        showDialog.set(true);
     }
 
     public void createNewGroup(String groupName) {
@@ -150,5 +153,7 @@ public class UserListViewModel
         }
     }
 
-
+    public void setNavigator(UserListNavigator mNavigator) {
+        this.mNavigator = mNavigator;
+    }
 }

@@ -2,6 +2,7 @@ package com.volynski.familytrack.viewmodels;
 
 import android.content.Context;
 import android.databinding.BaseObservable;
+import android.databinding.ObservableBoolean;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -24,6 +25,7 @@ public class UserListItemViewModel extends BaseObservable
     private Context mContext;
     private User mUser;
     private UserListNavigator mNavigator;
+    public final ObservableBoolean checked = new ObservableBoolean(false);
 
     public UserListItemViewModel(Context context, User user, UserListNavigator navigator) {
         mContext = context;
@@ -78,9 +80,9 @@ public class UserListItemViewModel extends BaseObservable
         if (users != null) {
             // TODO need to review this code
             // Here I did silent navigator assignment, this is not good for common cases
-            UserListNavigator navigator = (UserListNavigator)context;
+            //UserListNavigator navigator = (UserListNavigator)context;
             for (User user : users) {
-                result.add(new UserListItemViewModel(context, user, navigator));
+                result.add(new UserListItemViewModel(context, user, null /*navigator*/));
             }
         }
         return result;

@@ -10,6 +10,7 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 /**
  * Created by DmitryVolynski on 22.08.2017.
@@ -22,6 +23,7 @@ public class UserOnMapViewModel extends BaseObservable {
     private FamilyTrackDataSource mRepository;
 
     public final ObservableList<User> users = new ObservableArrayList<>();
+    private UserListNavigator mNavigator;
 
     public UserOnMapViewModel(Context context,
                              FamilyTrackDataSource dataSource) {
@@ -72,5 +74,9 @@ public class UserOnMapViewModel extends BaseObservable {
                 }
             }
         }
+    }
+
+    public void setNavigator(UserListNavigator mNavigator) {
+        this.mNavigator = mNavigator;
     }
 }

@@ -3,4 +3,6 @@
     <dimen name="list_item_horizontal_margin">16dp</dimen>
     <dimen name="list_item_padding">8dp</dimen>
     <dimen name="list_item_height">72dp</dimen>
+    <dimen name="popup_width">400dp</dimen>
+    <dimen name="popup_height">400dp</dimen>
 </resources>

@@ -62,7 +62,7 @@ public class RecyclerViewListAdapter<T>
         final T viewModel = mViewModels.get(position);
         holder.bind(mBindingId, viewModel);
 
-        if (mViewToShowPopupId != -1) {
+        if (mPopupMenuEnabled) {
             View v = holder.itemView.findViewById(mViewToShowPopupId);
             v.setOnClickListener(holder);
         }

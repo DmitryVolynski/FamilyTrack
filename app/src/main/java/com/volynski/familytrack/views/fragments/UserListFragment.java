@@ -24,6 +24,7 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
+import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -40,12 +41,14 @@ public class UserListFragment
     FragmentUserListBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
 
-    public static UserListFragment newInstance(Context context) {
+    public static UserListFragment newInstance(Context context, UserListNavigator navigator) {
         UserListFragment result = new UserListFragment();
 
         // TODO проверить это место. может быть создание модели именно здесь неверно.
-        result.setViewModel(new UserListViewModel(context,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context)));
+        UserListViewModel viewModel = new UserListViewModel(context,
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
+        viewModel.setNavigator(navigator);
+        result.setViewModel(viewModel);
         return result;
     }
 

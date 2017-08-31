@@ -35,6 +35,7 @@ import com.volynski.familytrack.databinding.FragmentUserOnMapBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.google.android.gms.location.places.GeoDataClient;
+import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import timber.log.Timber;
 
@@ -59,11 +60,13 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
     private RecyclerViewListAdapter mAdapter;
 
 
-    public static UserOnMapFragment newInstance(Context context) {
+    public static UserOnMapFragment newInstance(Context context, UserListNavigator navigator) {
         UserOnMapFragment result = new UserOnMapFragment();
 
-        result.setViewModel(new UserOnMapViewModel(context,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context)));
+        UserOnMapViewModel viewModel = new UserOnMapViewModel(context,
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
+        viewModel.setNavigator(navigator);
+        result.setViewModel(viewModel);
 
         return result;
     }
