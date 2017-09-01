@@ -43,7 +43,7 @@ public class InviteUsersViewModel
     private List<User> mUnfilteredUserList = new ArrayList<>();
 
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
-    public final ObservableList<User> users = new ObservableArrayList<>();
+    public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
     public final ObservableField<String> searchString = new ObservableField<>("");
 
     public InviteUsersViewModel(Context context,
@@ -59,19 +59,44 @@ public class InviteUsersViewModel
     }
 
     private void filterUserList() {
-        users.clear();
+        viewModels.clear();
         for (User user : mUnfilteredUserList) {
             if (user.getDisplayName().contains(searchString.get()) ||
                     user.getFamilyName().contains(searchString.get()) ||
                     user.getGivenName().contains(searchString.get()) ||
                     user.getEmail().contains(searchString.get()) ||
                     user.getPhone().contains(searchString.get())) {
-                users.add(user);
+                viewModels.add(new UserListItemViewModel(mContext, user, null));
             }
         }
         notifyChange();
     }
 
+    public void doInvite() {
+        Timber.v("Do invite command");
+        mRepository.inviteContacts(mCurrentUser.getGroupUuid(),
+                getUsersFromViewModels(viewModels), new FamilyTrackDataSource.InviteContactsCallback() {
+                    @Override
+                    public void onInviteContactsCompleted(FirebaseResult<String> result) {
+                        Timber.v("Invite done");
+                    }
+                });
+        mNavigator.dismissInviteUsersDialog();
+    }
+
+    private List<User> getUsersFromViewModels(ObservableList<UserListItemViewModel> viewModels) {
+        List<User> result = new ArrayList<>();
+        for (UserListItemViewModel viewModel : viewModels) {
+            if (viewModel.checked.get()) {
+                result.add(viewModel.getUser());
+            }
+        }
+        return result;
+    }
+
+    public void cancelInvite() {
+        mNavigator.dismissInviteUsersDialog();
+    }
 
     @Override
     public void onClick(View v) {
@@ -114,10 +139,10 @@ public class InviteUsersViewModel
      */
     private void populateUserListFromDbResult(FirebaseResult<List<User>> result) {
         if (result.getData() != null) {
-            users.clear();
+            viewModels.clear();
             mUnfilteredUserList.clear();
             for (User user : result.getData()) {
-                users.add(user);
+                viewModels.add(new UserListItemViewModel(mContext, user, null));
                 mUnfilteredUserList.add(user);
             }
         }

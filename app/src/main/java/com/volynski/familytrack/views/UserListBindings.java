@@ -30,9 +30,20 @@ public class UserListBindings {
         }
     }
 
+    @BindingAdapter("app:viewModels")
+    public static void setViewModels(RecyclerView recyclerView,
+                                     List<UserListItemViewModel> viewModels) {
+        RecyclerViewListAdapter<UserListItemViewModel>
+                adapter =
+                (RecyclerViewListAdapter<UserListItemViewModel>) recyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setViewModels(viewModels);
+        }
+    }
+
     @BindingAdapter("app:imageUrl")
     public static void bindImage(ImageView view, String imageUrl) {
-        if (imageUrl != "") {
+        if (!imageUrl.equals("")) {
             Picasso.with(view.getContext())
                     .load(imageUrl)
                     .transform(new CropCircleTransformation())

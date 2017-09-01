@@ -53,13 +53,12 @@ public class InviteUsersDialogFragment extends DialogFragment {
         mLayoutManager = new GridLayoutManager(this.getContext(), 1);
         mBinding.recyclerViewDialoginviteusers.setLayoutManager(mLayoutManager);
 
-        //DividerItemDecoration dividerItemDecoration =
-        //        new DividerItemDecoration(mBinding.recyclerViewDialoginviteusers.getContext(),
-        //                mLayoutManager.getOrientation());
+        DividerItemDecoration dividerItemDecoration =
+                new DividerItemDecoration(getContext(), mLayoutManager.getOrientation());
 
-        //mBinding.recyclerViewDialoginviteusers.addItemDecoration(dividerItemDecoration);
+        mBinding.recyclerViewDialoginviteusers.addItemDecoration(dividerItemDecoration);
 
-        mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.users,
+        mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
                 R.layout.invite_user_list_item, BR.viewmodel);
 
         mBinding.recyclerViewDialoginviteusers.setAdapter(mAdapter);
@@ -72,7 +71,8 @@ public class InviteUsersDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setTitle("Select users to invite");
+        //dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         return dialog;
     }
 
@@ -91,8 +91,6 @@ public class InviteUsersDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        ViewGroup.LayoutParams params = getActivity().findViewById(android.R.id.content).getLayoutParams();
-        mRootView.setLayoutParams(new FrameLayout.LayoutParams(800, 800));
         mViewModel.start(mCurrentUser);
     }
 

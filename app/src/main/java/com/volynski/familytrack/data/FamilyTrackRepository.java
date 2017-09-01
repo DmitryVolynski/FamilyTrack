@@ -240,6 +240,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     @Override
     public void getContactsToInvite(@NonNull GetContactsToInvite callback) {
         User user = null;
+        // read contacts from ContactsContract.Data.CONTENT_URI
         Cursor cursor = mContext.getContentResolver().query(
                 ContactsContract.Data.CONTENT_URI,
                 null,
@@ -247,6 +248,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
                 ContactsContract.Data.CONTACT_ID);
 
+        // merge same contacts with emails & phone numbers
         Map<String, User> contacts = new HashMap<>();
         while (cursor.moveToNext()) {
             String key = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID));
@@ -275,6 +277,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             }
         }
 
+        // select contacts that have phone number and email both
         List<User> users = new ArrayList<>();
         for (String key : contacts.keySet()) {
             User u = contacts.get(key);
@@ -284,5 +287,51 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         }
         FirebaseResult<List<User>> result = new FirebaseResult<List<User>>(users);
         callback.onGetContactsToInviteCompleted(result);
+    }
+
+    @Override
+    public void inviteContacts(@NonNull final String groupUuid,
+                               @NonNull final List<User> usersToinvite,
+                               @NonNull final InviteContactsCallback callback) {
+        // check that group exists
+        getGroupByUuid(groupUuid, new GetGroupByUuidCallback() {
+            @Override
+            public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                if (result.getData() == null) {
+                    // group not found
+                    callback.onInviteContactsCompleted(
+                            new FirebaseResult<String>(FamilyTrackException.getInstance(mContext, FamilyTrackException.DB_GROUP_NOT_FOUND)));
+                    return;
+                }
+
+                DatabaseReference ref = getFirebaseConnection().getReference("groups/" + groupUuid + "/members");
+                for (User user : usersToinvite) {
+                    if (!isAlreadyInGroup(user, result.getData())) {
+                        user.setStatusId(User.USER_INVITED);
+                        user.setRoleId(User.ROLE_UNDEFINED);
+                        ref.push().setValue(user);
+                    }
+                }
+            }
+        });
+    }
+
+    /**
+     * checks if user already is member of group
+     * @param user - user to check
+     * @param group - group of users from firebase wich we want to check against membership of user
+     * @return true if user already in group
+     */
+    private boolean isAlreadyInGroup(User user, Group group) {
+        boolean result = false;
+        for (String key : group.getMembers().keySet()) {
+            User groupUser = group.getMembers().get(key);
+            if (user.getPhone().equals(groupUser.getPhone()) &&
+                user.getEmail().equals(groupUser.getEmail())) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 }

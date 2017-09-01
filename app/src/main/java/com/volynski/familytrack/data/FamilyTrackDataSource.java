@@ -64,8 +64,19 @@ public interface FamilyTrackDataSource {
      * reads contacts from phone and returns them as list of available users to invite
      * list is filtered using these criterias:
      *      - user from contacts shouldn't be already invited
-     *      - user from contacts should have a gmail address
+     *      - user from contacts should have email & phone number both
      * @param callback
      */
     void getContactsToInvite(@NonNull GetContactsToInvite callback);
+
+    interface InviteContactsCallback {void onInviteContactsCompleted(FirebaseResult<String> result ); }
+
+    /**
+     * Stores users from usersToinvite list into specified group in firebase
+     * User ignored if already invited (stored in group)
+     * @param groupUuid - group Id to invite users to
+     * @param usersToinvite - list of users to invite
+     * @param callback
+     */
+    void inviteContacts(@NonNull String groupUuid, @NonNull List<User> usersToinvite, @NonNull InviteContactsCallback callback);
 }

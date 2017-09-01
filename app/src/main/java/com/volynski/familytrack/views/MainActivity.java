@@ -6,10 +6,13 @@ import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.transition.Transition;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.transition.Fade;
+import android.transition.Slide;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,6 +39,7 @@ public class MainActivity
 
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
+    private InviteUsersDialogFragment mInviteUsersDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,32 +114,21 @@ public class MainActivity
         }
     }
 
+    @Override
+    public void dismissInviteUsersDialog() {
+        if (mInviteUsersDialog != null)  {
+            mInviteUsersDialog.dismiss();
+            mInviteUsersDialog = null;
+        }
+    }
+
     /**
      * Replaces user list fragment
      */
     @Override
     public void inviteUsers() {
         Timber.v("Invite users");
-        InviteUsersDialogFragment dialogFragment = InviteUsersDialogFragment.newInstance(this, this);
-        dialogFragment.show(getSupportFragmentManager(), "aa");
-
-
-        //CoordinatorLayout layout = (CoordinatorLayout) findViewById(R.id.coordinatorlayout_main);
-
-        // inflate the layout of the popup window
-        //LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        //final View popupView = inflater.inflate(R.layout.fragment_invite_users, null);
-
-        // create the popup window
-        //int width =  (int) Math.round(0.8 * layout.getWidth());  //LinearLayout.LayoutParams.WRAP_CONTENT;
-        //int height = (int) Math.round(0.8 * layout.getHeight());  //LinearLayout.LayoutParams.WRAP_CONTENT;
-
-        //boolean focusable = true; // lets taps outside the popup also dismiss it
-        //final PopupWindow popupWindow =
-        //        new PopupWindow(dialogFragment.getRootView(), width, height, focusable);
-
-        // show the popup window
-        //popupWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
-
+        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(this, this);
+        mInviteUsersDialog.show(getSupportFragmentManager(), "aa");
     }
 }
