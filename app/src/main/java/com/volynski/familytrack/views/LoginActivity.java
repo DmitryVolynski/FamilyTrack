@@ -196,6 +196,7 @@ public class LoginActivity extends AppCompatActivity implements
     private void proceedToMainActivity() {
         final FamilyTrackDataSource dataSource =
                 new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this);
+
         dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(),
                 new FamilyTrackDataSource.GetUserByEmailCallback() {
             @Override

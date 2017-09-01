@@ -285,6 +285,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 users.add(u);
             }
         }
+
+        // TODO удалить те контакты, которые уже получили приглашение (занесены в бд)
         FirebaseResult<List<User>> result = new FirebaseResult<List<User>>(users);
         callback.onGetContactsToInviteCompleted(result);
     }
