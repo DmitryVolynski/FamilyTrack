@@ -33,6 +33,8 @@ import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.views.fragments.FirstTimeUserDialogFragment;
+import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
 
 import java.util.List;
 
@@ -57,7 +59,8 @@ public class LoginActivity extends AppCompatActivity implements
     private Button mRevokeButton;
     private Button mCheckUserExistsButton;
     private Button mMainActivityButton;
-    
+    private FirstTimeUserDialogFragment mFirstTimeDialog;
+
     private TextView mStatus;
     private GoogleApiClient mGoogleApiClient;
     FirebaseAuth mFirebaseAuth;
@@ -229,8 +232,12 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void startMainActivity() {
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        startActivity(intent);
+        // TODO сделать навигатор (вместо null)
+        mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(this, null);
+        mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
+
+        //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        //startActivity(intent);
     }
 
     private void checkUserExists() {
