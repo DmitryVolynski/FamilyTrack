@@ -12,6 +12,8 @@ public class StringKeys {
     public static final String SHARED_PREFS_FILE_KEY
             = StringKeys.class.getPackage().getName() + ".PREFERENCE_FILE_KEY";
     public static final String SHARED_PREFS_CURRENT_USER_KEY = "CURRENT_USER";
-
     public static final String SHARED_PREFS_IDTOKEN_KEY = "ID_TOKEN";
+
+    public static final String USER_UUID_KEY = "USER_UUID";
+    public static final String SHARED_PREFS_CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
 }

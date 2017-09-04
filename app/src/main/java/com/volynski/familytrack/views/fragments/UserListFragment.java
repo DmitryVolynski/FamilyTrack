@@ -20,7 +20,6 @@ import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
-import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
@@ -35,7 +34,7 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 public class UserListFragment
         extends Fragment {
     private UserListViewModel mViewModel;
-    private User mCurrentUser;
+    private String mCurrentUserUuid;
     private GridLayoutManager mLayoutManager;
 
     FragmentUserListBinding mBinding;
@@ -55,7 +54,7 @@ public class UserListFragment
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start(mCurrentUser);
+        mViewModel.start(mCurrentUserUuid);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class UserListFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mCurrentUser = SharedPrefsUtil.getCurrentUser(getContext());
+        mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
 
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_list,

@@ -3,14 +3,16 @@ package com.volynski.familytrack.viewmodels;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
-import android.databinding.ObservableBoolean;
 import android.databinding.ObservableList;
 
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+
+import timber.log.Timber;
 
 /**
  * Created by DmitryVolynski on 22.08.2017.
@@ -36,14 +38,25 @@ public class UserOnMapViewModel extends BaseObservable {
      * ViewModel will populate the view if current user is member of any group
      * @param user - User object representing current user
      */
-    public void start(User user) {
-        mCurrentUser = user;
+    public void start(final String userUuid) {
+        /*
         if (mCurrentUser.getStatusId() != User.USER_JOINED) {
             return;
         }
-
+        */
         mIsDataLoading = true;
-        loadUsersList(mCurrentUser.getGroupUuid());
+        mRepository.getUserByUuid(userUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
+            @Override
+            public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                if (result.getData() != null) {
+                    mCurrentUser = result.getData();
+                    loadUsersList(mCurrentUser.getActiveMembership().getGroupUuid());
+                } else {
+                    Timber.v("User with uuid=" + userUuid + " not found ");
+                }
+            }
+        });
+
     }
 
     /**
@@ -69,7 +82,7 @@ public class UserOnMapViewModel extends BaseObservable {
     private void populateUserListFromDbResult(FirebaseResult<Group> result) {
         if (result.getData() != null && result.getData().getMembers() != null) {
             for (User user : result.getData().getMembers().values()) {
-                if (user.getStatusId() == User.USER_JOINED) {
+                if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
                     this.users.add(user);
                 }
             }

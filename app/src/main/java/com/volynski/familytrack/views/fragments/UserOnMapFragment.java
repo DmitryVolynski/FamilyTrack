@@ -3,16 +3,13 @@ package com.volynski.familytrack.views.fragments;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
-import android.databinding.Observable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +19,6 @@ import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -30,7 +26,6 @@ import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
-import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentUserOnMapBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
@@ -52,7 +47,7 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
     private PlaceDetectionClient mPlaceDetectionClient;
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
-    private User mCurrentUser;
+    private String mCurrentUserUuid;
     private LinearLayoutManager mLayoutManager;
     private static final int DEFAULT_ZOOM = 15;
 
@@ -74,7 +69,7 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start(mCurrentUser);
+        mViewModel.start(mCurrentUserUuid);
     }
 
     @Override
@@ -100,7 +95,7 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mCurrentUser = SharedPrefsUtil.getCurrentUser(getContext());
+        mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
 
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_on_map,

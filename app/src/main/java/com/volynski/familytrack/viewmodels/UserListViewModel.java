@@ -117,28 +117,40 @@ public class UserListViewModel
      * ViewModel will populate the view if current user is member of any group
      * @param user - User object representing current user
      */
-    public void start(User user) {
-        mCurrentUser = user;
+    public void start(final String userUuid) {
+        /*
         if (mCurrentUser.getStatusId() != User.USER_JOINED) {
             return;
         }
-
+        */
         mIsDataLoading = true;
-        loadUsersList();
+        mRepository.getUserByUuid(userUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
+            @Override
+            public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                if (result.getData() != null) {
+                    mCurrentUser = result.getData();
+                    loadUsersList();
+                } else {
+                    Timber.v("User with uuid=" + userUuid + " not found ");
+                }
+            }
+        });
     }
 
     /**
      *
      */
     private void loadUsersList() {
-        mRepository.getGroupByUuid(mCurrentUser.getGroupUuid(),
-                new FamilyTrackDataSource.GetGroupByUuidCallback() {
-                    @Override
-                    public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
-                        populateUserListFromDbResult(result);
-                        mIsDataLoading = false;
-                    }
-                });
+        if (mCurrentUser.getActiveMembership() != null) {
+            mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(),
+                    new FamilyTrackDataSource.GetGroupByUuidCallback() {
+                        @Override
+                        public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                            populateUserListFromDbResult(result);
+                            mIsDataLoading = false;
+                        }
+                    });
+        }
     }
 
     /**

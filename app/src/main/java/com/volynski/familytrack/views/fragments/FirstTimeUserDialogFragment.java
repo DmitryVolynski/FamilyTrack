@@ -6,23 +6,21 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RadioGroup;
 
-import com.volynski.familytrack.BR;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentFirstTimeUserBinding;
-import com.volynski.familytrack.databinding.FragmentInviteUsersBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.FirstTimeUserViewModel;
-import com.volynski.familytrack.viewmodels.InviteUsersViewModel;
-import com.volynski.familytrack.views.navigators.UserListNavigator;
+import com.volynski.familytrack.views.navigators.LoginNavigator;
 
 /**
  * Created by DmitryVolynski on 02.09.2017.
@@ -30,7 +28,6 @@ import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 public class FirstTimeUserDialogFragment extends DialogFragment {
     private FirstTimeUserViewModel mViewModel;
-    private User mCurrentUser;
     private GridLayoutManager mLayoutManager;
     private View mRootView;
     FragmentFirstTimeUserBinding mBinding;
@@ -39,8 +36,6 @@ public class FirstTimeUserDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        mCurrentUser = SharedPrefsUtil.getCurrentUser(getContext());
-
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_first_time_user,
                 container,
@@ -58,8 +53,8 @@ public class FirstTimeUserDialogFragment extends DialogFragment {
                 R.layout.invite_user_list_item, BR.viewmodel);
 
         mBinding.recyclerViewDialoginviteusers.setAdapter(mAdapter);
-        mBinding.setViewmodel(mViewModel);
         */
+        mBinding.setViewmodel(mViewModel);
         mRootView = mBinding.getRoot();
         return mRootView;
     }
@@ -73,12 +68,15 @@ public class FirstTimeUserDialogFragment extends DialogFragment {
     }
 
     public static FirstTimeUserDialogFragment newInstance(Context context,
-                                                        UserListNavigator navigator) {
+                                                          GoogleSignInAccount signInAccount,
+                                                          LoginNavigator navigator) {
+
         FirstTimeUserDialogFragment result = new FirstTimeUserDialogFragment();
 
         FirstTimeUserViewModel viewModel =
-                new FirstTimeUserViewModel(context,
+                new FirstTimeUserViewModel(context, signInAccount,
                         new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
+
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
         return result;
@@ -87,7 +85,7 @@ public class FirstTimeUserDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start(mCurrentUser);
+        mViewModel.start();
     }
 
     public void setViewModel(FirstTimeUserViewModel mViewModel) {

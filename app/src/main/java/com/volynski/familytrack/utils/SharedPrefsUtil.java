@@ -23,6 +23,32 @@ public class SharedPrefsUtil {
      * @param context
      * @param user - User object of current authenticated user with Firebase-generated uuid
      */
+    public static void setCurrentUserUuid(Context context, String userUuid) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY, userUuid);
+        editor.commit();
+    }
+
+    /**
+     * Reads current user data from shared preferences and deserialize them from json string
+     * into User object
+     * @param context
+     * @return User object with current user data
+     */
+    public static String getCurrentUserUuid(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        return preferences.getString(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY, "");
+    }
+
+    /**
+     * Saves User object in shared preferences using json format
+     * @param context
+     * @param user - User object of current authenticated user with Firebase-generated uuid
+     */
     public static void setCurrentUser(Context context,
                                       User user) {
         SharedPreferences preferences =
@@ -58,6 +84,14 @@ public class SharedPrefsUtil {
 
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(StringKeys.SHARED_PREFS_IDTOKEN_KEY, idToken);
+        editor.commit();
+    }
+
+    public static void wipeUserData(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove(StringKeys.SHARED_PREFS_CURRENT_USER_KEY);
         editor.commit();
     }
 

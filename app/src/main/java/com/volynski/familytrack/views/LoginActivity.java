@@ -2,6 +2,7 @@ package com.volynski.familytrack.views;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -28,13 +29,14 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.fragments.FirstTimeUserDialogFragment;
-import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
+import com.volynski.familytrack.views.navigators.LoginNavigator;
 
 import java.util.List;
 
@@ -44,6 +46,7 @@ public class LoginActivity extends AppCompatActivity implements
         ConnectionCallbacks,
         OnConnectionFailedListener,
         View.OnClickListener,
+        LoginNavigator,
         FamilyTrackDataSource.GetUserByEmailCallback,
         FamilyTrackDataSource.GetContactsToInvite {
 
@@ -65,6 +68,8 @@ public class LoginActivity extends AppCompatActivity implements
     private GoogleApiClient mGoogleApiClient;
     FirebaseAuth mFirebaseAuth;
     private GoogleSignInAccount mGoogleSignInAccount;
+    private String mUserEmail;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,6 +78,8 @@ public class LoginActivity extends AppCompatActivity implements
         Timber.plant(new Timber.DebugTree());
 
         setContentView(R.layout.activity_login);
+
+        SharedPrefsUtil.wipeUserData(this);
 
         // Get references to all of the UI views
         mSignInButton = (SignInButton) findViewById(R.id.sign_in_button);
@@ -157,6 +164,7 @@ public class LoginActivity extends AppCompatActivity implements
             mGoogleSignInAccount = result.getSignInAccount();
             mStatus.setText(mGoogleSignInAccount.getDisplayName());
             mSignInButton.setEnabled(false);
+            mUserEmail = mGoogleSignInAccount.getEmail();
             SharedPrefsUtil.setGoogleAccountIdToken(this, mGoogleSignInAccount.getIdToken());
         } else {
             // Signed out, show unauthenticated UI.
@@ -191,12 +199,12 @@ public class LoginActivity extends AppCompatActivity implements
                 checkUserExists();
                 break;
             case R.id.button_login_goto_main_activity:
-                proceedToMainActivity();
+                startMainActivity();
                 break;
         }
     }
 
-    private void proceedToMainActivity() {
+    private void gotoMainActivity() {
         final FamilyTrackDataSource dataSource =
                 new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this);
 
@@ -209,7 +217,7 @@ public class LoginActivity extends AppCompatActivity implements
                     // doesn't exists in db - register him in db
                     User user = new User("", mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
                             mGoogleSignInAccount.getDisplayName(), mGoogleSignInAccount.getPhotoUrl().toString(),
-                            mGoogleSignInAccount.getEmail(), "4838437", User.ROLE_UNDEFINED, User.USER_CREATED, "", null);
+                            mGoogleSignInAccount.getEmail(), "4838437", null, null);
                     dataSource.createUser(user, new FamilyTrackDataSource.CreateUserCallback() {
                         @Override
                         public void onCreateUserCompleted(FirebaseResult<User> result) {
@@ -232,12 +240,8 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void startMainActivity() {
-        // TODO сделать навигатор (вместо null)
-        mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(this, null);
+        mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(this, mGoogleSignInAccount, this);
         mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
-
-        //Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        //startActivity(intent);
     }
 
     private void checkUserExists() {
@@ -302,6 +306,13 @@ public class LoginActivity extends AppCompatActivity implements
                     PERMISSIONS_REQUEST_READ_CONTACTS);
         }
     }
+
+    @Override
+    public void proceedToMainActivity() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        startActivity(intent);
+    }
+
     private void createNewUser() {
 
         /*

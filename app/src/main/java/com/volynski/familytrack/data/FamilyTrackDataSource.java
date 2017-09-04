@@ -35,14 +35,33 @@ public interface FamilyTrackDataSource {
     void changeUserStatus(@NonNull String userUuid, @NonNull int newStatus);
 
     interface GetUserByUuidCallback { void onGetUserByUuidCompleted(FirebaseResult<User> result); }
-    void getUserByUuid(@NonNull String userUuid, @NonNull GetUserByUuidCallback callback);
+    void getUserByUuid(@NonNull String userUuid,
+                       @NonNull GetUserByUuidCallback callback);
 
     interface GetUserByEmailCallback { void onGetUserByEmailCompleted(FirebaseResult<User> result); }
-    void getUserByEmail(@NonNull String userEmail, @NonNull GetUserByEmailCallback callback);
+    void getUserByEmail(@NonNull String userEmail,
+                        @NonNull GetUserByEmailCallback callback);
 
+    interface GetGroupsAvailableToJoinCallback {void onGetGroupsAvailableToJoinCompleted(FirebaseResult<List<Group>> result); }
+
+    /**
+     * Returns a list of groups, in which user with specified phoneNumber/email was invited
+     * Conditions of group selection:
+     *      - user with specified phoneNumber/email contains in a group
+     *      - user has status User.USER_INVITED
+     * @param phoneNumber - user phoneNumber
+     * @param email - user email
+     * @param callback - callback to return result
+     */
+    void getGroupsAvailableToJoin(@NonNull String phoneNumber,
+                                  //@NonNull String email,
+                                  @NonNull GetGroupsAvailableToJoinCallback callback);
+
+    // --------------------------------------------------------------------------------------------
     //
-    // ---------- group's operations
+    // group's operations
     //
+    // --------------------------------------------------------------------------------------------
     interface CreateGroupCallback {void onCreateGroupCompleted(FirebaseResult<Group> result); }
     void createGroup(@NonNull Group group, String adminUuid, CreateGroupCallback callback);
 

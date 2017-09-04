@@ -10,13 +10,9 @@ import android.databinding.ObservableList;
 import android.util.Log;
 import android.view.View;
 
-import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
-import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
-import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.ArrayList;
@@ -74,7 +70,7 @@ public class InviteUsersViewModel
 
     public void doInvite() {
         Timber.v("Do invite command");
-        mRepository.inviteContacts(mCurrentUser.getGroupUuid(),
+        mRepository.inviteContacts(mCurrentUser.getActiveMembership().getGroupUuid(),
                 getUsersFromViewModels(viewModels), new FamilyTrackDataSource.InviteContactsCallback() {
                     @Override
                     public void onInviteContactsCompleted(FirebaseResult<String> result) {
@@ -115,10 +111,11 @@ public class InviteUsersViewModel
      */
     public void start(User user) {
         mCurrentUser = user;
+        /*
         if (mCurrentUser.getStatusId() != User.USER_JOINED) {
             return;
         }
-
+        */
         mIsDataLoading = true;
         loadUsersList();
     }

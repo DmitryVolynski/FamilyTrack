@@ -17,6 +17,16 @@ public class Location {
     private String mKnownLocationName;
     private int mBatteryLevel;
 
+    public Location() {}
+    public Location(Timestamp timestamp, double longitude,
+                    double latitude, String knownLocationName, int batteryLevel) {
+        mTimestamp = timestamp;
+        mLongitude = longitude;
+        mLatitude = latitude;
+        mKnownLocationName = knownLocationName;
+        mBatteryLevel = batteryLevel;
+    }
+
     public Timestamp getTimestamp() {
         return mTimestamp;
     }
@@ -55,5 +65,10 @@ public class Location {
 
     public void setBatteryLevel(int mBatteryLevel) {
         this.mBatteryLevel = mBatteryLevel;
+    }
+
+    public Location clone() {
+        return new Location(mTimestamp, mLongitude,
+                mLatitude, mKnownLocationName, mBatteryLevel);
     }
 }

@@ -3,19 +3,15 @@ package com.volynski.familytrack.data.models.firebase;
 import com.google.firebase.database.Exclude;
 import com.google.gson.Gson;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by DmitryVolynski on 16.08.2017.
  * Model class for a User
  */
 
 public class User {
-    public static final int ROLE_ADMIN = 1;
-    public static final int ROLE_MEMBER = 2;
-    public static final int ROLE_UNDEFINED = 3;
-
-    public static final int USER_INVITED = 1;
-    public static final int USER_JOINED = 2;
-    public static final int USER_CREATED = 3;
 
 
     private String mFamilyName;
@@ -25,15 +21,13 @@ public class User {
     private String mEmail;
     private String mPhone;
     private String mUserUuid;
-    private int mRoleId;
-    private int mStatusId;
-    private String mGroupUuid;
+    private Map<String, Membership> mMemberships;
     private Location mLastKnownLocation;
 
     public User() {}
 
     public User(String uuid, String familyName, String givenName, String displayName, String photoUrl,
-                String email, String phone, int roleId, int statusId, String groupUuid, Location location) {
+                String email, String phone, Map<String, Membership> memberships, Location location) {
         this.mUserUuid = uuid;
         this.mFamilyName = familyName;
         this.mGivenName = givenName;
@@ -41,14 +35,11 @@ public class User {
         this.mPhotoUrl = photoUrl;
         this.mEmail = email;
         this.mPhone = phone;
-        this.mRoleId = roleId;
-        this.mStatusId = statusId;
-        this.mGroupUuid = groupUuid;
         this.mLastKnownLocation = location;
     }
 
     public static User getFakeUser() {
-        return new User("1234567890", "Volynski", "Dmitry", "", "", "jkdg",  "123", 1, 1, "0987654321", null);
+        return new User("1234567890", "Volynski", "Dmitry", "", "", "volynski@hotmail.com",  "0987654321", null, null);
     }
 
     @Exclude
@@ -108,11 +99,15 @@ public class User {
         return (new Gson()).fromJson(jsonUser, User.class);
     }
 
+    /*
     public User clone() {
+        HashMap<String, Membership> map = new HashMap<>();
+        for (Membership membership : mMemberships)
         return new User(mUserUuid, mFamilyName,
                 mGivenName, mDisplayName, mPhotoUrl, mEmail, mPhone,
-                mRoleId, mStatusId, mGroupUuid, mLastKnownLocation);
+                map, mLastKnownLocation.clone());
     }
+    */
 
     public Location getLastKnownLocation() {
         return mLastKnownLocation;
@@ -122,35 +117,41 @@ public class User {
         this.mLastKnownLocation = mLastKnownLocation;
     }
 
-    public int getRoleId() {
-        return mRoleId;
-    }
-
-    public void setRoleId(int mRoleId) {
-        this.mRoleId = mRoleId;
-    }
-
-    public int getStatusId() {
-        return mStatusId;
-    }
-
-    public void setStatusId(int mStatusId) {
-        this.mStatusId = mStatusId;
-    }
-
-    public String getGroupUuid() {
-        return mGroupUuid;
-    }
-
-    public void setGroupUuid(String groupUuid) {
-        this.mGroupUuid = groupUuid;
-    }
-
     public String getDisplayName() {
         return mDisplayName;
     }
 
     public void setDisplayName(String mDisplayName) {
         this.mDisplayName = mDisplayName;
+    }
+
+    public Map<String, Membership> getMemberships() {
+        return mMemberships;
+    }
+
+    public void setMemberships(Map<String, Membership> mMemberships) {
+        this.mMemberships = mMemberships;
+    }
+
+    @Exclude
+    public Membership getActiveMembership() {
+        Membership result = null;
+        if (mMemberships != null) {
+            for (String key : mMemberships.keySet()) {
+                Membership membership = mMemberships.get(key);
+                if (membership.getStatusId() == Membership.USER_JOINED) {
+                    result = membership;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    public void addMembership(Membership membership) {
+        if (mMemberships == null) {
+            mMemberships = new HashMap<>();
+        }
+        mMemberships.put(membership.getGroupUuid(), membership);
     }
 }
