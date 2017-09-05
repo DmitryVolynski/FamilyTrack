@@ -1,14 +1,11 @@
 package com.volynski.familytrack.data;
 
-import android.app.Application;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Build;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -27,6 +24,7 @@ import com.volynski.familytrack.data.models.firebase.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
@@ -132,7 +130,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                callback.onGetUserByUuidCompleted(new FirebaseResult<User>(databaseError));
             }
         });
     }
@@ -154,7 +152,29 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                callback.onGetUserByEmailCompleted(new FirebaseResult<User>(databaseError));
+            }
+        });
+    }
 
+    @Override
+    public void getUserByPhone(@NonNull String userPhone, @NonNull final GetUserByPhoneCallback callback) {
+        DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
+        Query query = ref.orderByChild("phone").equalTo(userPhone).limitToFirst(1);
+
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User user = null;
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    user = FirebaseUtil.getUserFromSnapshot(dataSnapshot.getChildren().iterator().next());
+                };
+                callback.onGetUserByPhoneCompleted(new FirebaseResult<User>(user));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                callback.onGetUserByPhoneCompleted(new FirebaseResult<User>(databaseError));
             }
         });
     }
@@ -171,19 +191,18 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
                     /*
                     User newAdmin = result.getData().clone();
-                    Membership membership = new Membership(groupKey, group.getName(),
-                            Membership.ROLE_ADMIN, Membership.USER_JOINED);
-                    newAdmin.setMemberships(new HashMap<String, Membership>());
-                    newAdmin.getMemberships().put(groupKey, membership);
                     newAdmin.setLastKnownLocation(null);
                     */
                     User user = result.getData();
                     User newAdmin = new User(user.getUserUuid(), user.getFamilyName(), user.getGivenName(),
                             user.getDisplayName(), user.getPhotoUrl(), user.getEmail(), user.getPhone(), null,
                             (user.getLastKnownLocation() == null ? null : user.getLastKnownLocation().clone()));
+                    Membership membership = new Membership(groupKey, group.getName(),
+                            Membership.ROLE_ADMIN, Membership.USER_JOINED);
+                    newAdmin.setMemberships(new HashMap<String, Membership>());
+                    newAdmin.getMemberships().put(groupKey, membership);
 
-                    user.addMembership(new Membership(groupKey, group.getName(),
-                            Membership.ROLE_ADMIN, Membership.USER_JOINED));
+                    user.addMembership(membership);
                     group.getMembers().put(newAdmin.getUserUuid(), newAdmin);
 
                     // create new group at /groups/groupKey and at /users/userKey/group
@@ -301,30 +320,51 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void inviteContacts(@NonNull final String groupUuid,
-                               @NonNull final List<User> usersToinvite,
-                               @NonNull final InviteContactsCallback callback) {
+    public void inviteUsers(@NonNull final String groupUuid,
+                            @NonNull final List<User> usersToinvite,
+                            @NonNull final InviteUsersCallback callback) {
         // check that group exists
         getGroupByUuid(groupUuid, new GetGroupByUuidCallback() {
             @Override
             public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                 if (result.getData() == null) {
                     // group not found
-                    callback.onInviteContactsCompleted(
+                    callback.onInviteUsersCompleted(
                             new FirebaseResult<String>(FamilyTrackException.getInstance(mContext, FamilyTrackException.DB_GROUP_NOT_FOUND)));
                     return;
                 }
 
-                DatabaseReference ref = getFirebaseConnection().getReference("invited_users");
                 for (User user : usersToinvite) {
-                    if (!isAlreadyInGroup(user, result.getData())) {
-                        Membership membership = new Membership(groupUuid, result.getData().getName(),
-                                Membership.ROLE_UNDEFINED, Membership.USER_INVITED);
-                        user.setMemberships(new HashMap<String, Membership>());
-                        user.getMemberships().put(groupUuid, membership);
-                        ref.push().setValue(user);
-                    }
+                    inviteUser(user, result.getData());
                 }
+            }
+        });
+    }
+
+    private void inviteUser(final User user, final Group group) {
+        if (isUserAlreadyInvited(user, group)) {
+            return;
+        }
+
+        // проверяем логинился ли такой пользователь в системе
+        final Map<String, Object> childUpdates = new HashMap<>();
+        getUserByPhone(user.getPhone(), new GetUserByPhoneCallback() {
+            @Override
+            public void onGetUserByPhoneCompleted(FirebaseResult<User> result) {
+                User dbUser = result.getData();
+                if (dbUser == null) {
+                    // пользователь не найден, вначале создаем пользователя в ветке registered_users
+                    user.addMembership(new Membership(group.getGroupUuid(), group.getName(), Membership.ROLE_UNDEFINED, Membership.USER_INVITED));
+                    user.setUserUuid(getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY).push().getKey());
+                    childUpdates.put(Group.REGISTERED_USERS_GROUP_KEY + "/" + user.getUserUuid(), user);
+
+                    group.addUser(user);
+                    childUpdates.put("/groups/" + group.getGroupUuid(), group);
+                } else {
+                    // в системе найден зарегистрированный пользователь, но он не приглашен в группу
+
+                }
+                getFirebaseConnection().getReference().updateChildren(childUpdates);
             }
         });
     }
@@ -335,7 +375,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
      * @param group - group of users from firebase wich we want to check against membership of user
      * @return true if user already in group
      */
-    private boolean isAlreadyInGroup(User user, Group group) {
+    private boolean isUserAlreadyInvited(User user, Group group) {
         boolean result = false;
         for (String key : group.getMembers().keySet()) {
             User groupUser = group.getMembers().get(key);
@@ -351,26 +391,23 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     @Override
     public void getGroupsAvailableToJoin(@NonNull String phoneNumber,
                                          final @NonNull GetGroupsAvailableToJoinCallback callback) {
-        DatabaseReference ref = getFirebaseConnection().getReference("groups");
-        Query query = ref.child("members").orderByKey(); // .orderByChild("phone");
-
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        this.getUserByPhone(phoneNumber, new GetUserByPhoneCallback() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                checkObject(dataSnapshot);
+            public void onGetUserByPhoneCompleted(FirebaseResult<User> result) {
+                checkObject(result);
                 List<Group> groups = new ArrayList<Group>();
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Group group = FirebaseUtil.getGroupFromSnapshot(snapshot);
-                    groups.add(group);
+                if (result.getException() != null) {
+                    callback.onGetGroupsAvailableToJoinCompleted(new FirebaseResult<List<Group>>(result.getException()));
+                }
+                if (result.getData().getMemberships() != null) {
+                    for (String key : result.getData().getMemberships().keySet()) {
+                        Membership membership = result.getData().getMemberships().get(key);
+                        if (membership.getStatusId() == Membership.USER_INVITED ||
+                                membership.getStatusId() == Membership.USER_DEPARTED)
+                        groups.add(new Group(membership.getGroupUuid(), membership.getGroupName()));
+                    }
                 }
                 callback.onGetGroupsAvailableToJoinCompleted(new FirebaseResult<List<Group>>(groups));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                callback.onGetGroupsAvailableToJoinCompleted(
-                        new FirebaseResult<List<Group>>(
-                                new FamilyTrackException(databaseError.getCode(), databaseError.getDetails())));
             }
         });
     }

@@ -44,8 +44,6 @@ public class InviteUsersDialogFragment extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        mCurrentUser = SharedPrefsUtil.getCurrentUser(getContext());
-
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_invite_users,
                 container,
@@ -77,11 +75,12 @@ public class InviteUsersDialogFragment extends DialogFragment {
     }
 
     public static InviteUsersDialogFragment newInstance(Context context,
+                                                        String currentUserUuid,
                                                         UserListNavigator navigator) {
         InviteUsersDialogFragment result = new InviteUsersDialogFragment();
 
         InviteUsersViewModel viewModel =
-                new InviteUsersViewModel(context,
+                new InviteUsersViewModel(context, currentUserUuid,
                         new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
@@ -91,7 +90,7 @@ public class InviteUsersDialogFragment extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start(mCurrentUser);
+        mViewModel.start();
     }
 
     public void setViewModel(InviteUsersViewModel mViewModel) {

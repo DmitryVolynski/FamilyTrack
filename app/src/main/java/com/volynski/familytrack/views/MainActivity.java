@@ -1,25 +1,18 @@
 package com.volynski.familytrack.views;
 
-import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.transition.Transition;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.transition.Fade;
-import android.transition.Slide;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.PopupWindow;
 
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.TabViewPageAdapter;
 import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
@@ -37,6 +30,7 @@ public class MainActivity
     private static final String USER_LIST_FRAGMENT = UserListFragment.class.getSimpleName();
     private static final String USER_ON_MAP_FRAGMENT = UserOnMapFragment.class.getSimpleName();
 
+    private String mCurrentUserUuid = "";
     private TabLayout mTabLayout;
     private ViewPager mViewPager;
     private InviteUsersDialogFragment mInviteUsersDialog;
@@ -44,6 +38,14 @@ public class MainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        if (intent.hasExtra(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY)) {
+            mCurrentUserUuid = intent.getStringExtra(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY);
+        } else {
+            Timber.e("Current user uuid expected but not found in intent");
+            return;
+        }
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -63,8 +65,8 @@ public class MainActivity
     private void setupTabView() {
         // Get the ViewPager and set it's PagerAdapter so that it can display items
         mViewPager = (ViewPager) findViewById(R.id.viewpager_main);
-        mViewPager.setAdapter(new TabViewPageAdapter(getSupportFragmentManager(),
-                this, this));
+        mViewPager.setAdapter(new TabViewPageAdapter(mCurrentUserUuid,
+                getSupportFragmentManager(), this, this));
 
         // Give the TabLayout the ViewPager
         mTabLayout = (TabLayout) findViewById(R.id.tabs_main);
@@ -128,7 +130,7 @@ public class MainActivity
     @Override
     public void inviteUsers() {
         Timber.v("Invite users");
-        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(this, this);
+        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(this, mCurrentUserUuid, this);
         mInviteUsersDialog.show(getSupportFragmentManager(), "aa");
     }
 }

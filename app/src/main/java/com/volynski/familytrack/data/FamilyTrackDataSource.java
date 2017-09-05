@@ -42,6 +42,10 @@ public interface FamilyTrackDataSource {
     void getUserByEmail(@NonNull String userEmail,
                         @NonNull GetUserByEmailCallback callback);
 
+    interface GetUserByPhoneCallback { void onGetUserByPhoneCompleted(FirebaseResult<User> result); }
+    void getUserByPhone(@NonNull String userPhone,
+                        @NonNull GetUserByPhoneCallback callback);
+
     interface GetGroupsAvailableToJoinCallback {void onGetGroupsAvailableToJoinCompleted(FirebaseResult<List<Group>> result); }
 
     /**
@@ -88,7 +92,7 @@ public interface FamilyTrackDataSource {
      */
     void getContactsToInvite(@NonNull GetContactsToInvite callback);
 
-    interface InviteContactsCallback {void onInviteContactsCompleted(FirebaseResult<String> result ); }
+    interface InviteUsersCallback {void onInviteUsersCompleted(FirebaseResult<String> result ); }
 
     /**
      * Stores users from usersToinvite list into specified group in firebase
@@ -97,5 +101,5 @@ public interface FamilyTrackDataSource {
      * @param usersToinvite - list of users to invite
      * @param callback
      */
-    void inviteContacts(@NonNull String groupUuid, @NonNull List<User> usersToinvite, @NonNull InviteContactsCallback callback);
+    void inviteUsers(@NonNull String groupUuid, @NonNull List<User> usersToinvite, @NonNull InviteUsersCallback callback);
 }

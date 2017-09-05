@@ -31,6 +31,7 @@ public class InviteUsersViewModel
 
     private final static String TAG = UserListViewModel.class.getSimpleName();
     private final Context mContext;
+    private String mCurrentUserUuid = "";
     private User mCurrentUser;
     private boolean mIsDataLoading = false;
     private UserListNavigator mNavigator;
@@ -42,8 +43,9 @@ public class InviteUsersViewModel
     public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
     public final ObservableField<String> searchString = new ObservableField<>("");
 
-    public InviteUsersViewModel(Context context,
+    public InviteUsersViewModel(Context context, String currentuserUuid,
                              FamilyTrackDataSource dataSource) {
+        mCurrentUserUuid = currentuserUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
         searchString.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
@@ -70,10 +72,10 @@ public class InviteUsersViewModel
 
     public void doInvite() {
         Timber.v("Do invite command");
-        mRepository.inviteContacts(mCurrentUser.getActiveMembership().getGroupUuid(),
-                getUsersFromViewModels(viewModels), new FamilyTrackDataSource.InviteContactsCallback() {
+        mRepository.inviteUsers(mCurrentUser.getActiveMembership().getGroupUuid(),
+                getUsersFromViewModels(viewModels), new FamilyTrackDataSource.InviteUsersCallback() {
                     @Override
-                    public void onInviteContactsCompleted(FirebaseResult<String> result) {
+                    public void onInviteUsersCompleted(FirebaseResult<String> result) {
                         Timber.v("Invite done");
                     }
                 });
@@ -109,15 +111,24 @@ public class InviteUsersViewModel
     /**
      * Starts loading data from contact list of the phone
      */
-    public void start(User user) {
-        mCurrentUser = user;
-        /*
-        if (mCurrentUser.getStatusId() != User.USER_JOINED) {
+    public void start() {
+        if (mCurrentUserUuid.equals("")) {
+            Timber.e("Can't start viewmodel. UserUuid is empty");
             return;
         }
-        */
+
         mIsDataLoading = true;
-        loadUsersList();
+        mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
+            @Override
+            public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                if (result.getData() != null) {
+                    mCurrentUser = result.getData();
+                    loadUsersList();
+                } else {
+                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                }
+            }
+        });
     }
 
     private void loadUsersList() {

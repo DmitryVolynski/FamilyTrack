@@ -14,6 +14,8 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.LoginNavigator;
 
+import java.util.List;
+
 import timber.log.Timber;
 
 /**
@@ -61,7 +63,13 @@ public class FirstTimeUserViewModel extends BaseObservable {
      * Reads list of groups in which current user was invited
      */
     private void loadGroupsList() {
-
+        mRepository.getGroupsAvailableToJoin(phoneNumber.get(),
+                new FamilyTrackDataSource.GetGroupsAvailableToJoinCallback() {
+            @Override
+            public void onGetGroupsAvailableToJoinCompleted(FirebaseResult<List<Group>> result) {
+                checkResult(result);
+            }
+        });
     }
 
     public void goStepTwo() {
@@ -116,18 +124,24 @@ public class FirstTimeUserViewModel extends BaseObservable {
     private void joinExistingGroup() {
     }
 
-    private void createNewGroup(String groupName, String userUuid) {
+    private void createNewGroup(String groupName, final String userUuid) {
         Timber.v("Create group: " + groupName);
-        mRepository.createGroup(new Group(groupName), userUuid, null);
-        mNavigator.proceedToMainActivity();
+        mRepository.createGroup(new Group(groupName), userUuid, new FamilyTrackDataSource.CreateGroupCallback() {
+            @Override
+            public void onCreateGroupCompleted(FirebaseResult<Group> result) {
+                mNavigator.proceedToMainActivity(userUuid);
+            }
+        });
     }
 
     private void checkResult(Object result) {
         int i = 0;
     }
 
+
     public void doItLater() {
-        mNavigator.proceedToMainActivity();
+        // TODO необходимо передавать правильный идентификатор клиента
+        mNavigator.proceedToMainActivity("");
     }
 
     public void setNavigator(LoginNavigator mNavigator) {

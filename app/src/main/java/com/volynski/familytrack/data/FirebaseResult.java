@@ -1,5 +1,7 @@
 package com.volynski.familytrack.data;
 
+import com.google.firebase.database.DatabaseError;
+
 /**
  * Created by DmitryVolynski on 21.08.2017.
  *
@@ -21,7 +23,7 @@ public class FirebaseResult<T> {
         this.mData = mResult;
     }
 
-    public Exception getException() {
+    public FamilyTrackException getException() {
         return mException;
     }
 
@@ -37,5 +39,10 @@ public class FirebaseResult<T> {
     public FirebaseResult(FamilyTrackException e) {
         this.mData = null;
         this.mException = e;
+    }
+
+    public FirebaseResult(DatabaseError error) {
+        this.mData = null;
+        this.mException = new FamilyTrackException(error.getCode(), error.getMessage());
     }
 }

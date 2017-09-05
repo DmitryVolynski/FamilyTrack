@@ -19,13 +19,14 @@ public class TabViewPageAdapter extends FragmentPagerAdapter {
     private String tabTitles[] = new String[] { "Users", "Map", "Invites" };
     private Context context;
     private UserListNavigator mNavigator;
+    private String mCurrentUserUuid;
 
-    public TabViewPageAdapter(FragmentManager fm,
-                              Context context,
-                              UserListNavigator navigator) {
+    public TabViewPageAdapter(String currentUserUuid, FragmentManager fm,
+                              Context context, UserListNavigator navigator) {
         super(fm);
         this.context = context;
         mNavigator = navigator;
+        mCurrentUserUuid = currentUserUuid;
     }
 
     @Override
@@ -38,13 +39,13 @@ public class TabViewPageAdapter extends FragmentPagerAdapter {
         Fragment result = null;
         switch (position) {
             case 0:
-                result = UserListFragment.newInstance(context, mNavigator);
+                result = UserListFragment.newInstance(context, mCurrentUserUuid, mNavigator);
                 break;
             case 1:
-                result = UserOnMapFragment.newInstance(context, mNavigator);
+                result = UserOnMapFragment.newInstance(context, mCurrentUserUuid, mNavigator);
                 break;
             case 2:
-                result = InviteUsersDialogFragment.newInstance(context, null);
+                result = InviteUsersDialogFragment.newInstance(context, mCurrentUserUuid, null);
                 break;
         }
         return result;

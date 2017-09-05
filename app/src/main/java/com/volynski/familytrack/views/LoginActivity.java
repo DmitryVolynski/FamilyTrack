@@ -166,6 +166,7 @@ public class LoginActivity extends AppCompatActivity implements
             mSignInButton.setEnabled(false);
             mUserEmail = mGoogleSignInAccount.getEmail();
             SharedPrefsUtil.setGoogleAccountIdToken(this, mGoogleSignInAccount.getIdToken());
+            startMainActivity();
         } else {
             // Signed out, show unauthenticated UI.
             //updateUI(false);
@@ -204,44 +205,10 @@ public class LoginActivity extends AppCompatActivity implements
         }
     }
 
-    private void gotoMainActivity() {
-        final FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this);
-
-        dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(),
-                new FamilyTrackDataSource.GetUserByEmailCallback() {
-            @Override
-            public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
-                if (result.getData() == null) {
-                    // user signed in for the first time and
-                    // doesn't exists in db - register him in db
-                    User user = new User("", mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
-                            mGoogleSignInAccount.getDisplayName(), mGoogleSignInAccount.getPhotoUrl().toString(),
-                            mGoogleSignInAccount.getEmail(), "4838437", null, null);
-                    dataSource.createUser(user, new FamilyTrackDataSource.CreateUserCallback() {
-                        @Override
-                        public void onCreateUserCompleted(FirebaseResult<User> result) {
-                            if (result.getData() != null) {
-                                SharedPrefsUtil.setCurrentUser(getApplicationContext(), result.getData());
-                                startMainActivity();
-                            } else {
-                                Timber.e("Create user failed.", result.getException());
-                            }
-                        }
-                    });
-                } else {
-                    // user already registered in db, just save him in SharedPreferences
-                    SharedPrefsUtil.setCurrentUser(getApplicationContext(), result.getData());
-                    startMainActivity();
-                }
-            }
-        });
-
-    }
-
     private void startMainActivity() {
-        mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(this, mGoogleSignInAccount, this);
-        mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
+        FamilyTrackDataSource dataSource =
+                new FamilyTrackRepository(mGoogleSignInAccount.getIdToken(), this);
+        dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(), this);
     }
 
     private void checkUserExists() {
@@ -283,12 +250,6 @@ public class LoginActivity extends AppCompatActivity implements
         int i = 0;
     }
 
-    @Override
-    public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
-        if (result.getData() == null) {
-            createNewUser();
-        }
-    }
 
     private void getLocationPermission() {
         /*
@@ -308,22 +269,20 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void proceedToMainActivity() {
+    public void proceedToMainActivity(String userUuid) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY, userUuid);
         startActivity(intent);
     }
 
-    private void createNewUser() {
-
-        /*
-        FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(mGoogleSignInAccount);
-
-        User user = new User("", mGoogleSignInAccount.getFamilyName(), mGoogleSignInAccount.getGivenName(),
-                mGoogleSignInAccount.getPhotoUrl().toString(), mGoogleSignInAccount.getEmail(),
-                "4838437", User.ROLE_UNDEFINED, User.USER_CREATED, null);
-        dataSource.createUser(user);
-        */
-
+    @Override
+    public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
+        if (result.getData() == null || result.getData().getActiveMembership() == null) {
+            mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(LoginActivity.this,
+                    mGoogleSignInAccount, LoginActivity.this);
+            mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
+        } else {
+            proceedToMainActivity(result.getData().getUserUuid());
+        }
     }
 }

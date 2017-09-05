@@ -20,6 +20,7 @@ import timber.log.Timber;
 
 public class UserOnMapViewModel extends BaseObservable {
     private final Context mContext;
+    private String mCurrentUserUuid = "";
     private User mCurrentUser;
     private boolean mIsDataLoading = false;
     private FamilyTrackDataSource mRepository;
@@ -28,7 +29,9 @@ public class UserOnMapViewModel extends BaseObservable {
     private UserListNavigator mNavigator;
 
     public UserOnMapViewModel(Context context,
+                              String currentUserUuid,
                              FamilyTrackDataSource dataSource) {
+        mCurrentUserUuid = currentUserUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
     }
@@ -38,21 +41,24 @@ public class UserOnMapViewModel extends BaseObservable {
      * ViewModel will populate the view if current user is member of any group
      * @param user - User object representing current user
      */
-    public void start(final String userUuid) {
-        /*
-        if (mCurrentUser.getStatusId() != User.USER_JOINED) {
+    public void start() {
+
+        if (mCurrentUserUuid.equals("")) {
+            Timber.e("Can't start viewmodel. UserUuid is empty");
             return;
         }
-        */
+
         mIsDataLoading = true;
-        mRepository.getUserByUuid(userUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
+        mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() != null) {
                     mCurrentUser = result.getData();
-                    loadUsersList(mCurrentUser.getActiveMembership().getGroupUuid());
+                    if (mCurrentUser.getActiveMembership() != null) {
+                        loadUsersList(mCurrentUser.getActiveMembership().getGroupUuid());
+                    }
                 } else {
-                    Timber.v("User with uuid=" + userUuid + " not found ");
+                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
                 }
             }
         });

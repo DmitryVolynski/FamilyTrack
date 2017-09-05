@@ -55,10 +55,12 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
     private RecyclerViewListAdapter mAdapter;
 
 
-    public static UserOnMapFragment newInstance(Context context, UserListNavigator navigator) {
+    public static UserOnMapFragment newInstance(Context context,
+                                                String currentUserUuid,
+                                                UserListNavigator navigator) {
         UserOnMapFragment result = new UserOnMapFragment();
 
-        UserOnMapViewModel viewModel = new UserOnMapViewModel(context,
+        UserOnMapViewModel viewModel = new UserOnMapViewModel(context, currentUserUuid,
                 new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
@@ -69,7 +71,7 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start(mCurrentUserUuid);
+        mViewModel.start();
     }
 
     @Override

@@ -61,4 +61,11 @@ public class Group {
     public void setMembers(Map<String, User> mMembers) {
         this.mMembers = mMembers;
     }
+
+    public void addUser(User user) {
+        if (mMembers == null) {
+            mMembers = new HashMap<>();
+        }
+        mMembers.put(user.getUserUuid(), user);
+    }
 }

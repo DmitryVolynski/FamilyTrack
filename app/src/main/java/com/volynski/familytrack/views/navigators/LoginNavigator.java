@@ -5,5 +5,5 @@ package com.volynski.familytrack.views.navigators;
  */
 
 public interface LoginNavigator {
-    void proceedToMainActivity();
+    void proceedToMainActivity(String userUuid);
 }

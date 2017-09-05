@@ -30,6 +30,7 @@ public class UserListViewModel
 
     private final static String TAG = UserListViewModel.class.getSimpleName();
     private final Context mContext;
+    private String mCurrentUserUuid = "";
     private User mCurrentUser;
     private boolean mIsDataLoading;
     private FamilyTrackDataSource mRepository;
@@ -39,7 +40,9 @@ public class UserListViewModel
     public final ObservableList<User> users = new ObservableArrayList<>();
 
     public UserListViewModel(Context context,
+                             String currentUserUuid,
                              FamilyTrackDataSource dataSource) {
+        mCurrentUserUuid = currentUserUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
     }
@@ -117,21 +120,22 @@ public class UserListViewModel
      * ViewModel will populate the view if current user is member of any group
      * @param user - User object representing current user
      */
-    public void start(final String userUuid) {
-        /*
-        if (mCurrentUser.getStatusId() != User.USER_JOINED) {
+    public void start() {
+
+        if (mCurrentUserUuid.equals("")) {
+            Timber.e("Can't start viewmodel. UserUuid is empty");
             return;
         }
-        */
+
         mIsDataLoading = true;
-        mRepository.getUserByUuid(userUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
+        mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() != null) {
                     mCurrentUser = result.getData();
                     loadUsersList();
                 } else {
-                    Timber.v("User with uuid=" + userUuid + " not found ");
+                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
                 }
             }
         });

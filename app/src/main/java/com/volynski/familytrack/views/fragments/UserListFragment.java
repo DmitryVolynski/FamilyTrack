@@ -34,17 +34,19 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 public class UserListFragment
         extends Fragment {
     private UserListViewModel mViewModel;
-    private String mCurrentUserUuid;
+    //private String mCurrentUserUuid;
     private GridLayoutManager mLayoutManager;
 
     FragmentUserListBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
 
-    public static UserListFragment newInstance(Context context, UserListNavigator navigator) {
+    public static UserListFragment newInstance(Context context,
+                                               String currentUserUuid,
+                                               UserListNavigator navigator) {
         UserListFragment result = new UserListFragment();
 
         // TODO проверить это место. может быть создание модели именно здесь неверно.
-        UserListViewModel viewModel = new UserListViewModel(context,
+        UserListViewModel viewModel = new UserListViewModel(context, currentUserUuid,
                 new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
@@ -54,7 +56,7 @@ public class UserListFragment
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start(mCurrentUserUuid);
+        mViewModel.start();
     }
 
     @Override
@@ -67,7 +69,6 @@ public class UserListFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
 
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_list,
