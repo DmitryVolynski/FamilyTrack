@@ -43,9 +43,9 @@ public class InviteUsersViewModel
     public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
     public final ObservableField<String> searchString = new ObservableField<>("");
 
-    public InviteUsersViewModel(Context context, String currentuserUuid,
+    public InviteUsersViewModel(Context context, String currentUserUuid,
                              FamilyTrackDataSource dataSource) {
-        mCurrentUserUuid = currentuserUuid;
+        mCurrentUserUuid = currentUserUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
         searchString.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {

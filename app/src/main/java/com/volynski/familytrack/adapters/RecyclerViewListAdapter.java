@@ -149,6 +149,9 @@ public class RecyclerViewListAdapter<T>
                 if (handler != null) {
                     handler.onClick(getAdapterPosition(), view);
                 }
+                if (mItemClickHandler != null) {
+                    mItemClickHandler.onClick(getAdapterPosition(), view);
+                }
             }
         }
     }

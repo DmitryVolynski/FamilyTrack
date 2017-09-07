@@ -40,8 +40,8 @@ public class MainActivity
         super.onCreate(savedInstanceState);
 
         Intent intent = getIntent();
-        if (intent.hasExtra(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY)) {
-            mCurrentUserUuid = intent.getStringExtra(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY);
+        if (intent.hasExtra(StringKeys.USER_UUID_KEY)) {
+            mCurrentUserUuid = intent.getStringExtra(StringKeys.USER_UUID_KEY);
         } else {
             Timber.e("Current user uuid expected but not found in intent");
             return;
@@ -98,7 +98,9 @@ public class MainActivity
     // ---
     @Override
     public void openUserDetails(String userUuid) {
-        Timber.v("Not implemented");
+        Intent intent = new Intent(this, UserDetailsActivity.class);
+        intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
+        startActivity(intent);
     }
 
     @Override
@@ -129,7 +131,7 @@ public class MainActivity
      */
     @Override
     public void inviteUsers() {
-        Timber.v("Invite users");
+        Timber.v("Invite mUsers");
         mInviteUsersDialog = InviteUsersDialogFragment.newInstance(this, mCurrentUserUuid, this);
         mInviteUsersDialog.show(getSupportFragmentManager(), "aa");
     }

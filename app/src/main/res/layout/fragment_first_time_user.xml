@@ -172,15 +172,15 @@
                 </LinearLayout>
 
                 <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recyclerView_dialoginviteusers"
+                    android:id="@+id/recyclerView_dialogfirsttimeuser"
                     android:layout_width="match_parent"
                     android:layout_height="300dp"
                     android:layout_marginEnd="8dp"
                     android:layout_marginLeft="8dp"
                     android:layout_marginRight="8dp"
                     android:layout_marginStart="8dp"
-                    android:background="@color/colorPrimaryDark"
-                    android:visibility="@{viewmodel.joinExistingGroupOption ? View.VISIBLE : View.INVISIBLE}" />
+                    android:visibility="@{viewmodel.joinExistingGroupOption ? View.VISIBLE : View.INVISIBLE}"
+                    app:groups="@{viewmodel.availableGroups}" />
 
                 <!--app:viewModels="@{viewmodel.viewModels}"-->
             </FrameLayout>

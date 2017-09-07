@@ -7,7 +7,7 @@ import java.util.Map;
 
 /**
  * Created by DmitryVolynski on 16.08.2017.
- * Model class for a group of users
+ * Model class for a group of mUsers
  */
 
 public class Group {
@@ -67,5 +67,10 @@ public class Group {
             mMembers = new HashMap<>();
         }
         mMembers.put(user.getUserUuid(), user);
+    }
+
+    @Exclude
+    public int getMembersCount() {
+        return (mMembers == null ? 0 : mMembers.size());
     }
 }

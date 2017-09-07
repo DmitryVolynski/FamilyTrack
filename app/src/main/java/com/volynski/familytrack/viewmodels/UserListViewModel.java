@@ -2,6 +2,7 @@ package com.volynski.familytrack.viewmodels;
 
 
 import android.content.Context;
+import android.database.Observable;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
@@ -17,6 +18,9 @@ import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -37,7 +41,10 @@ public class UserListViewModel
     private UserListNavigator mNavigator;
 
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
-    public final ObservableList<User> users = new ObservableArrayList<>();
+    public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
+
+    private List<User> mUsers = new ArrayList<>();
+
 
     public UserListViewModel(Context context,
                              String currentUserUuid,
@@ -48,12 +55,12 @@ public class UserListViewModel
     }
 
     /**
-     * Shows a dialog with a list of all available users
+     * Shows a dialog with a list of all available mUsers
      * User list extracted from phone contacts
-     * Set of selected users will be added to current group with state 'Joining'
+     * Set of selected mUsers will be added to current group with state 'Joining'
      */
     public void inviteUsers() {
-        Timber.v("Invite users");
+        Timber.v("Invite mUsers");
         if (mNavigator != null) {
             mNavigator.inviteUsers();
         } else {
@@ -78,7 +85,7 @@ public class UserListViewModel
     }
 
     /**
-     * Reads list of users from firebase and refresh it in RecyclerView
+     * Reads list of mUsers from firebase and refresh it in RecyclerView
      */
     private void refreshList() {
         Log.v(TAG, "refreshList started");
@@ -86,15 +93,12 @@ public class UserListViewModel
 
 
     /**
-     * Joins users to selected group
+     * Joins mUsers to selected group
      * Shows a dialog window with all available groups (for joining)
      * If user select one, he will be joined to selected group
      */
     private void joinGroup() {
         Log.v(TAG, "joinGroup started");
-
-        users.add(User.getFakeUser());
-        users.add(User.getFakeUser());
         notifyChange();
     }
 
@@ -162,9 +166,12 @@ public class UserListViewModel
      * @param result
      */
     private void populateUserListFromDbResult(FirebaseResult<Group> result) {
+        mUsers.clear();
+        viewModels.clear();
         if (result.getData() != null && result.getData().getMembers() != null) {
             for (User user : result.getData().getMembers().values()) {
-                this.users.add(user);
+                viewModels.add(new UserListItemViewModel(mContext, user, mNavigator));
+                mUsers.add(user);
             }
         }
     }

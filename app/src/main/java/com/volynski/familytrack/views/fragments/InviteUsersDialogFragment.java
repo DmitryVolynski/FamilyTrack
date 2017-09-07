@@ -69,7 +69,7 @@ public class InviteUsersDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Select users to invite");
+        dialog.setTitle("Select mUsers to invite");
         //dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         return dialog;
     }

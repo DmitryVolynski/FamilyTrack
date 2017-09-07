@@ -2,9 +2,11 @@ package com.volynski.familytrack.viewmodels;
 
 import android.content.Context;
 import android.databinding.BaseObservable;
+import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
+import android.databinding.ObservableList;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
@@ -41,7 +43,8 @@ public class FirstTimeUserViewModel extends BaseObservable {
     public final ObservableBoolean createNewGroupOption = new ObservableBoolean(true);
     public final ObservableBoolean joinExistingGroupOption = new ObservableBoolean(false);
     public final ObservableField<String> newGroupName = new ObservableField<>("My group");
-
+    public final ObservableList<GroupListItemViewModel> availableGroups = new ObservableArrayList<>();
+    private int mSelectedGroupIndex = -1;
 
     public FirstTimeUserViewModel(Context context,
                                   GoogleSignInAccount googleSignInAccount,
@@ -68,23 +71,28 @@ public class FirstTimeUserViewModel extends BaseObservable {
             @Override
             public void onGetGroupsAvailableToJoinCompleted(FirebaseResult<List<Group>> result) {
                 checkResult(result);
+                populateAvailableGroups(result);
+                mIsDataLoading = false;
             }
         });
     }
+
+    private void populateAvailableGroups(FirebaseResult<List<Group>> data) {
+        if (data.getData() != null) {
+            availableGroups.clear();
+            for (Group group : data.getData()) {
+                availableGroups.add(new GroupListItemViewModel(mContext, group));
+            }
+        }
+    }
+
 
     public void goStepTwo() {
         dialogStepNo.set(STEP_HOW_TO_START_APP);
     }
 
     public void decide() {
-        /*
-        mRepository.getGroupsAvailableToJoin("dd", new FamilyTrackDataSource.GetGroupsAvailableToJoinCallback() {
-            @Override
-            public void onGetGroupsAvailableToJoinCompleted(FirebaseResult<List<Group>> result) {
-                checkResult(result);
-            }
-        });
-        */
+
         mRepository.getUserByEmail(mGoogleSignInAccount.getEmail(),
                 new FamilyTrackDataSource.GetUserByEmailCallback() {
                     @Override
@@ -117,11 +125,32 @@ public class FirstTimeUserViewModel extends BaseObservable {
     }
 
     private void proceedUserChoice(String userUuid) {
-        if (createNewGroupOption.get()) { createNewGroup(newGroupName.get(), userUuid); }
-        if (joinExistingGroupOption.get()) { joinExistingGroup(); }
+        if (createNewGroupOption.get()) {
+            createNewGroup(newGroupName.get(), userUuid);
+        }
+        if (joinExistingGroupOption.get()) {
+            joinExistingGroup(userUuid);
+        }
     }
 
-    private void joinExistingGroup() {
+    private void joinExistingGroup(final String userUuid) {
+        if (mSelectedGroupIndex == -1) {
+            return;
+        }
+
+        GroupListItemViewModel viewModel = availableGroups.get(mSelectedGroupIndex);
+        if (viewModel == null) {
+            Timber.e("GroupListItemViewModel viewModel unexpectedly null on index " + mSelectedGroupIndex);
+            return;
+        }
+
+        String groupUuid = viewModel.getGroup().getGroupUuid();
+        mRepository.addUserToGroup(userUuid, groupUuid, new FamilyTrackDataSource.AddUserToGroupCallback() {
+            @Override
+            public void onAddUserToGroupCompleted(FirebaseResult<String> result) {
+                mNavigator.proceedToMainActivity(userUuid);
+            }
+        });
     }
 
     private void createNewGroup(String groupName, final String userUuid) {
@@ -154,6 +183,20 @@ public class FirstTimeUserViewModel extends BaseObservable {
 
     public void setGoogleSignInAccount(GoogleSignInAccount mGoogleSignInAccount) {
         this.mGoogleSignInAccount = mGoogleSignInAccount;
+    }
+
+    public void selectGroup(int itemId) {
+        int i = 0;
+        for (GroupListItemViewModel viewModel : availableGroups) {
+            if (i++ == itemId) {
+                viewModel.checked.set(true);
+                mSelectedGroupIndex = itemId;
+            } else {
+                if (viewModel.checked.get()) {
+                    viewModel.checked.set(false);
+                }
+            }
+        }
     }
 }
 

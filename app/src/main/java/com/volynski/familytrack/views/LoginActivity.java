@@ -271,7 +271,7 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void proceedToMainActivity(String userUuid) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.putExtra(StringKeys.SHARED_PREFS_CURRENT_USER_UUID_KEY, userUuid);
+        intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
         startActivity(intent);
     }
 

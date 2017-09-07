@@ -82,7 +82,7 @@ public class UserListFragment
                         mLayoutManager.getOrientation());
 
         mBinding.recyclerviewFragmentuserslistUserslist.addItemDecoration(dividerItemDecoration);
-        mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.users,
+        mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
                 R.layout.user_list_item, BR.viewmodel);
         mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
 

@@ -69,8 +69,11 @@ public interface FamilyTrackDataSource {
     interface CreateGroupCallback {void onCreateGroupCompleted(FirebaseResult<Group> result); }
     void createGroup(@NonNull Group group, String adminUuid, CreateGroupCallback callback);
 
-    void addUser(@NonNull String groupUuid, @NonNull String userUuid);
-    void removeUser(@NonNull String groupUuid, @NonNull String userUuid);
+    interface AddUserToGroupCallback { void onAddUserToGroupCompleted(FirebaseResult<String> result); }
+    void addUserToGroup(@NonNull String userUuid, @NonNull String groupUuid, AddUserToGroupCallback callback);
+
+    interface RemoveUserFromGroupCallback { void onRemoveUserFromGroupCompleted(FirebaseResult<String> result); }
+    void removeUserFromGroup(@NonNull String groupUuid, @NonNull String userUuid, RemoveUserFromGroupCallback callback);
 
     /**
      *
@@ -84,7 +87,7 @@ public interface FamilyTrackDataSource {
     interface GetContactsToInvite {void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result); }
 
     /**
-     * reads contacts from phone and returns them as list of available users to invite
+     * reads contacts from phone and returns them as list of available mUsers to invite
      * list is filtered using these criterias:
      *      - user from contacts shouldn't be already invited
      *      - user from contacts should have email & phone number both
@@ -95,10 +98,10 @@ public interface FamilyTrackDataSource {
     interface InviteUsersCallback {void onInviteUsersCompleted(FirebaseResult<String> result ); }
 
     /**
-     * Stores users from usersToinvite list into specified group in firebase
+     * Stores mUsers from usersToinvite list into specified group in firebase
      * User ignored if already invited (stored in group)
-     * @param groupUuid - group Id to invite users to
-     * @param usersToinvite - list of users to invite
+     * @param groupUuid - group Id to invite mUsers to
+     * @param usersToinvite - list of mUsers to invite
      * @param callback
      */
     void inviteUsers(@NonNull String groupUuid, @NonNull List<User> usersToinvite, @NonNull InviteUsersCallback callback);

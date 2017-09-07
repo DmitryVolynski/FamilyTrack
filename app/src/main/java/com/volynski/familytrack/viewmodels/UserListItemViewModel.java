@@ -72,7 +72,7 @@ public class UserListItemViewModel extends BaseObservable
      * These viewModels should be used to present each user in a list
      *
      * @param context
-     * @param users - list of users
+     * @param users - list of mUsers
      * @return list of {@link UserListItemViewModel}
      */
     public static List<UserListItemViewModel> createViewModels(Context context, List<User> users) {

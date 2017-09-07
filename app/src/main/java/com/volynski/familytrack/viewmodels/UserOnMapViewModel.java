@@ -66,7 +66,7 @@ public class UserOnMapViewModel extends BaseObservable {
     }
 
     /**
-     * Get group members from DB and populates users object for the view
+     * Get group members from DB and populates mUsers object for the view
      * @param groupUuid - group Id to get members of
      */
     private void loadUsersList(String groupUuid) {

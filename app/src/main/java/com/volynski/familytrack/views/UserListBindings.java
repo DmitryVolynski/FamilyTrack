@@ -7,7 +7,9 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
+import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.viewmodels.GroupListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 
 import java.util.List;
@@ -25,7 +27,6 @@ public class UserListBindings {
         RecyclerViewListAdapter<UserListItemViewModel>
                 adapter = (RecyclerViewListAdapter<UserListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
-            //recyclerView.getv
             adapter.setViewModels(UserListItemViewModel.createViewModels(recyclerView.getContext(), users));
         }
     }
@@ -33,9 +34,17 @@ public class UserListBindings {
     @BindingAdapter("app:viewModels")
     public static void setViewModels(RecyclerView recyclerView,
                                      List<UserListItemViewModel> viewModels) {
-        RecyclerViewListAdapter<UserListItemViewModel>
-                adapter =
+        RecyclerViewListAdapter<UserListItemViewModel> adapter =
                 (RecyclerViewListAdapter<UserListItemViewModel>) recyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setViewModels(viewModels);
+        }
+    }
+
+    @BindingAdapter("app:groups")
+    public static void setGroups(RecyclerView recyclerView, List<GroupListItemViewModel> viewModels) {
+        RecyclerViewListAdapter<GroupListItemViewModel>
+                adapter = (RecyclerViewListAdapter<GroupListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
             adapter.setViewModels(viewModels);
         }
@@ -43,7 +52,7 @@ public class UserListBindings {
 
     @BindingAdapter("app:imageUrl")
     public static void bindImage(ImageView view, String imageUrl) {
-        if (!imageUrl.equals("")) {
+        if (imageUrl != null && !imageUrl.equals("")) {
             Picasso.with(view.getContext())
                     .load(imageUrl)
                     .transform(new CropCircleTransformation())
