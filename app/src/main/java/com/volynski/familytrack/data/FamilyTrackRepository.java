@@ -19,6 +19,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.HistoryItem;
+import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 
@@ -392,16 +394,18 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             @Override
             public void onGetUserByPhoneCompleted(FirebaseResult<User> result) {
                 checkObject(result);
-                List<Group> groups = new ArrayList<Group>();
                 if (result.getException() != null) {
                     callback.onGetGroupsAvailableToJoinCompleted(new FirebaseResult<List<Group>>(result.getException()));
                 }
-                if (result.getData().getMemberships() != null) {
-                    for (String key : result.getData().getMemberships().keySet()) {
-                        Membership membership = result.getData().getMemberships().get(key);
-                        if (membership.getStatusId() == Membership.USER_INVITED ||
-                                membership.getStatusId() == Membership.USER_DEPARTED)
-                        groups.add(new Group(membership.getGroupUuid(), membership.getGroupName()));
+                List<Group> groups = new ArrayList<Group>();
+                if (result.getData() != null) {
+                    if (result.getData().getMemberships() != null) {
+                        for (String key : result.getData().getMemberships().keySet()) {
+                            Membership membership = result.getData().getMemberships().get(key);
+                            if (membership.getStatusId() == Membership.USER_INVITED ||
+                                    membership.getStatusId() == Membership.USER_DEPARTED)
+                                groups.add(new Group(membership.getGroupUuid(), membership.getGroupName()));
+                        }
                     }
                 }
                 callback.onGetGroupsAvailableToJoinCompleted(new FirebaseResult<List<Group>>(groups));
@@ -433,5 +437,53 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                         }
                     }
                 });
+    }
+
+    @Override
+    public void updateUserLocation(@NonNull final String userUuid,
+                                   @NonNull final Location location,
+                                   @NonNull final UpdateUserLocationCallback callback) {
+        Timber.v("Started");
+        getUserByUuid(userUuid, new GetUserByUuidCallback() {
+            @Override
+            public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                User user = result.getData();
+                if (user == null) {
+                    callback.onUpdateUserLocationCompleted(
+                            new FirebaseResult<String>(FamilyTrackException.getInstance(mContext,
+                                    FamilyTrackException.DB_USER_BY_UUID_NOT_FOUND)));
+                    return;
+                }
+
+                // now prepare data for updates
+                // we should update user location in three nodes:
+                // /groups/<groupUuid>/members/<userUuid> - for active group only!
+                // /registered_users/<userUuid>
+                // /history/<userUuid>/<new location>
+                Map<String, Object> childUpdates = new HashMap<>();
+                childUpdates.put(FamilyTrackDbRefsHelper.userRef(userUuid) + User.FIELD_LAST_KNOWN_LOCATION, location);
+                if (user.getActiveMembership() != null) {
+                    childUpdates.put(FamilyTrackDbRefsHelper.userOfGroupRef(
+                            user.getActiveMembership().getGroupUuid(), userUuid) + User.FIELD_LAST_KNOWN_LOCATION, location);
+                }
+
+                String historyItemPath = FamilyTrackDbRefsHelper.userHistory(userUuid);
+                DatabaseReference ref = getFirebaseConnection().getReference(historyItemPath);
+                String historyItemKey = ref.push().getKey();
+
+                childUpdates.put(historyItemPath + "/" + historyItemKey, location);
+                mFirebaseDatabase.getReference()
+                        .updateChildren(childUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (callback != null) {
+                                    callback.onUpdateUserLocationCompleted(
+                                            new FirebaseResult<String>("Ok"));
+                                }
+                            }
+                        });
+            }
+        });
     }
 }

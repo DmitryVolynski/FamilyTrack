@@ -1,6 +1,7 @@
 package com.volynski.familytrack.data.models.firebase;
 
-import java.security.Timestamp;
+import com.google.firebase.database.Exclude;
+
 import java.util.Calendar;
 
 /**
@@ -11,14 +12,24 @@ import java.util.Calendar;
  */
 
 public class Location {
-    private Timestamp mTimestamp;
+    private long mTimestamp;
     private double mLongitude;
     private double mLatitude;
     private String mKnownLocationName;
     private int mBatteryLevel;
 
     public Location() {}
-    public Location(Timestamp timestamp, double longitude,
+
+    public Location(double longitude, double latitude,
+                    String knownLocationName, int batteryLevel) {
+        mTimestamp = Calendar.getInstance().getTimeInMillis();
+        mLongitude = longitude;
+        mLatitude = latitude;
+        mKnownLocationName = knownLocationName;
+        mBatteryLevel = batteryLevel;
+    }
+
+    public Location(long timestamp, double longitude,
                     double latitude, String knownLocationName, int batteryLevel) {
         mTimestamp = timestamp;
         mLongitude = longitude;
@@ -27,13 +38,31 @@ public class Location {
         mBatteryLevel = batteryLevel;
     }
 
-    public Timestamp getTimestamp() {
+    public Location(Calendar calendar, double longitude,
+                    double latitude, String knownLocationName, int batteryLevel) {
+        mTimestamp = calendar.getTimeInMillis();
+        mLongitude = longitude;
+        mLatitude = latitude;
+        mKnownLocationName = knownLocationName;
+        mBatteryLevel = batteryLevel;
+    }
+
+    @Exclude
+    public Calendar getCalendar() {
+        Calendar result = Calendar.getInstance();
+        result.setTimeInMillis(mTimestamp);
+        return result;
+    }
+
+
+    public long getTimestamp() {
         return mTimestamp;
     }
 
-    public void setTimestamp(Timestamp mTimestamp) {
-        this.mTimestamp = mTimestamp;
+    public void setTimestamp(long timestamp) {
+        mTimestamp = timestamp;
     }
+
 
     public double getLongitude() {
         return mLongitude;

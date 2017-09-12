@@ -15,7 +15,8 @@ public class User {
 
     // TODO описать все json-поля таким образов
     public static final String FIELD_ROLE_ID = "roleId";
-    public static String FIELD_STATUS_ID = "statusId";
+    public static final String FIELD_LAST_KNOWN_LOCATION = "lastKnownLocation";
+    public static final String FIELD_STATUS_ID = "statusId";
 
     private String mFamilyName;
     private String mGivenName;

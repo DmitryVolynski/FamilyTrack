@@ -9,6 +9,7 @@ import android.content.Context;
 public class FamilyTrackException extends Exception {
     //public static final int FT_ERROR_USER_ALREADY_EXISTS = -1000;
     public static final int DB_GROUP_NOT_FOUND = -1001;
+    public static final int DB_USER_BY_UUID_NOT_FOUND = -1002;
 
     private int mErrorCode;
     private Exception mInnerException;

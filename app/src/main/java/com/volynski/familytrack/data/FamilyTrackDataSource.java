@@ -3,6 +3,7 @@ package com.volynski.familytrack.data;
 import android.support.annotation.NonNull;
 
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
 
 import java.util.List;
@@ -31,6 +32,11 @@ public interface FamilyTrackDataSource {
     void createUser(@NonNull User user, CreateUserCallback callback);
 
     void updateUser(@NonNull User user);
+
+    interface UpdateUserLocationCallback { void onUpdateUserLocationCompleted(FirebaseResult<String> result); }
+    void updateUserLocation(@NonNull String userUuid,
+                            @NonNull Location location,
+                            UpdateUserLocationCallback callback);
 
     void changeUserStatus(@NonNull String userUuid, @NonNull int newStatus);
 

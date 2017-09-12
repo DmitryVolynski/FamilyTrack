@@ -1,8 +1,14 @@
 package com.volynski.familytrack.views;
 
 import android.databinding.BindingAdapter;
+import android.databinding.InverseBindingAdapter;
+import android.databinding.InverseBindingListener;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 
 import com.squareup.picasso.Picasso;
 import com.volynski.familytrack.R;
@@ -13,6 +19,7 @@ import com.volynski.familytrack.viewmodels.GroupListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 
 import java.util.List;
+import java.util.Observable;
 
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
@@ -50,8 +57,8 @@ public class UserListBindings {
         }
     }
 
-    @BindingAdapter("app:imageUrl")
-    public static void bindImage(ImageView view, String imageUrl) {
+    @BindingAdapter("app:roundImageUrl")
+    public static void bindRoundImage(ImageView view, String imageUrl) {
         if (imageUrl != null && !imageUrl.equals("")) {
             Picasso.with(view.getContext())
                     .load(imageUrl)
@@ -60,5 +67,45 @@ public class UserListBindings {
         } else {
             view.setImageResource(R.mipmap.ic_no_user_photo);
         }
+    }
+
+    @BindingAdapter("app:imageUrl")
+    public static void bindImage(ImageView view, String imageUrl) {
+        if (imageUrl != null && !imageUrl.equals("")) {
+            Picasso.with(view.getContext())
+                    .load(imageUrl)
+                    .into(view);
+        } else {
+            view.setImageResource(R.mipmap.ic_no_user_photo);
+        }
+    }
+
+    @BindingAdapter(value = {"bind:selectedValue", "bind:selectedValueAttrChanged"}, requireAll = false)
+    public static void bindSpinnerData(Spinner spinner,
+                                       String newSelectedValue,
+                                       final InverseBindingListener newTextAttrChanged) {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                newTextAttrChanged.onChange();
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        if (newSelectedValue != null) {
+            int pos = -1;
+            for (int i=0; i < spinner.getAdapter().getCount(); i++) {
+                if (spinner.getAdapter().getItem(i).equals(newSelectedValue)) {
+                    pos = i;
+                    break;
+                }
+            }
+            spinner.setSelection(pos, true);
+        }
+    }
+    @InverseBindingAdapter(attribute = "bind:selectedValue", event = "bind:selectedValueAttrChanged")
+    public static String captureSelectedValue(Spinner spinner) {
+        return (String) spinner.getSelectedItem();
     }
 }

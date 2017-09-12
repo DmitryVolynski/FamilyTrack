@@ -12,6 +12,7 @@ import android.view.View;
 
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
+import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
@@ -28,6 +29,8 @@ public class UserDetailsViewModel extends BaseObservable {
     public ObservableField<User> user = new ObservableField<User>();
 
     public ObservableBoolean isDataLoading = new ObservableBoolean(false);
+    public ObservableArrayList<String> spinnerEntries = new ObservableArrayList<>();
+    public ObservableField<String> activeGroup = new ObservableField<>();
 
     private final Context mContext;
     private String mUserUuid = "";
@@ -41,10 +44,10 @@ public class UserDetailsViewModel extends BaseObservable {
         mUserUuid = userUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
-        user.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
+        activeGroup.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(android.databinding.Observable sender, int propertyId) {
-                test();
+                int i = 0;
             }
         });
     }
@@ -60,10 +63,20 @@ public class UserDetailsViewModel extends BaseObservable {
         }
 
         mIsDataLoading = true;
+
         mRepository.getUserByUuid(mUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
-                if (result.getData() != null) {
+                User u = result.getData();
+                if (u != null) {
+                    if (u.getMemberships() != null) {
+                        for (String key : u.getMemberships().keySet()) {
+                            spinnerEntries.add(u.getMemberships().get(key).getGroupName());
+                        }
+                    }
+                    if (u.getActiveMembership() != null) {
+                        activeGroup.set(u.getActiveMembership().getGroupName());
+                    }
                     user.set(result.getData());
                     notifyChange();
                 } else {

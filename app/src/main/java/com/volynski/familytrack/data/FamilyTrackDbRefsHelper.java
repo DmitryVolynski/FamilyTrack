@@ -1,5 +1,7 @@
 package com.volynski.familytrack.data;
 
+import com.volynski.familytrack.data.models.firebase.HistoryItem;
+
 /**
  * Created by DmitryVolynski on 06.09.2017.
  */
@@ -7,6 +9,7 @@ package com.volynski.familytrack.data;
 public class FamilyTrackDbRefsHelper {
     public static final String NODE_GROUPS = "groups/";
     public static final String NODE_USERS = "registered_users/";
+    public static final String NODE_HISTORY = "history/";
 
     private static final String NODE_USER_FORMAT_STRING = NODE_USERS + "%s/";
     private static final String NODE_GROUP_FORMAT_STRING = NODE_GROUPS + "%s/";
@@ -19,6 +22,8 @@ public class FamilyTrackDbRefsHelper {
 
     private static final String NODE_USER_MEMBERSHIPS_FORMAT_STRING = NODE_USER_OF_GROUP_FORMAT_STRING + "memberships/";
     private static final String NODE_USER_MEMBERSHIP_FORMAT_STRING = NODE_USER_OF_GROUP_FORMAT_STRING + "memberships/%s/";
+
+    private static final String NODE_USER_HISTORY_FORMAT_STRING = NODE_HISTORY + "%s/";
 
     public static String groupRef(String groupUuid) {
         return String.format(NODE_GROUP_FORMAT_STRING, groupUuid);
@@ -52,6 +57,10 @@ public class FamilyTrackDbRefsHelper {
     // groups -KtGRD00beq29domxQQZ members -KtIE1SKww3I3S21C1dO memberships -KtGRD00beq29domxQQZ
     public static String userMembershipRef(String userUuid, String groupUuid) {
         return String.format(NODE_USER_MEMBERSHIP_FORMAT_STRING, groupUuid, userUuid, groupUuid);
+    }
+
+    public static String userHistory(String userUuid) {
+        return String.format(NODE_USER_HISTORY_FORMAT_STRING, userUuid) + HistoryItem.FIELD_LOCATIONS;
     }
     
 }
