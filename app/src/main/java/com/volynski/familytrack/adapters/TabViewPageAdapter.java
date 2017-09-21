@@ -15,8 +15,8 @@ import com.volynski.familytrack.views.navigators.UserListNavigator;
  */
 
 public class TabViewPageAdapter extends FragmentPagerAdapter {
-    final int PAGE_COUNT = 3;
-    private String tabTitles[] = new String[] { "Users", "Map", "Invites" };
+    final int PAGE_COUNT = 2;
+    private String tabTitles[] = new String[] { "Users", "Map" };
     private Context context;
     private UserListNavigator mNavigator;
     private String mCurrentUserUuid;
@@ -44,9 +44,9 @@ public class TabViewPageAdapter extends FragmentPagerAdapter {
             case 1:
                 result = UserOnMapFragment.newInstance(context, mCurrentUserUuid, mNavigator);
                 break;
-            case 2:
-                result = InviteUsersDialogFragment.newInstance(context, mCurrentUserUuid, null);
-                break;
+            //case 2:
+            //    result = InviteUsersDialogFragment.newInstance(context, mCurrentUserUuid, null);
+            //    break;
         }
         return result;
     }

@@ -1,5 +1,7 @@
 package com.volynski.familytrack.views.navigators;
 
+import com.google.android.gms.maps.model.LatLng;
+
 /**
  * Created by DmitryVolynski on 28.08.2017.
  *
@@ -10,7 +12,7 @@ package com.volynski.familytrack.views.navigators;
 public interface UserListNavigator {
     void openUserDetails(String userUuid);
     void removeUser(String userUuid);
-    void showUserOnMap(double latitude, double longitude);
     void inviteUsers();
     void dismissInviteUsersDialog();
+    void showUserOnMap(LatLng loc);
 }

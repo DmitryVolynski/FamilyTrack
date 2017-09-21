@@ -3,6 +3,7 @@ package com.volynski.familytrack.views;
 import android.Manifest;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -37,9 +38,18 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.PlaceDetectionClient;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
@@ -69,6 +79,8 @@ public class LoginActivity extends AppCompatActivity implements
     private static final int RC_SIGN_IN = 0;
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+    private static final int PERMISSIONS_ACCESS_FINE_LOCATION = 2;
+    private static final int PERMISSIONS_ACCESS_COARSE_LOCATION = 3;
 
     private SignInButton mSignInButton;
     private Button mSignOutButton;
@@ -126,11 +138,19 @@ public class LoginActivity extends AppCompatActivity implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        getLocationPermission();
         checkIfAlreadySignedIn();
     }
 
     private void checkIfAlreadySignedIn() {
-        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+        OptionalPendingResult<GoogleSignInResult> opr =
+                Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
         if (opr.isDone()) {
             // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
             // and the GoogleSignInResult will be available instantly.
@@ -178,8 +198,31 @@ public class LoginActivity extends AppCompatActivity implements
             mStatus.setText(mGoogleSignInAccount.getDisplayName());
             mSignInButton.setEnabled(false);
             mUserEmail = mGoogleSignInAccount.getEmail();
-            SharedPrefsUtil.setGoogleAccountIdToken(this, mGoogleSignInAccount.getIdToken());
-            startMainActivity();
+
+            String idToken = mGoogleSignInAccount.getIdToken();
+            SharedPrefsUtil.setGoogleAccountIdToken(this, idToken);
+
+            Timber.v("firebaseAuthWithGooogle:" + idToken);
+            AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+            mFirebaseAuth = FirebaseAuth.getInstance();
+            if (mFirebaseAuth.getCurrentUser() == null) {
+                mFirebaseAuth.signInWithCredential(credential)
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                Timber.v(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                                startMainActivity();
+                                // If sign in fails, display a message to the user. If sign in succeeds
+                                // the auth state listener will be notified and logic to handle the
+                                // signed in user can be handled in the listener.
+                                if (!task.isSuccessful()) {
+                                    Log.w(TAG, "signInWithCredential", task.getException());
+                                }
+                            }
+                        });
+            } else {
+                startMainActivity();
+            }
         } else {
             // Signed out, show unauthenticated UI.
             //updateUI(false);
@@ -269,21 +312,36 @@ public class LoginActivity extends AppCompatActivity implements
          * Request location permission, so that we can get the location of the
          * device. The result of the permission request is handled by a callback,
          * onRequestPermissionsResult.
-         */
+
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_GRANTED) {
-            //mLocationPermissionGranted = true;
-        } else {
+                == PackageManager.PERMISSION_DENIED) {
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.READ_CONTACTS},
                     PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
+         */
+
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_ACCESS_FINE_LOCATION);
+        }
+
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION)
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                    PERMISSIONS_ACCESS_COARSE_LOCATION);
         }
     }
 
     @Override
     public void proceedToMainActivity(String userUuid) {
-        startJobService(userUuid);
+        //startJobService(userUuid);
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
         startActivity(intent);
@@ -300,7 +358,22 @@ public class LoginActivity extends AppCompatActivity implements
         }
     }
 
+    private void checkObject(Object o) {
+        int i = 0;
+    }
+
     private void startJobService(String userUuid) {
+        //PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace( mGoogleApiClient, null );
+        //result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+
+        //    @Override
+        //    public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
+        //        checkObject(placeLikelihoods);
+        //        Timber.v(placeLikelihoods.get(0).getPlace().getName().toString());
+        //        //placeLikelihoods.get(0).getPlace().getName()
+        //    }
+        //});
+
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
 
         Bundle bundle = new Bundle();
@@ -312,10 +385,11 @@ public class LoginActivity extends AppCompatActivity implements
                 .setExtras(bundle)
                 .setRecurring(true)
                 .setLifetime(Lifetime.FOREVER)
-                .setReplaceCurrent(false)
+                .setReplaceCurrent(true)
                 .setTrigger(Trigger.executionWindow(15, 15))
+                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .build();
 
-        dispatcher.schedule(newJob);
+        dispatcher.mustSchedule(newJob);
     }
 }

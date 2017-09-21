@@ -3,6 +3,7 @@ package com.volynski.familytrack.data.models.firebase;
 import com.google.firebase.database.Exclude;
 import com.google.gson.Gson;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -157,5 +158,17 @@ public class User {
             mMemberships = new HashMap<>();
         }
         mMemberships.put(membership.getGroupUuid(), membership);
+    }
+
+    @Exclude
+    public String getTextForSnippet() {
+        String result = "";
+        if (mLastKnownLocation != null) {
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(mLastKnownLocation.getTimestamp());
+            result = String.format("%1$tF %1$tR %2$s(%3$d%%)",
+                    cal.getTime(), mLastKnownLocation.getAddress(), mLastKnownLocation.getBatteryLevel());
+        }
+        return result;
     }
 }

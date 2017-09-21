@@ -62,7 +62,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
-        Log.d(TAG, "firebaseAuthWithGooogle:" + idToken);
+        Timber.v("firebaseAuthWithGooogle:" + idToken);
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mFirebaseAuth = FirebaseAuth.getInstance();
         if (mFirebaseAuth.getCurrentUser() == null) {
@@ -70,7 +70,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
-                            Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                            Timber.v(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the

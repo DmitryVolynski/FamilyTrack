@@ -1,5 +1,6 @@
 package com.volynski.familytrack.data.models.firebase;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.Exclude;
 
 import java.util.Calendar;
@@ -16,35 +17,39 @@ public class Location {
     private double mLongitude;
     private double mLatitude;
     private String mKnownLocationName;
+    private String mAddress;
     private int mBatteryLevel;
 
     public Location() {}
 
     public Location(double longitude, double latitude,
-                    String knownLocationName, int batteryLevel) {
+                    String knownLocationName, String address, int batteryLevel) {
         mTimestamp = Calendar.getInstance().getTimeInMillis();
         mLongitude = longitude;
         mLatitude = latitude;
         mKnownLocationName = knownLocationName;
         mBatteryLevel = batteryLevel;
+        mAddress = address;
     }
 
     public Location(long timestamp, double longitude,
-                    double latitude, String knownLocationName, int batteryLevel) {
+                    double latitude, String knownLocationName, String address, int batteryLevel) {
         mTimestamp = timestamp;
         mLongitude = longitude;
         mLatitude = latitude;
         mKnownLocationName = knownLocationName;
         mBatteryLevel = batteryLevel;
+        mAddress = address;
     }
 
     public Location(Calendar calendar, double longitude,
-                    double latitude, String knownLocationName, int batteryLevel) {
+                    double latitude, String knownLocationName, String address, int batteryLevel) {
         mTimestamp = calendar.getTimeInMillis();
         mLongitude = longitude;
         mLatitude = latitude;
         mKnownLocationName = knownLocationName;
         mBatteryLevel = batteryLevel;
+        mAddress = address;
     }
 
     @Exclude
@@ -54,6 +59,10 @@ public class Location {
         return result;
     }
 
+    @Exclude
+    public LatLng getLatLng() {
+        return new LatLng(mLatitude, mLongitude);
+    }
 
     public long getTimestamp() {
         return mTimestamp;
@@ -96,8 +105,16 @@ public class Location {
         this.mBatteryLevel = mBatteryLevel;
     }
 
+    public String getAddress() {
+        return mAddress;
+    }
+
+    public void setAddress(String address) {
+        mAddress = address;
+    }
+
     public Location clone() {
         return new Location(mTimestamp, mLongitude,
-                mLatitude, mKnownLocationName, mBatteryLevel);
+                mLatitude, mKnownLocationName, mAddress, mBatteryLevel);
     }
 }

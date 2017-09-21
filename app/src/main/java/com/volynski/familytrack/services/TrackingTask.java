@@ -1,18 +1,30 @@
 package com.volynski.familytrack.services;
 
 import android.content.Context;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.PlaceLikelihood;
+import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
+import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
+import com.volynski.familytrack.data.FirebaseResult;
+import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
 import java.io.IOException;
@@ -27,54 +39,131 @@ import timber.log.Timber;
  */
 
 
-public class TrackingTask extends Thread {
+public class TrackingTask
+        extends Thread
+        implements
+            GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener {
+
     private final TrackingTaskCallback mCallback;
+    private final FamilyTrackDataSource mDataSource;
     private String mUserUuid;
-    private FusedLocationProviderClient mFusedLocationClient;
     private Context mContext;
+    private GoogleApiClient mGoogleApiClient;
 
     public TrackingTask(String userUuid, Context context, @NonNull TrackingTaskCallback callback) {
         mUserUuid = userUuid;
-        mContext = context;
+        mContext = context.getApplicationContext();
         mCallback = callback;
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
+        mDataSource = new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(mContext), mContext);
     }
 
     @Override
     public void run() {
-        Timber.v("Started at " + Calendar.getInstance().getTime().toString());
+        initGoogleApiClient();
+    }
+
+    private void updateUserLocation(String userUuid, PlaceLikelihood placeLikelihood) {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        int batteryPct = Math.round((level / (float)scale) * 100);
+
+        Location userLocation = new Location(placeLikelihood.getPlace().getLatLng().longitude,
+                placeLikelihood.getPlace().getLatLng().latitude,
+                placeLikelihood.getPlace().getAddress().toString(),
+                placeLikelihood.getPlace().getName().toString(),
+                batteryPct);
+
+        mDataSource.updateUserLocation(userUuid, userLocation, new FamilyTrackDataSource.UpdateUserLocationCallback() {
+            @Override
+            public void onUpdateUserLocationCompleted(FirebaseResult<String> result) {
+                mCallback.onTaskCompleted();
+            }
+        });
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Timber.v("i=" + i);
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Timber.v("Connected");
+        doWork();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Timber.v(connectionResult.getErrorMessage());
+        int i = 0;
+    }
+
+    private void doWork() {
+        Timber.v("Go!");
+        if (!mGoogleApiClient.isConnected()) {
+            Timber.v("Not connected");
+            mCallback.onTaskCompleted();
+            return;
+        }
         try {
-            mFusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
+            result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
                 @Override
-                public void onSuccess(Location location) {
-                    Geocoder geocoder = new Geocoder(mContext, Locale.ENGLISH);
-                    try {
-                        List<Address> addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-                        if (addresses != null) {
-                            updateUserLocation(mUserUuid, location, addresses);
+                public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
+                    mGoogleApiClient.disconnect();
+                    Timber.v("isSuccess=" + String.valueOf(placeLikelihoods.getStatus().isSuccess()));
+                    if (placeLikelihoods.getStatus().isSuccess()) {
+                        if (placeLikelihoods.getCount() > 0) {
+                            Timber.v(placeLikelihoods.get(0).getPlace().getName().toString());
+                            updateUserLocation(mUserUuid, placeLikelihoods.get(0));
+                        } else {
+                            Timber.v("=0");
+                            mCallback.onTaskCompleted();
                         }
-                    } catch (IOException ex) {
-                        Timber.e(ex);
+                    } else {
+                        Timber.v("!= success");
+                        mCallback.onTaskCompleted();
                     }
-                    mCallback.onTaskCompleted();
+                    placeLikelihoods.release();
                 }
             });
-        } catch (SecurityException ex) {
+        } catch (Exception ex) {
+            if (mGoogleApiClient != null) {
+                mGoogleApiClient.disconnect();
+            }
             Timber.e(ex);
+            mCallback.onTaskCompleted();
         }
     }
 
-    private void updateUserLocation(String userUuid, Location location, List<Address> addresses) {
-        FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(mContext), mContext);
-        com.volynski.familytrack.data.models.firebase.Location userLocation =
-                new com.volynski.familytrack.data.models.firebase.Location(location.getLongitude(),
-                        location.getLatitude(), addresses.get(0).getFeatureName(), 3);
-        dataSource.updateUserLocation(userUuid, userLocation, null);
+    @Override
+    protected void finalize() throws Throwable {
+        Timber.v("finalize");
+        super.finalize();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    private void initGoogleApiClient() {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(mContext.getApplicationContext())
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            mGoogleApiClient.connect();
+        }
     }
 
     private void checkObject(Object o) {
         int i = 0;
-    }
 
+    }
 }

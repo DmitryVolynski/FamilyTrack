@@ -44,8 +44,9 @@ public class UserListItemViewModel extends BaseObservable
 
     @Override
     public void onClick(int itemId, View v) {
-        // item click goes to detail screen
-        mNavigator.showUserOnMap(55.994017, 37.195024);
+        if (mUser.getLastKnownLocation() != null) {
+            mNavigator.showUserOnMap(mUser.getLastKnownLocation().getLatLng());
+        }
     }
 
     @Override

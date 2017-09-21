@@ -3,6 +3,7 @@ package com.volynski.familytrack.viewmodels;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
+import android.databinding.ObservableBoolean;
 import android.databinding.ObservableList;
 
 import com.volynski.familytrack.data.FamilyTrackDataSource;
@@ -11,6 +12,7 @@ import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+import com.volynski.familytrack.views.navigators.UserOnMapNavigator;
 
 import timber.log.Timber;
 
@@ -25,7 +27,12 @@ public class UserOnMapViewModel extends BaseObservable {
     private boolean mIsDataLoading = false;
     private FamilyTrackDataSource mRepository;
 
+    public ObservableBoolean redrawMarkers = new ObservableBoolean(false);
+    // for map markers
     public final ObservableList<User> users = new ObservableArrayList<>();
+
+    // for horisontal list of users
+    public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
     private UserListNavigator mNavigator;
 
     public UserOnMapViewModel(Context context,
@@ -90,8 +97,10 @@ public class UserOnMapViewModel extends BaseObservable {
             for (User user : result.getData().getMembers().values()) {
                 if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
                     this.users.add(user);
+                    this.viewModels.add(new UserListItemViewModel(mContext, user, mNavigator));
                 }
             }
+            redrawMarkers.set(true);
         }
     }
 
