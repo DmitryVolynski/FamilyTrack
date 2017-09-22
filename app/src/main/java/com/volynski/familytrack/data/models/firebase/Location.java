@@ -13,6 +13,8 @@ import java.util.Calendar;
  */
 
 public class Location {
+    public static final String FIELD_TIMESTAMP = "timestamp";
+
     private long mTimestamp;
     private double mLongitude;
     private double mLatitude;
@@ -117,4 +119,14 @@ public class Location {
         return new Location(mTimestamp, mLongitude,
                 mLatitude, mKnownLocationName, mAddress, mBatteryLevel);
     }
+
+    @Exclude
+    public String getTextForSnippet() {
+        String result = "";
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(mTimestamp);
+        return String.format("%1$tF %1$tR %2$s(%3$d%%)",
+                cal.getTime(), mAddress, mBatteryLevel);
+    }
+
 }

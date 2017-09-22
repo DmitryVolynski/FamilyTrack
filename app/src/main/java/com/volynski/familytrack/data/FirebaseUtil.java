@@ -4,6 +4,7 @@ import android.support.constraint.solver.widgets.Snapshot;
 
 import com.google.firebase.database.DataSnapshot;
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
 
 /**
@@ -21,6 +22,11 @@ public class FirebaseUtil {
         User user = (User)snapshot.getValue(User.class);
         user.setUserUuid(snapshot.getKey());
         return user;
+    }
+
+    public static Location getLocationFromSnapshot(DataSnapshot snapshot) {
+        Location location = (Location) snapshot.getValue(Location.class);
+        return location;
     }
 
     public static Group getGroupFromSnapshot(DataSnapshot snapshot) {

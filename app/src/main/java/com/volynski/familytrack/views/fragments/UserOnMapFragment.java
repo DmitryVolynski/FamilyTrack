@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -15,6 +16,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ToggleButton;
 
 import com.google.android.gms.location.places.PlaceDetectionClient;
 import com.google.android.gms.location.places.Places;
@@ -27,6 +29,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
@@ -39,6 +42,7 @@ import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -48,7 +52,9 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 22.08.2017.
  */
 
-public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
+public class UserOnMapFragment
+            extends Fragment
+            implements OnMapReadyCallback, View.OnClickListener {
     private static final String TAG = UserOnMapFragment.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
@@ -86,6 +92,14 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onClick(View v) {
+        ToggleButton tb = (ToggleButton)v;
+        if (tb != null && mViewModel != null) {
+            mViewModel.onToggleButtonClick(tb.getTextOn().toString());
+        }
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
@@ -109,19 +123,14 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
                              @Nullable Bundle savedInstanceState) {
         mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
 
-        mViewModel.redrawMarkers.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                UserOnMapFragment.this.redrawMarkers();
-            }
-        });
-
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_on_map,
                 container,
                 false);
 
         setupMapFragment();
+        setupToggleButtons();
+        setupCustomListeners();
 
         mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         mBinding.recyclerviewFrguseronmapUserslist.setLayoutManager(mLayoutManager);
@@ -140,6 +149,23 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
         return mBinding.getRoot();
     }
 
+    private void setupCustomListeners() {
+        mViewModel.redrawMarkers.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                UserOnMapFragment.this.redrawMarkers();
+            }
+        });
+
+        mViewModel.redrawPath.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                UserOnMapFragment.this.redrawPath();
+            }
+        });
+    }
+
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -154,23 +180,43 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
 
     }
 
+    private void redrawPath() {
+        if (mViewModel.path == null) {
+            return;
+        }
+        redrawMarkers();
+        PolylineOptions options = new PolylineOptions();
+        User user = mViewModel.getSelectedUser();
+        for (Location location : mViewModel.path) {
+            options.add(location.getLatLng()).color(R.color.colorSecondaryDark);
+            MarkerOptions markerOptions = new MarkerOptions()
+                    .position(location.getLatLng())
+                    .title(user.getDisplayName())
+                    .snippet(location.getTextForSnippet())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+
+            mMap.addMarker(markerOptions);
+        }
+        mMap.addPolyline(options);
+    }
+
     private void redrawMarkers() {
         List<User> users = mViewModel.users;
-        if (users != null) {
-            mMap.clear();
-            mMarkers.clear();
-            for (User user : users) {
-                Location location = user.getLastKnownLocation();
-                if (location != null) {
-                    LatLng point = new LatLng(location.getLatitude(), location.getLongitude());
-                    MarkerOptions markerOptions = new MarkerOptions()
-                            .position(point)
-                            .title(user.getDisplayName())
-                            .snippet(user.getTextForSnippet())
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        if (users == null) {
+            return;
+        }
+        mMap.clear();
+        mMarkers.clear();
+        for (User user : users) {
+            Location location = user.getLastKnownLocation();
+            if (location != null) {
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(location.getLatLng())
+                        .title(user.getDisplayName())
+                        .snippet(user.getTextForSnippet())
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
 
-                    mMarkers.put(user.getUserUuid(), mMap.addMarker(markerOptions));
-                }
+                mMarkers.put(user.getUserUuid(), mMap.addMarker(markerOptions));
             }
         }
     }
@@ -199,10 +245,26 @@ public class UserOnMapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+
     public void moveCameraTo(double latitude, double longitude) {
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(latitude, longitude), DEFAULT_ZOOM));
+            new LatLng(latitude, longitude), DEFAULT_ZOOM));
     }
 
+    private void setupToggleButtons() {
+        mBinding.tbutFrguseronmapOff.setOnClickListener(this);
+        mBinding.tbutFrguseronmap1h.setOnClickListener(this);
+        mBinding.tbutFrguseronmap8h.setOnClickListener(this);
+        mBinding.tbutFrguseronmap1d.setOnClickListener(this);
+        mBinding.tbutFrguseronmap1w.setOnClickListener(this);
+    }
 
+    public void userClicked(User user) {
+        if (user.getLastKnownLocation() != null) {
+            LatLng loc = user.getLastKnownLocation().getLatLng();
+            moveCameraTo(loc.latitude, loc.longitude);
+        }
+
+        mViewModel.selectUser(user);
+    }
 }

@@ -31,6 +31,7 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Location;
+import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
@@ -184,12 +185,12 @@ public class MainActivity
     }
 
     @Override
-    public void showUserOnMap(LatLng loc) {
+    public void showUserOnMap(User user) {
         UserOnMapFragment fragment =
                 (UserOnMapFragment)findFragmentByClassName(UserOnMapFragment.class.getSimpleName());
         if (fragment != null) {
             mTabLayout.getTabAt(1).select();
-            fragment.moveCameraTo(loc.latitude, loc.longitude);
+            fragment.userClicked(user);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.volynski.familytrack.views.navigators;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.volynski.familytrack.data.models.firebase.User;
 
 /**
  * Created by DmitryVolynski on 28.08.2017.
@@ -14,5 +15,5 @@ public interface UserListNavigator {
     void removeUser(String userUuid);
     void inviteUsers();
     void dismissInviteUsersDialog();
-    void showUserOnMap(LatLng loc);
+    void showUserOnMap(User user);
 }

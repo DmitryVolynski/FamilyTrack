@@ -111,7 +111,17 @@ public class TrackingTask
             return;
         }
         try {
-            PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
+            FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
+            // TODO доделать определение точных координат
+            /*
+            mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
+                @Override
+                public void onComplete(@NonNull Task<android.location.Location> task) {
+                    task.
+                }
+            });
+            */
+            PendingResult < PlaceLikelihoodBuffer > result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
             result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
                 @Override
                 public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {

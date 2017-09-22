@@ -486,4 +486,33 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             }
         });
     }
+
+    @Override
+    public void getUserTrack(@NonNull String userUuid,
+                             @NonNull long periodStart,
+                             @NonNull long periodEnd,
+                             final @NonNull GetUserTrackCallback callback) {
+        String historyItemPath = FamilyTrackDbRefsHelper.userHistory(userUuid);
+        DatabaseReference ref = getFirebaseConnection().getReference(historyItemPath);
+
+        Query query = ref.orderByChild("timestamp").startAt(periodStart).endAt(periodEnd);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Location> locations = new ArrayList<Location>();
+                if (dataSnapshot.getChildren() != null) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        locations.add(FirebaseUtil.getLocationFromSnapshot(snapshot));
+                    }
+                }
+                callback.onGetUserTrackCompleted(new FirebaseResult<List<Location>>(locations));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
 }

@@ -45,7 +45,7 @@ public class UserListItemViewModel extends BaseObservable
     @Override
     public void onClick(int itemId, View v) {
         if (mUser.getLastKnownLocation() != null) {
-            mNavigator.showUserOnMap(mUser.getLastKnownLocation().getLatLng());
+            mNavigator.showUserOnMap(mUser);
         }
     }
 

@@ -81,47 +81,57 @@
                     android:orientation="horizontal">
 
                     <ToggleButton
+                        android:id="@+id/tbut_frguseronmap_off"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
                         android:paddingEnd="16dp"
                         android:paddingStart="16dp"
-                        android:textOff="Off"
-                        android:textOn="On" />
+                        android:checked='@{viewmodel.toggleButtons["OFF"]}'
+                        android:textOff="OFF"
+                        android:textOn="OFF" />
 
                     <ToggleButton
+                        android:id="@+id/tbut_frguseronmap_1h"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
                         android:paddingEnd="16dp"
                         android:paddingStart="16dp"
+                        android:checked='@{viewmodel.toggleButtons["1H"]}'
                         android:textOff="1H"
                         android:textOn="1H" />
 
                     <ToggleButton
+                        android:id="@+id/tbut_frguseronmap_8h"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
                         android:paddingEnd="16dp"
                         android:paddingStart="16dp"
+                        android:checked='@{viewmodel.toggleButtons["8H"]}'
                         android:textOff="8H"
                         android:textOn="8H" />
 
                     <ToggleButton
+                        android:id="@+id/tbut_frguseronmap_1d"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
                         android:paddingEnd="16dp"
                         android:paddingStart="16dp"
+                        android:checked='@{viewmodel.toggleButtons["1D"]}'
                         android:textOff="1D"
                         android:textOn="1D" />
 
                     <ToggleButton
+                        android:id="@+id/tbut_frguseronmap_1w"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
                         android:paddingEnd="16dp"
                         android:paddingStart="16dp"
+                        android:checked='@{viewmodel.toggleButtons["1W"]}'
                         android:textOff="1W"
                         android:textOn="1W" />
 

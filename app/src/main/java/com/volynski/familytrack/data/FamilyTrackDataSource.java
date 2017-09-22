@@ -67,6 +67,20 @@ public interface FamilyTrackDataSource {
                                   //@NonNull String email,
                                   @NonNull GetGroupsAvailableToJoinCallback callback);
 
+    interface GetUserTrackCallback {void onGetUserTrackCompleted(FirebaseResult<List<Location>> result); }
+
+    /**
+     * Returns a historical list of known user locations for selected period of time
+     * @param userUuid - user uuid
+     * @param periodStart - start date in milliseconds
+     * @param periodEnd - end date in milliseconds
+     * @param callback - callback to return result
+     */
+    void getUserTrack(@NonNull String userUuid,
+                      @NonNull long periodStart,
+                      @NonNull long periodEnd,
+                      @NonNull GetUserTrackCallback callback);
+
     // --------------------------------------------------------------------------------------------
     //
     // group's operations
