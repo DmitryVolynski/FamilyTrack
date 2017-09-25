@@ -33,7 +33,10 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
+import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
+import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
 import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
@@ -55,6 +58,7 @@ public class MainActivity
     private ViewPager mViewPager;
     private InviteUsersDialogFragment mInviteUsersDialog;
     private GoogleApiClient mGoogleApiClient;
+    private FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,17 +75,41 @@ public class MainActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                proceedFabButton();
+                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                //        .setAction("Action", null).show();
             }
         });
         
         setupTabView();
         initGoogleApiClient();
+    }
+
+    private void proceedFabButton() {
+        int tpos = mTabLayout.getSelectedTabPosition();
+        switch (tpos) {
+            case 0:
+                UserListFragment f0 =
+                        (UserListFragment)findFragmentByClassName(USER_LIST_FRAGMENT);
+                if (f0 != null) {
+                    f0.inviteUser();
+                }
+                break;
+
+            case 1:
+                UserOnMapFragment f1 =
+                        (UserOnMapFragment)findFragmentByClassName(USER_ON_MAP_FRAGMENT);
+                if (f1 != null) {
+                    f1.addGeofence();
+                    mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
+                }
+                break;
+        }
+
     }
 
     private void setupTabView() {
@@ -122,34 +150,6 @@ public class MainActivity
     @Override
     protected void onStart() {
         super.onStart();
-        /*
-        Timber.v("Started at " + Calendar.getInstance().getTime().toString());
-        Timber.v("isConnected=" + String.valueOf(mGoogleApiClient.isConnected()));
-        PendingResult<PlaceLikelihoodBuffer> result =
-                Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
-        result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-
-            @Override
-            public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
-                Timber.v("isSuccess=" + String.valueOf(placeLikelihoods.getStatus().isSuccess()));
-                if (placeLikelihoods.getStatus().isSuccess()) {
-                    if (placeLikelihoods.getCount() > 0) {
-                        Timber.v(placeLikelihoods.get(0).getPlace().getName().toString());
-                        //updateUserLocation(mUserUuid, placeLikelihoods.get(0));
-                    } else {
-                        Timber.v("=0");
-                        //mCallback.onTaskCompleted();
-                    }
-                } else {
-                    Timber.v("!= success");
-                    //mCallback.onTaskCompleted();
-                }
-                placeLikelihoods.release();
-            }
-        });
-        //PlaceLikelihoodBuffer placeLikelihoods = result.await();
-        Timber.v("Done");
-        */
     }
 
     @Override
@@ -185,12 +185,26 @@ public class MainActivity
     }
 
     @Override
-    public void showUserOnMap(User user) {
-        UserOnMapFragment fragment =
-                (UserOnMapFragment)findFragmentByClassName(UserOnMapFragment.class.getSimpleName());
-        if (fragment != null) {
-            mTabLayout.getTabAt(1).select();
-            fragment.userClicked(user);
+    public void userClicked(User user, String uiContext) {
+        switch(uiContext) {
+            case UserOnMapViewModel.UI_CONTEXT :
+                UserOnMapFragment f1 =
+                        (UserOnMapFragment)findFragmentByClassName(UserOnMapFragment.class.getSimpleName());
+                if (f1 != null) {
+                    mTabLayout.getTabAt(1).select();
+                    f1.userClicked(user);
+                }
+                break;
+            case UserHistoryChartViewModel.UI_CONTEXT:
+                UserHistoryChartFragment f2 =
+                        (UserHistoryChartFragment)findFragmentByClassName(UserHistoryChartFragment.class.getSimpleName());
+                if (f2 != null) {
+                    mTabLayout.getTabAt(2).select();
+                    f2.userClicked(user);
+                }
+                break;
+            default:
+                Timber.v("Unexpected case=" + uiContext);
         }
     }
 

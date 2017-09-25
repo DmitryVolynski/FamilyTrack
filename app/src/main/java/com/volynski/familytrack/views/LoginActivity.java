@@ -341,7 +341,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void proceedToMainActivity(String userUuid) {
-        startJobService(userUuid);
+        //startJobService(userUuid);
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
         startActivity(intent);

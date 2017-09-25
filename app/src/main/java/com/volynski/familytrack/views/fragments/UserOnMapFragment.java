@@ -267,4 +267,8 @@ public class UserOnMapFragment
 
         mViewModel.selectUser(user);
     }
+
+    public void addGeofence() {
+        mBinding.xxx.animate().translationX(-1000).setDuration(300).alpha(1).start();
+    }
 }

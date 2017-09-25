@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="com.volynski.familytrack.viewmodels.UserOnMapViewModel"/>
+            type="com.volynski.familytrack.viewmodels.UserHistoryChartViewModel"/>
     </data>
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
@@ -15,10 +15,11 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <fragment
-                android:id="@+id/map_activitymain"
+            <com.github.mikephil.charting.charts.PieChart
+                android:id="@+id/chart_frguserhistorychart"
                 android:name="com.google.android.gms.maps.MapFragment"
                 android:layout_width="0dp"
+                android:contentDescription="User history chart"
                 android:layout_height="0dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginEnd="8dp"
@@ -43,7 +44,6 @@
                 tools:layout_editor_absoluteY="486dp" />
 
             <LinearLayout
-                android:id="@+id/xxx"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginBottom="8dp"
@@ -64,7 +64,7 @@
                     android:orientation="horizontal">
 
                     <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_off"
+                        android:id="@+id/tbut_frguserhistorychart_off"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
@@ -75,7 +75,7 @@
                         android:textOn="OFF" />
 
                     <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_1h"
+                        android:id="@+id/tbut_frguserhistorychart_1h"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
@@ -86,7 +86,7 @@
                         android:textOn="1H" />
 
                     <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_8h"
+                        android:id="@+id/tbut_frguserhistorychart_8h"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
@@ -97,7 +97,7 @@
                         android:textOn="8H" />
 
                     <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_1d"
+                        android:id="@+id/tbut_frguserhistorychart_1d"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
@@ -108,7 +108,7 @@
                         android:textOn="1D" />
 
                     <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_1w"
+                        android:id="@+id/tbut_frguserhistorychart_1w"
                         android:layout_width="64dp"
                         android:layout_height="36dp"
                         android:background="@drawable/toggle_button_selector"
@@ -122,7 +122,7 @@
                 </LinearLayout>
 
                 <android.support.v7.widget.RecyclerView
-                    android:id="@+id/recyclerview_frguseronmap_userslist"
+                    android:id="@+id/recyclerview_frguserhistorychart"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     app:viewModels="@{viewmodel.viewModels}"

@@ -63,7 +63,9 @@ public class TrackingTask
         initGoogleApiClient();
     }
 
-    private void updateUserLocation(String userUuid, PlaceLikelihood placeLikelihood) {
+    private void updateUserLocation(String userUuid,
+                                    android.location.Location loc,
+                                    PlaceLikelihood placeLikelihood) {
         IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
         Intent batteryStatus = mContext.registerReceiver(null, ifilter);
 
@@ -72,10 +74,10 @@ public class TrackingTask
 
         int batteryPct = Math.round((level / (float)scale) * 100);
 
-        Location userLocation = new Location(placeLikelihood.getPlace().getLatLng().longitude,
-                placeLikelihood.getPlace().getLatLng().latitude,
-                placeLikelihood.getPlace().getAddress().toString(),
+        Location userLocation = new Location(loc.getLongitude(),
+                loc.getLatitude(),
                 placeLikelihood.getPlace().getName().toString(),
+                placeLikelihood.getPlace().getAddress().toString(),
                 batteryPct);
 
         mDataSource.updateUserLocation(userUuid, userLocation, new FamilyTrackDataSource.UpdateUserLocationCallback() {
@@ -113,33 +115,29 @@ public class TrackingTask
         try {
             FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
             // TODO доделать определение точных координат
-            /*
             mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
                 @Override
-                public void onComplete(@NonNull Task<android.location.Location> task) {
-                    task.
-                }
-            });
-            */
-            PendingResult < PlaceLikelihoodBuffer > result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
-            result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-                @Override
-                public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
-                    mGoogleApiClient.disconnect();
-                    Timber.v("isSuccess=" + String.valueOf(placeLikelihoods.getStatus().isSuccess()));
-                    if (placeLikelihoods.getStatus().isSuccess()) {
-                        if (placeLikelihoods.getCount() > 0) {
-                            Timber.v(placeLikelihoods.get(0).getPlace().getName().toString());
-                            updateUserLocation(mUserUuid, placeLikelihoods.get(0));
-                        } else {
-                            Timber.v("=0");
-                            mCallback.onTaskCompleted();
-                        }
-                    } else {
-                        Timber.v("!= success");
+                public void onComplete(final @NonNull Task<android.location.Location> task) {
+                    if (!task.isSuccessful()) {
+                        Timber.v("mFusedLocationClient.getLastLocation() != success");
                         mCallback.onTaskCompleted();
                     }
-                    placeLikelihoods.release();
+                    PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
+                    result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
+                        @Override
+                        public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
+                            mGoogleApiClient.disconnect();
+                            Timber.v("isSuccess=" + String.valueOf(placeLikelihoods.getStatus().isSuccess()));
+                            if (placeLikelihoods.getStatus().isSuccess() && placeLikelihoods.getCount() > 0) {
+                                Timber.v(placeLikelihoods.get(0).getPlace().getName().toString());
+                                updateUserLocation(mUserUuid, task.getResult(), placeLikelihoods.get(0));
+                            } else {
+                                Timber.v("=0 or not isSuccess");
+                                mCallback.onTaskCompleted();
+                            }
+                            placeLikelihoods.release();
+                        }
+                    });
                 }
             });
         } catch (Exception ex) {

@@ -6,8 +6,6 @@ import android.databinding.ObservableArrayList;
 import android.databinding.ObservableArrayMap;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableList;
-import android.databinding.ObservableMap;
-import android.view.View;
 
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
@@ -16,19 +14,23 @@ import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
-import com.volynski.familytrack.views.navigators.UserOnMapNavigator;
 
 import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import timber.log.Timber;
 
+
 /**
- * Created by DmitryVolynski on 22.08.2017.
+ * Created by DmitryVolynski on 25.09.2017.
  */
 
-public class UserOnMapViewModel extends BaseObservable {
-    public final static String UI_CONTEXT = "UserOnMapViewModel";
+public class UserHistoryChartViewModel extends BaseObservable {
+    public final static String UI_CONTEXT = "UserHistoryChartViewModel";
 
     private final Context mContext;
     private String mCurrentUserUuid = "";
@@ -37,24 +39,22 @@ public class UserOnMapViewModel extends BaseObservable {
     private boolean mIsDataLoading = false;
     private FamilyTrackDataSource mRepository;
 
-    public ObservableBoolean redrawPath = new ObservableBoolean(false);
-    public ObservableBoolean redrawMarkers = new ObservableBoolean(false);
-    // for map markers
-    public final ObservableList<User> users = new ObservableArrayList<>();
-
-    // horizontal list of users
+    public ObservableBoolean redrawChart = new ObservableBoolean(false);
     public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
+    public Map<Integer, String> userStatistic =
+            new TreeMap<Integer, String>(new Comparator<Integer>() {
+        public int compare(Integer o1, Integer o2) {
+            return o2.compareTo(o1);
+        }
+    });
 
     // toggle buttons array
     public final ObservableArrayMap<String, Boolean> toggleButtons = new ObservableArrayMap<>();
-
-    public final ObservableList<Location> path = new ObservableArrayList<>();
-
     private UserListNavigator mNavigator;
 
-    public UserOnMapViewModel(Context context,
-                              String currentUserUuid,
-                             FamilyTrackDataSource dataSource) {
+    public UserHistoryChartViewModel(Context context,
+                                     String currentUserUuid,
+                                     FamilyTrackDataSource dataSource) {
         mCurrentUserUuid = currentUserUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
@@ -123,11 +123,9 @@ public class UserOnMapViewModel extends BaseObservable {
         if (result.getData() != null && result.getData().getMembers() != null) {
             for (User user : result.getData().getMembers().values()) {
                 if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
-                    this.users.add(user);
                     this.viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
                 }
             }
-            redrawMarkers.set(true);
         }
     }
 
@@ -139,10 +137,18 @@ public class UserOnMapViewModel extends BaseObservable {
         for (String buttonKey : toggleButtons.keySet()) {
             toggleButtons.put(buttonKey, period.equals(buttonKey));
         }
-        setupUserTrack();
     }
 
-    private void setupUserTrack() {
+    public User getSelectedUser() {
+        return mSelectedUser;
+    }
+
+    public void selectUser(User user) {
+        mSelectedUser = user;
+        setupChart();
+    }
+
+    private void setupChart() {
         if (mSelectedUser == null) {
             Timber.v("Selected user==null, can't show track");
             return;
@@ -155,20 +161,37 @@ public class UserOnMapViewModel extends BaseObservable {
                 new FamilyTrackDataSource.GetUserTrackCallback() {
                     @Override
                     public void onGetUserTrackCompleted(FirebaseResult<List<Location>> result) {
-                        path.clear();
-                        path.addAll(result.getData());
+                        prepareChartData(result.getData());
                         // just switch the value to inform that it's nessesary to redraw the path
-                        redrawPath.set(!redrawPath.get());
+                        redrawChart.set(!redrawChart.get());
                     }
                 });
     }
 
-    public User getSelectedUser() {
-        return mSelectedUser;
+    /**
+     * Reads a list of user locations and creates summary data for
+     * top 10 most visited locations. Summary data stored in userStatistic
+     * @param data
+     */
+    private void prepareChartData(List<Location> data) {
+
+        userStatistic.clear();
+        HashMap<String, Integer> tmp = new HashMap<>();
+        if (data == null) {
+            Timber.v("prepareChartData: non-null data expected");
+            return;
+        }
+        for (Location loc : data) {
+            tmp.putIfAbsent(loc.getKnownLocationName(), 0);
+            int n = (int)tmp.get(loc.getKnownLocationName());
+
+            tmp.replace(loc.getKnownLocationName(), n, n+1);
+        }
+
+        for (String key : tmp.keySet()) {
+            userStatistic.put(tmp.get(key), key);
+        }
+        int i = 0;
     }
 
-    public void selectUser(User user) {
-        mSelectedUser = user;
-        setupUserTrack();
-    }
 }

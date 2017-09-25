@@ -29,6 +29,7 @@ public class InviteUsersViewModel
         extends BaseObservable
         implements View.OnClickListener {
 
+    public final static String UI_CONTEXT = InviteUsersViewModel.class.getSimpleName();
     private final static String TAG = UserListViewModel.class.getSimpleName();
     private final Context mContext;
     private String mCurrentUserUuid = "";
@@ -64,7 +65,7 @@ public class InviteUsersViewModel
                     user.getGivenName().contains(searchString.get()) ||
                     user.getEmail().contains(searchString.get()) ||
                     user.getPhone().contains(searchString.get())) {
-                viewModels.add(new UserListItemViewModel(mContext, user, null));
+                viewModels.add(new UserListItemViewModel(mContext, user, null, UI_CONTEXT));
             }
         }
         notifyChange();
@@ -150,7 +151,7 @@ public class InviteUsersViewModel
             viewModels.clear();
             mUnfilteredUserList.clear();
             for (User user : result.getData()) {
-                viewModels.add(new UserListItemViewModel(mContext, user, null));
+                viewModels.add(new UserListItemViewModel(mContext, user, null, UI_CONTEXT));
                 mUnfilteredUserList.add(user);
             }
         }

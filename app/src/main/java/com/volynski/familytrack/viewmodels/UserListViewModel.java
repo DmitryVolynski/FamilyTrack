@@ -32,6 +32,7 @@ public class UserListViewModel
         extends BaseObservable
         implements View.OnClickListener {
 
+    public final static String UI_CONTEXT = UserListViewModel.class.getSimpleName();
     private final static String TAG = UserListViewModel.class.getSimpleName();
     private final Context mContext;
     private String mCurrentUserUuid = "";
@@ -170,7 +171,7 @@ public class UserListViewModel
         viewModels.clear();
         if (result.getData() != null && result.getData().getMembers() != null) {
             for (User user : result.getData().getMembers().values()) {
-                viewModels.add(new UserListItemViewModel(mContext, user, mNavigator));
+                viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
                 mUsers.add(user);
             }
         }

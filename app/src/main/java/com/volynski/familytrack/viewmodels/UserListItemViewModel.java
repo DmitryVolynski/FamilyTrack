@@ -25,12 +25,15 @@ public class UserListItemViewModel extends BaseObservable
     private Context mContext;
     private User mUser;
     private UserListNavigator mNavigator;
+    private String mUiContext;
     public final ObservableBoolean checked = new ObservableBoolean(false);
 
-    public UserListItemViewModel(Context context, User user, UserListNavigator navigator) {
+    public UserListItemViewModel(Context context, User user,
+                                 UserListNavigator navigator, String uiContext) {
         mContext = context;
         mUser = user;
         mNavigator = navigator;
+        mUiContext = uiContext;
     }
 
     public User getUser() {
@@ -45,7 +48,7 @@ public class UserListItemViewModel extends BaseObservable
     @Override
     public void onClick(int itemId, View v) {
         if (mUser.getLastKnownLocation() != null) {
-            mNavigator.showUserOnMap(mUser);
+            mNavigator.userClicked(mUser, mUiContext);
         }
     }
 
@@ -60,7 +63,7 @@ public class UserListItemViewModel extends BaseObservable
                 mNavigator.removeUser(mUser.getUserUuid());
                 break;
             case R.id.menuitem_userpopupmenu_showonmap:
-                //mNavigator.showUserOnMap(mUser.getUserUuid());
+                //mNavigator.userClicked(mUser.getUserUuid());
                 //break;
             case R.id.menuitem_userpopupmenu_userdetails:
                 mNavigator.openUserDetails(mUser.getUserUuid());
@@ -76,18 +79,20 @@ public class UserListItemViewModel extends BaseObservable
      * @param users - list of mUsers
      * @return list of {@link UserListItemViewModel}
      */
-    public static List<UserListItemViewModel> createViewModels(Context context, List<User> users) {
+
+    public static List<UserListItemViewModel> createViewModels(Context context, List<User> users, String uiContext) {
         List<UserListItemViewModel> result = new ArrayList<>();
         if (users != null) {
             // TODO need to review this code
             // Here I did silent navigator assignment, this is not good for common cases
             //UserListNavigator navigator = (UserListNavigator)context;
             for (User user : users) {
-                result.add(new UserListItemViewModel(context, user, null /*navigator*/));
+                result.add(new UserListItemViewModel(context, user, null /*navigator*/, uiContext));
             }
         }
         return result;
     }
+
 
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;

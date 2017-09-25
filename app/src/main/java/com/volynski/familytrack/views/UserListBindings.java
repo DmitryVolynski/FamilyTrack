@@ -35,14 +35,6 @@ import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
 public class UserListBindings {
     @SuppressWarnings("unchecked")
-    @BindingAdapter("app:items")
-    public static void setItems(RecyclerView recyclerView, List<User> users) {
-        RecyclerViewListAdapter<UserListItemViewModel>
-                adapter = (RecyclerViewListAdapter<UserListItemViewModel>) recyclerView.getAdapter();
-        if (adapter != null) {
-            adapter.setViewModels(UserListItemViewModel.createViewModels(recyclerView.getContext(), users));
-        }
-    }
 
     @BindingAdapter("app:viewModels")
     public static void setViewModels(RecyclerView recyclerView,

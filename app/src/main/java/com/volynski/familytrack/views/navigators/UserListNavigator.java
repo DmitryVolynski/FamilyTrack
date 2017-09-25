@@ -15,5 +15,5 @@ public interface UserListNavigator {
     void removeUser(String userUuid);
     void inviteUsers();
     void dismissInviteUsersDialog();
-    void showUserOnMap(User user);
+    void userClicked(User user, String uiContext);
 }

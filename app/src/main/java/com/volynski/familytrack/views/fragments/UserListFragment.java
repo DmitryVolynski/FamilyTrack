@@ -138,4 +138,8 @@ public class UserListFragment
     public void setViewModel(UserListViewModel mViewModel) {
         this.mViewModel = mViewModel;
     }
+
+    public void inviteUser() {
+
+    }
 }

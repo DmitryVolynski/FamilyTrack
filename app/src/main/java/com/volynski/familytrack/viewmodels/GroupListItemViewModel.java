@@ -38,7 +38,7 @@ public class GroupListItemViewModel extends BaseObservable
     @Override
     public void onClick(int itemId, View v) {
         // item click goes to detail screen
-        //mNavigator.showUserOnMap(55.994017, 37.195024);
+        //mNavigator.userClicked(55.994017, 37.195024);
         Timber.v("Item " + itemId + " clicked");
     }
 
