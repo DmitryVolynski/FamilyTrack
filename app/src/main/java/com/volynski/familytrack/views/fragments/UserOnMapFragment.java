@@ -26,6 +26,8 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -40,9 +42,9 @@ import com.volynski.familytrack.databinding.FragmentUserOnMapBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.google.android.gms.location.places.GeoDataClient;
+import com.volynski.familytrack.views.MainActivity;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -68,6 +70,8 @@ public class UserOnMapFragment
     private LinearLayoutManager mLayoutManager;
     private static final int DEFAULT_ZOOM = 15;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
+    private boolean mGeofenceEditingMode = false;
+    private Circle mCurrentGeofence;
 
     FragmentUserOnMapBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
@@ -145,7 +149,7 @@ public class UserOnMapFragment
         mBinding.recyclerviewFrguseronmapUserslist.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
 
-
+        mBinding.yyy.setVisibility(View.INVISIBLE);
         return mBinding.getRoot();
     }
 
@@ -163,8 +167,22 @@ public class UserOnMapFragment
                 UserOnMapFragment.this.redrawPath();
             }
         });
-    }
 
+        mBinding.buttonFrguseronmapCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cancelAddingGeofence();
+            }
+        });
+
+        mViewModel.zoneRadius.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                mCurrentGeofence.setRadius(mViewModel.zoneRadius.get());
+            }
+        });
+
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -172,12 +190,39 @@ public class UserOnMapFragment
         getLocationPermission();
         try {
             //mMap.setMyLocationEnabled(true);
-            //mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+
             redrawMarkers();
         } catch (Exception e) {
             Timber.e(e);
         }
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                updateGeofenceCenter(latLng);
+            }
+        });
+    }
 
+    private void updateGeofenceCenter(LatLng latLng) {
+        if (!mGeofenceEditingMode) {
+            return;
+        }
+        moveCameraTo(latLng);
+
+        if (mCurrentGeofence == null) {
+            CircleOptions circleOptions = new CircleOptions()
+                    .center(latLng)
+                    .clickable(true)
+                    .fillColor(R.color.colorEditGeofence)
+                    .strokeColor(Color.TRANSPARENT)
+                    .radius(mViewModel.zoneRadius.get());
+            mCurrentGeofence = mMap.addCircle(circleOptions);
+        } else {
+            mCurrentGeofence.setCenter(latLng);
+        }
+        mViewModel.zoneCenterLatitude.set(latLng.latitude);
+        mViewModel.zoneCenterLongitude.set(latLng.longitude);
     }
 
     private void redrawPath() {
@@ -245,6 +290,9 @@ public class UserOnMapFragment
         }
     }
 
+    public void moveCameraTo(LatLng loc) {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(loc, DEFAULT_ZOOM));
+    }
 
     public void moveCameraTo(double latitude, double longitude) {
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
@@ -268,7 +316,23 @@ public class UserOnMapFragment
         mViewModel.selectUser(user);
     }
 
-    public void addGeofence() {
-        mBinding.xxx.animate().translationX(-1000).setDuration(300).alpha(1).start();
+    private void saveGeofence() {
+        mViewModel.saveZone();
+    }
+
+    private void cancelAddingGeofence() {
+        mBinding.xxx.animate().translationX(0).setDuration(300).alpha(1).start();
+        mBinding.yyy.animate().translationX(mBinding.xxx.getWidth()).setDuration(300).start();
+        ((MainActivity)getActivity()).restoreFab();
+        mGeofenceEditingMode = false;
+        mCurrentGeofence.remove();
+    }
+
+    public void startAddingGeofence() {
+        mBinding.yyy.setX(mBinding.xxx.getWidth());
+        mBinding.yyy.setVisibility(View.VISIBLE);
+        mBinding.xxx.animate().translationX(-mBinding.xxx.getWidth()).setDuration(300).alpha(1).start();
+        mBinding.yyy.animate().translationX(0).setDuration(300).start();
+        mGeofenceEditingMode = true;
     }
 }

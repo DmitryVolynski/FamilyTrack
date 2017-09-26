@@ -1,13 +1,9 @@
 package com.volynski.familytrack.views;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.BatteryManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -17,22 +13,11 @@ import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.PlaceLikelihood;
-import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
-import com.google.android.gms.maps.model.LatLng;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.TabViewPageAdapter;
-import com.volynski.familytrack.data.FamilyTrackDataSource;
-import com.volynski.familytrack.data.FamilyTrackRepository;
-import com.volynski.familytrack.data.FirebaseResult;
-import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
@@ -41,7 +26,6 @@ import com.volynski.familytrack.views.fragments.UserListFragment;
 import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
-import java.util.Calendar;
 import java.util.List;
 
 import timber.log.Timber;
@@ -104,8 +88,9 @@ public class MainActivity
                 UserOnMapFragment f1 =
                         (UserOnMapFragment)findFragmentByClassName(USER_ON_MAP_FRAGMENT);
                 if (f1 != null) {
-                    f1.addGeofence();
-                    mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
+                    f1.startAddingGeofence();
+                    hideFab();
+
                 }
                 break;
         }
@@ -224,5 +209,13 @@ public class MainActivity
         Timber.v("Invite mUsers");
         mInviteUsersDialog = InviteUsersDialogFragment.newInstance(this, mCurrentUserUuid, this);
         mInviteUsersDialog.show(getSupportFragmentManager(), "aa");
+    }
+
+    private void hideFab() {
+        mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
+    }
+
+    public void restoreFab() {
+        mFab.animate().scaleX(1).scaleY(1).rotation(180).setDuration(200).start();
     }
 }

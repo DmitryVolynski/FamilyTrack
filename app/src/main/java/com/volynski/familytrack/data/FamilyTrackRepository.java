@@ -23,6 +23,7 @@ import com.volynski.familytrack.data.models.firebase.HistoryItem;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Zone;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -447,6 +448,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         getUserByUuid(userUuid, new GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                // check if user exists
                 User user = result.getData();
                 if (user == null) {
                     callback.onUpdateUserLocationCompleted(
@@ -513,6 +515,34 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
             }
         });
+
+    }
+
+    // --------------------------------------------------------------------------------------------
+    //
+    // zones operations
+    //
+    // --------------------------------------------------------------------------------------------
+
+    @Override
+    public void createZone(@NonNull String groupUuid,
+                           @NonNull Zone zone,
+                           CreateZoneCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.zonesOfGroup(groupUuid));
+        DatabaseReference newRec = ref.push();
+
+        newRec.setValue(zone);
+        if (callback != null) {
+            callback.onCreateZoneCompleted(new FirebaseResult<String>(newRec.getKey()));
+        }
+
+    }
+
+    @Override
+    public void updateZone(@NonNull String grupUuid,
+                           @NonNull Zone zone,
+                           UpdateZoneCallback callback) {
 
     }
 }

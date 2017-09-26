@@ -5,16 +5,21 @@ import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableArrayMap;
 import android.databinding.ObservableBoolean;
+import android.databinding.ObservableDouble;
+import android.databinding.ObservableField;
+import android.databinding.ObservableInt;
 import android.databinding.ObservableList;
 import android.databinding.ObservableMap;
 import android.view.View;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 import com.volynski.familytrack.views.navigators.UserOnMapNavigator;
 
@@ -29,7 +34,12 @@ import timber.log.Timber;
 
 public class UserOnMapViewModel extends BaseObservable {
     public final static String UI_CONTEXT = "UserOnMapViewModel";
+    private final static int ZONE_NONE = 0;
+    private final static int ZONE_EDIT = 1;
+    private final static int ZONE_NEW = 2;
 
+
+    private int mZoneEditMode = ZONE_NONE;
     private final Context mContext;
     private String mCurrentUserUuid = "";
     private User mCurrentUser;
@@ -49,8 +59,16 @@ public class UserOnMapViewModel extends BaseObservable {
     public final ObservableArrayMap<String, Boolean> toggleButtons = new ObservableArrayMap<>();
 
     public final ObservableList<Location> path = new ObservableArrayList<>();
+    public final ObservableMap<String, Zone> zones = new ObservableArrayMap<>();
+
+    // observable fields for editing new/existing zone
+    public final ObservableField<String> zoneName = new ObservableField<>();
+    public final ObservableInt zoneRadius = new ObservableInt(Zone.DEFAULT_RADIUS);
+    public final ObservableDouble zoneCenterLatitude = new ObservableDouble();
+    public final ObservableDouble zoneCenterLongitude = new ObservableDouble();
 
     private UserListNavigator mNavigator;
+    private String mZoneKey;
 
     public UserOnMapViewModel(Context context,
                               String currentUserUuid,
@@ -170,5 +188,41 @@ public class UserOnMapViewModel extends BaseObservable {
     public void selectUser(User user) {
         mSelectedUser = user;
         setupUserTrack();
+    }
+
+    public void startEditZone(String zoneKey) {
+        if (zones.containsKey(zoneKey)) {
+            mZoneKey = zoneKey;
+            Zone editZone = zones.get(zoneKey);
+            zoneName.set(editZone.getName());
+            zoneRadius.set(editZone.getRadius());
+            zoneCenterLatitude.set(editZone.getLatitude());
+            zoneCenterLongitude.set(editZone.getLongitude());
+            mZoneEditMode = ZONE_EDIT;
+        }
+    }
+
+    public void startNewZone() {
+        zoneName.set("New Zone");
+        zoneRadius.set(Zone.DEFAULT_RADIUS);
+        mZoneEditMode = ZONE_NEW;
+    }
+
+    public void saveZone() {
+        Zone zone = new Zone(mZoneKey, zoneName.get(),
+                new LatLng(zoneCenterLatitude.get(), zoneCenterLongitude.get()),
+                zoneRadius.get());
+        if (mZoneEditMode == ZONE_NEW) {
+            mRepository.createZone(mCurrentUser.getActiveMembership().getGroupUuid(), zone, new FamilyTrackDataSource.CreateZoneCallback() {
+                @Override
+                public void onCreateZoneCompleted(FirebaseResult<String> result) {
+
+                }
+            });
+        } else if (mZoneEditMode == ZONE_EDIT) {
+            mRepository.updateZone(mCurrentUser.getActiveMembership().getGroupUuid(), zone, null);
+        } else {
+            Timber.v("Attempt to save zone in unknown mode");
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Zone;
 
 import java.util.List;
 
@@ -125,4 +126,27 @@ public interface FamilyTrackDataSource {
      * @param callback
      */
     void inviteUsers(@NonNull String groupUuid, @NonNull List<User> usersToinvite, @NonNull InviteUsersCallback callback);
+
+    // --------------------------------------------------------------------------------------------
+    //
+    // zones operations
+    //
+    // --------------------------------------------------------------------------------------------
+    interface CreateZoneCallback { void onCreateZoneCompleted(FirebaseResult<String> result); }
+
+    /**
+     * Creates a new observed zone (geofence location) in firebase
+     * @param zone - description of new zone (geofence)
+     * @param callback - optional callback
+     */
+    void createZone(@NonNull String grupUuid, @NonNull Zone zone, CreateZoneCallback callback);
+
+    interface UpdateZoneCallback { void onUpdateZoneCompleted(FirebaseResult<String> result); }
+
+    /**
+     * Updates an existing observed zone (geofence location) in firebase
+     * @param zone - description of zone with existing key(!!!) (geofence)
+     * @param callback - optional callback
+     */
+    void updateZone(@NonNull String grupUuid, @NonNull Zone zone, UpdateZoneCallback callback);
 }
