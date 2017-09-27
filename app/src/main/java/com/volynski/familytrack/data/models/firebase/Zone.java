@@ -21,8 +21,8 @@ public class Zone {
     private String mUuid;
 
     public Zone() {
-        mRadius = DEFAULT_RADIUS;
-        mName = "New zone";
+        //mRadius = DEFAULT_RADIUS;
+        //mName = "New zone";
     }
 
     public Zone(String key, String name, LatLng loc, int radius) {
@@ -96,7 +96,13 @@ public class Zone {
         return String.format("%1$f/%2$f", latitude, longitude);
     }
 
+    @Exclude
     public static String getRadiusAsString(int radius) {
         return String.format("R:%1$dm", radius);
+    }
+
+    @Exclude
+    public LatLng getLatLng() {
+        return new LatLng(mLatitude, mLongitude);
     }
 }

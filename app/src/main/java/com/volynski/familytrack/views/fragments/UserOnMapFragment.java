@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -38,6 +37,7 @@ import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.databinding.FragmentUserOnMapBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
@@ -47,6 +47,7 @@ import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -59,6 +60,7 @@ public class UserOnMapFragment
             implements OnMapReadyCallback, View.OnClickListener {
     private static final String TAG = UserOnMapFragment.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final float GEOFENCE_STROKE_WIDTH = 2;
 
     private UserOnMapViewModel mViewModel;
     private GeoDataClient mGeoDataClient;
@@ -70,6 +72,7 @@ public class UserOnMapFragment
     private LinearLayoutManager mLayoutManager;
     private static final int DEFAULT_ZOOM = 15;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
+    private HashMap<String, Circle> mCircles = new HashMap<>();
     private boolean mGeofenceEditingMode = false;
     private Circle mCurrentGeofence;
 
@@ -154,6 +157,7 @@ public class UserOnMapFragment
     }
 
     private void setupCustomListeners() {
+        // redraw all users locations
         mViewModel.redrawMarkers.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
@@ -161,6 +165,7 @@ public class UserOnMapFragment
             }
         });
 
+        // redraw path when needed
         mViewModel.redrawPath.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
@@ -168,17 +173,36 @@ public class UserOnMapFragment
             }
         });
 
+        // cancel geofence editing
         mBinding.buttonFrguseronmapCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cancelAddingGeofence();
+                mViewModel.cancelZoneEdit();
+                switchToNormalMode();
             }
         });
 
+        // redraw circle whet user changed it radius
         mViewModel.zoneRadius.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 mCurrentGeofence.setRadius(mViewModel.zoneRadius.get());
+            }
+        });
+
+        // redraw all geofences
+        mViewModel.redrawZones.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                UserOnMapFragment.this.redrawZones();
+            }
+        });
+
+        // zone created/updated - switch to normal mode with list of users
+        mViewModel.saveZoneCompleted.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                switchToNormalMode();
             }
         });
 
@@ -191,7 +215,7 @@ public class UserOnMapFragment
         try {
             //mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
-
+            redrawZones();
             redrawMarkers();
         } catch (Exception e) {
             Timber.e(e);
@@ -202,10 +226,24 @@ public class UserOnMapFragment
                 updateGeofenceCenter(latLng);
             }
         });
+
+        mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+            @Override
+            public void onCircleClick(Circle circle) {
+                if (mViewModel.getZoneEditMode() == UserOnMapViewModel.EM_NONE) {
+                    startEditGeofence(circle);
+                }
+            }
+        });
     }
 
+    /**
+     * Updates geofence center when user edit geofence data and clicks new point on map
+     * Changed center displays on map & gos to viewmodel
+     * @param latLng - new center of editable geofence
+     */
     private void updateGeofenceCenter(LatLng latLng) {
-        if (!mGeofenceEditingMode) {
+        if (mViewModel.getZoneEditMode() == UserOnMapViewModel.EM_NONE) {
             return;
         }
         moveCameraTo(latLng);
@@ -214,8 +252,9 @@ public class UserOnMapFragment
             CircleOptions circleOptions = new CircleOptions()
                     .center(latLng)
                     .clickable(true)
-                    .fillColor(R.color.colorEditGeofence)
-                    .strokeColor(Color.TRANSPARENT)
+                    .fillColor(getResources().getColor(R.color.colorEditGeofenceFill, null))
+                    .strokeColor(getResources().getColor(R.color.colorEditGeofenceStroke, null))
+                    .strokeWidth(GEOFENCE_STROKE_WIDTH)
                     .radius(mViewModel.zoneRadius.get());
             mCurrentGeofence = mMap.addCircle(circleOptions);
         } else {
@@ -223,8 +262,13 @@ public class UserOnMapFragment
         }
         mViewModel.zoneCenterLatitude.set(latLng.latitude);
         mViewModel.zoneCenterLongitude.set(latLng.longitude);
+
     }
 
+    /**
+     * Redraws the path from viewmodel
+     * Previous path will be removed from map
+     */
     private void redrawPath() {
         if (mViewModel.path == null) {
             return;
@@ -245,12 +289,18 @@ public class UserOnMapFragment
         mMap.addPolyline(options);
     }
 
+    /**
+     * Redraws set of markers that correspond last known locations for all users
+     * in group.
+     */
     private void redrawMarkers() {
         List<User> users = mViewModel.users;
         if (users == null) {
             return;
         }
-        mMap.clear();
+        for (String key : mMarkers.keySet()) {
+            mMarkers.get(key).remove();
+        }
         mMarkers.clear();
         for (User user : users) {
             Location location = user.getLastKnownLocation();
@@ -263,6 +313,29 @@ public class UserOnMapFragment
 
                 mMarkers.put(user.getUserUuid(), mMap.addMarker(markerOptions));
             }
+        }
+    }
+
+    /**
+     * Redraws all geofence zones
+     * Previous set of zones will be revoved
+     */
+    private void redrawZones() {
+        Map<String, Zone> zones = mViewModel.zones;
+        for (String key : mCircles.keySet()) {
+            mCircles.get(key).remove();
+        }
+        mCircles.clear();
+        for (String key : zones.keySet()) {
+            Zone zone = zones.get(key);
+            CircleOptions circleOptions = new CircleOptions()
+                    .center(zone.getLatLng())
+                    .clickable(true)
+                    .fillColor(getResources().getColor(R.color.colorGeofenceFill, null))
+                    .strokeColor(getResources().getColor(R.color.colorGeofenceStroke, null))
+                    .strokeWidth(GEOFENCE_STROKE_WIDTH)
+                    .radius(zone.getRadius());
+            mCircles.put(key, mMap.addCircle(circleOptions));
         }
     }
 
@@ -316,23 +389,44 @@ public class UserOnMapFragment
         mViewModel.selectUser(user);
     }
 
-    private void saveGeofence() {
-        mViewModel.saveZone();
-    }
 
-    private void cancelAddingGeofence() {
-        mBinding.xxx.animate().translationX(0).setDuration(300).alpha(1).start();
-        mBinding.yyy.animate().translationX(mBinding.xxx.getWidth()).setDuration(300).start();
-        ((MainActivity)getActivity()).restoreFab();
-        mGeofenceEditingMode = false;
-        mCurrentGeofence.remove();
+    private void changeUiLayout(boolean isEditMode) {
+        if (isEditMode) {
+            mBinding.yyy.setX(mBinding.xxx.getWidth());
+            mBinding.yyy.setVisibility(View.VISIBLE);
+            mBinding.xxx.animate().translationX(-mBinding.xxx.getWidth()).setDuration(300).alpha(1).start();
+            mBinding.yyy.animate().translationX(0).setDuration(300).start();
+        } else {
+            mBinding.xxx.animate().translationX(0).setDuration(300).alpha(1).start();
+            mBinding.yyy.animate().translationX(mBinding.xxx.getWidth()).setDuration(300).start();
+            ((MainActivity)getActivity()).restoreFab();
+        }
+    }
+    private void switchToNormalMode() {
+        changeUiLayout(false);
+        if (mCurrentGeofence != null) {
+            mCurrentGeofence.remove();
+        }
+        mCurrentGeofence = null;
+        redrawZones();
     }
 
     public void startAddingGeofence() {
-        mBinding.yyy.setX(mBinding.xxx.getWidth());
-        mBinding.yyy.setVisibility(View.VISIBLE);
-        mBinding.xxx.animate().translationX(-mBinding.xxx.getWidth()).setDuration(300).alpha(1).start();
-        mBinding.yyy.animate().translationX(0).setDuration(300).start();
-        mGeofenceEditingMode = true;
+        changeUiLayout(true);
+        mViewModel.startNewZone();
     }
+
+    private void startEditGeofence(Circle circle) {
+        changeUiLayout(true);
+        mCurrentGeofence = circle;
+        mCurrentGeofence.setFillColor(getResources().getColor(R.color.colorEditGeofenceFill, null));
+        mCurrentGeofence.setStrokeColor(getResources().getColor(R.color.colorEditGeofenceStroke, null));
+        for (String key : mCircles.keySet()) {
+            if (mCircles.get(key).equals(circle)) {
+                mViewModel.startEditZone(key);
+                break;
+            }
+        }
+    }
+
 }

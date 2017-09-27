@@ -28,7 +28,7 @@ public class FamilyTrackDbRefsHelper {
     private static final String NODE_ZONES_OF_GROUP_FORMAT_STRING =
             NODE_GROUPS + "%s/geofences/";
     private static final String NODE_ZONE_OF_GROUP_FORMAT_STRING =
-            NODE_GROUPS + NODE_ZONES_OF_GROUP_FORMAT_STRING +  "%s/";
+            NODE_ZONES_OF_GROUP_FORMAT_STRING +  "%s/";
 
     public static String groupRef(String groupUuid) {
         return String.format(NODE_GROUP_FORMAT_STRING, groupUuid);
@@ -71,5 +71,9 @@ public class FamilyTrackDbRefsHelper {
     public static String zonesOfGroup(String groupUuid) {
         return String.format(NODE_ZONES_OF_GROUP_FORMAT_STRING, groupUuid);
     }
-    
+
+    public static String zoneOfGroup(String groupUuid, String zoneUuid) {
+        return String.format(NODE_ZONE_OF_GROUP_FORMAT_STRING, groupUuid, zoneUuid);
+    }
+
 }

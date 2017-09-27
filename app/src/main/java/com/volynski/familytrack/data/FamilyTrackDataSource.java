@@ -94,17 +94,35 @@ public interface FamilyTrackDataSource {
     void addUserToGroup(@NonNull String userUuid, @NonNull String groupUuid, AddUserToGroupCallback callback);
 
     interface RemoveUserFromGroupCallback { void onRemoveUserFromGroupCompleted(FirebaseResult<String> result); }
+
+    /**
+     * Removes user from specified group
+     * User will be deleted from path
+     * /groups/<groupUuid>/members/<userUuid>
+     *
+     * @param groupUuid - group uuid
+     * @param userUuid - user uuid
+     * @param callback - callback
+     */
     void removeUserFromGroup(@NonNull String groupUuid, @NonNull String userUuid, RemoveUserFromGroupCallback callback);
 
     /**
      *
      */
     interface GetGroupByUuidCallback {void onGetGroupByUuidCompleted(FirebaseResult<Group> result); }
+
+    /**
+     * Reads all group data (including members) for specified group
+     * @param groupUuid - group key to find specified group
+     * @param callback - callback to return result
+     */
     void getGroupByUuid(@NonNull String groupUuid, @NonNull GetGroupByUuidCallback callback);
 
+    // --------------------------------------------------------------------------------------------
     //
-    // ---------- contact list operations
+    // contact list operations
     //
+    // --------------------------------------------------------------------------------------------
     interface GetContactsToInvite {void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result); }
 
     /**

@@ -15,6 +15,7 @@ public class Group {
     private String mGroupUuid;
     private String mName;
     private Map<String, User> mMembers;
+    private Map<String, Zone> mGeofences;
 
     @Exclude
     public String getGroupUuid() {
@@ -72,5 +73,13 @@ public class Group {
     @Exclude
     public int getMembersCount() {
         return (mMembers == null ? 0 : mMembers.size());
+    }
+
+    public Map<String, Zone> getGeofences() {
+        return mGeofences;
+    }
+
+    public void setGeofences(Map<String, Zone> geofences) {
+        this.mGeofences = geofences;
     }
 }

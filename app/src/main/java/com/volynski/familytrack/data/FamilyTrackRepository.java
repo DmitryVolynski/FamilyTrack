@@ -540,9 +540,15 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void updateZone(@NonNull String grupUuid,
+    public void updateZone(@NonNull String groupUuid,
                            @NonNull Zone zone,
                            UpdateZoneCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.zoneOfGroup(groupUuid, zone.getUuid()));
 
+        ref.setValue(zone);
+        if (callback != null) {
+            callback.onUpdateZoneCompleted(new FirebaseResult<String>(zone.getUuid()));
+        }
     }
 }

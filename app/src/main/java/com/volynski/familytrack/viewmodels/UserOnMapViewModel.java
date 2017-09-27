@@ -10,7 +10,6 @@ import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.databinding.ObservableList;
 import android.databinding.ObservableMap;
-import android.view.View;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
@@ -21,7 +20,6 @@ import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
-import com.volynski.familytrack.views.navigators.UserOnMapNavigator;
 
 import java.util.Calendar;
 import java.util.List;
@@ -34,12 +32,12 @@ import timber.log.Timber;
 
 public class UserOnMapViewModel extends BaseObservable {
     public final static String UI_CONTEXT = "UserOnMapViewModel";
-    private final static int ZONE_NONE = 0;
-    private final static int ZONE_EDIT = 1;
-    private final static int ZONE_NEW = 2;
+    public final static int EM_NONE = 0;
+    public final static int EM_EDIT = 1;
+    public final static int EM_NEW = 2;
 
 
-    private int mZoneEditMode = ZONE_NONE;
+    private int mZoneEditMode = EM_NONE;
     private final Context mContext;
     private String mCurrentUserUuid = "";
     private User mCurrentUser;
@@ -47,6 +45,8 @@ public class UserOnMapViewModel extends BaseObservable {
     private boolean mIsDataLoading = false;
     private FamilyTrackDataSource mRepository;
 
+    public ObservableBoolean saveZoneCompleted = new ObservableBoolean(false);
+    public ObservableBoolean redrawZones = new ObservableBoolean(false);
     public ObservableBoolean redrawPath = new ObservableBoolean(false);
     public ObservableBoolean redrawMarkers = new ObservableBoolean(false);
     // for map markers
@@ -107,7 +107,7 @@ public class UserOnMapViewModel extends BaseObservable {
                 if (result.getData() != null) {
                     mCurrentUser = result.getData();
                     if (mCurrentUser.getActiveMembership() != null) {
-                        loadUsersList(mCurrentUser.getActiveMembership().getGroupUuid());
+                        populateObservables(mCurrentUser.getActiveMembership().getGroupUuid());
                     }
                 } else {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
@@ -118,37 +118,51 @@ public class UserOnMapViewModel extends BaseObservable {
     }
 
     /**
-     * Get group members from DB and populates mUsers object for the view
-     * @param groupUuid - group Id to get members of
+     * Read group info and populates users & zones (geofences)
+     * @param groupUuid - group Id to read
      */
-    private void loadUsersList(String groupUuid) {
+    private void populateObservables(String groupUuid) {
         mRepository.getGroupByUuid(groupUuid,
                 new FamilyTrackDataSource.GetGroupByUuidCallback() {
                     @Override
                     public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                         populateUserListFromDbResult(result);
+                        populateZonesFromDbResult(result);
                         mIsDataLoading = false;
                     }
                 });
     }
 
     /**
-     * Converts Firebase result (group with members) into ObservableList<User>
+     * Populates ObservableList<User> from Firebase result (group with members )
      * Users with state=USER_JOINED will be included. They are joined to the group and could be tracked
-     * @param result - Firebase result of getGroupByUuid
+     * @param result - Firebase result (Group object) of getGroupByUuid
      */
     private void populateUserListFromDbResult(FirebaseResult<Group> result) {
         if (result.getData() != null && result.getData().getMembers() != null) {
+            this.users.clear();
             for (User user : result.getData().getMembers().values()) {
                 if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
                     this.users.add(user);
                     this.viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
                 }
             }
-            redrawMarkers.set(true);
+            redrawMarkers.set(!redrawMarkers.get());
         }
     }
 
+    /**
+     * Populates ObservableMap<Zone> from Firebase result (group with members & zones)
+     * Users with state=USER_JOINED will be included. They are joined to the group and could be tracked
+     * @param result - Firebase result (Group object) of getGroupByUuid
+     */
+    private void populateZonesFromDbResult(FirebaseResult<Group> result) {
+        if (result.getData() != null && result.getData().getGeofences() != null) {
+            zones.clear();
+            zones.putAll(result.getData().getGeofences());
+            redrawZones.set(!redrawZones.get());
+        }
+    }
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
     }
@@ -198,31 +212,63 @@ public class UserOnMapViewModel extends BaseObservable {
             zoneRadius.set(editZone.getRadius());
             zoneCenterLatitude.set(editZone.getLatitude());
             zoneCenterLongitude.set(editZone.getLongitude());
-            mZoneEditMode = ZONE_EDIT;
+            mZoneEditMode = EM_EDIT;
         }
     }
 
     public void startNewZone() {
         zoneName.set("New Zone");
         zoneRadius.set(Zone.DEFAULT_RADIUS);
-        mZoneEditMode = ZONE_NEW;
+        mZoneEditMode = EM_NEW;
+    }
+
+    public int getZoneEditMode() {
+        return mZoneEditMode;
     }
 
     public void saveZone() {
         Zone zone = new Zone(mZoneKey, zoneName.get(),
                 new LatLng(zoneCenterLatitude.get(), zoneCenterLongitude.get()),
                 zoneRadius.get());
-        if (mZoneEditMode == ZONE_NEW) {
-            mRepository.createZone(mCurrentUser.getActiveMembership().getGroupUuid(), zone, new FamilyTrackDataSource.CreateZoneCallback() {
+        if (mZoneEditMode == EM_NEW) {
+            mRepository.createZone(mCurrentUser.getActiveMembership().getGroupUuid(),
+                    zone, new FamilyTrackDataSource.CreateZoneCallback() {
                 @Override
                 public void onCreateZoneCompleted(FirebaseResult<String> result) {
-
+                    updateZonesList();
+                    saveZoneCompleted.set(!saveZoneCompleted.get());
                 }
             });
-        } else if (mZoneEditMode == ZONE_EDIT) {
-            mRepository.updateZone(mCurrentUser.getActiveMembership().getGroupUuid(), zone, null);
+        } else if (mZoneEditMode == EM_EDIT) {
+            mRepository.updateZone(mCurrentUser.getActiveMembership().getGroupUuid(),
+                    zone, new FamilyTrackDataSource.UpdateZoneCallback() {
+                        @Override
+                        public void onUpdateZoneCompleted(FirebaseResult<String> result) {
+                            updateZonesList();
+                            saveZoneCompleted.set(!saveZoneCompleted.get());
+                        }
+                    });
         } else {
             Timber.v("Attempt to save zone in unknown mode");
         }
+    }
+
+    /**
+     * Reads all group-defined zones into local list
+     * and change value of ObeservableBoolean redrawZones
+     * to force view to redraw all zones
+     */
+    private void updateZonesList() {
+        mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(),
+                new FamilyTrackDataSource.GetGroupByUuidCallback() {
+                    @Override
+                    public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                        populateZonesFromDbResult(result);
+                    }
+                });
+    }
+
+    public void cancelZoneEdit() {
+        mZoneEditMode = EM_NONE;
     }
 }

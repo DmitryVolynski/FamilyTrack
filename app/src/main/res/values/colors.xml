@@ -7,5 +7,8 @@
     <color name="colorSecondary">#ff9100</color>
     <color name="colorSecondaryDark">#c56200</color>
     <color name="colorSecondaryLight">#ffc246</color>
-    <color name="colorEditGeofence">#ffffff</color>
+    <color name="colorEditGeofenceFill">#66ff9100</color>
+    <color name="colorEditGeofenceStroke">#eeff9100</color>
+    <color name="colorGeofenceStroke">#662196F3</color>
+    <color name="colorGeofenceFill">#66BBDEFB</color>
 </resources>

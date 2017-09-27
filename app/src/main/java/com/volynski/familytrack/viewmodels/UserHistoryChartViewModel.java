@@ -73,7 +73,7 @@ public class UserHistoryChartViewModel extends BaseObservable {
     /**
      * Starts loading data according to group membership of the user (groupUuid)
      * ViewModel will populate the view if current user is member of any group
-     * @param user - User object representing current user
+     *
      */
     public void start() {
 
@@ -182,10 +182,14 @@ public class UserHistoryChartViewModel extends BaseObservable {
             return;
         }
         for (Location loc : data) {
-            tmp.putIfAbsent(loc.getKnownLocationName(), 0);
-            int n = (int)tmp.get(loc.getKnownLocationName());
-
-            tmp.replace(loc.getKnownLocationName(), n, n+1);
+            String locName = loc.getKnownLocationName();
+            if (!tmp.containsKey(locName)) {
+                tmp.put(locName, 0);
+            } else {
+                int n = (int) tmp.get(locName);
+                tmp.remove(locName);
+                tmp.put(locName, ++n);
+            }
         }
 
         for (String key : tmp.keySet()) {
