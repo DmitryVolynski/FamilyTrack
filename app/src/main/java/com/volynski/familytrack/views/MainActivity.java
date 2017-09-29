@@ -59,6 +59,7 @@ public class MainActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
         mFab = (FloatingActionButton) findViewById(R.id.fab);
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -211,11 +212,17 @@ public class MainActivity
         mInviteUsersDialog.show(getSupportFragmentManager(), "aa");
     }
 
-    private void hideFab() {
+    public View getViewForSnackbar() {
+        return findViewById(R.id.coordinatorlayout_main);
+    }
+
+    public void hideFab() {
         mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
+        mFab.setVisibility(View.INVISIBLE);
     }
 
     public void restoreFab() {
         mFab.animate().scaleX(1).scaleY(1).rotation(180).setDuration(200).start();
+        mFab.setVisibility(View.VISIBLE);
     }
 }

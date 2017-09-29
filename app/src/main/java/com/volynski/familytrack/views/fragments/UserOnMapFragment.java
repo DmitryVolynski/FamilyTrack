@@ -1,6 +1,7 @@
 package com.volynski.familytrack.views.fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
@@ -39,7 +40,9 @@ import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.databinding.FragmentUserOnMapBinding;
+import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.google.android.gms.location.places.GeoDataClient;
 import com.volynski.familytrack.views.MainActivity;
@@ -75,6 +78,7 @@ public class UserOnMapFragment
     private HashMap<String, Circle> mCircles = new HashMap<>();
     private boolean mGeofenceEditingMode = false;
     private Circle mCurrentGeofence;
+    private Observable.OnPropertyChangedCallback mSnackbarCallback;
 
     FragmentUserOnMapBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
@@ -90,6 +94,25 @@ public class UserOnMapFragment
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
         return result;
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mSnackbarCallback != null) {
+            mViewModel.snackbarText.removeOnPropertyChangedCallback(mSnackbarCallback);
+        }
+        super.onDestroy();
+    }
+
+    private void setupSnackbar() {
+        mSnackbarCallback = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                SnackbarUtil.showSnackbar(((MainActivity)getActivity()).getViewForSnackbar(),
+                        mViewModel.snackbarText.get());
+            }
+        };
+        mViewModel.snackbarText.addOnPropertyChangedCallback(mSnackbarCallback);
     }
 
     @Override
@@ -137,6 +160,7 @@ public class UserOnMapFragment
 
         setupMapFragment();
         setupToggleButtons();
+        setupSnackbar();
         setupCustomListeners();
 
         mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -182,6 +206,14 @@ public class UserOnMapFragment
             }
         });
 
+        // click on 'remove' image button
+        mBinding.imageviewFrguseronmapRemovezone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startRemoveZone();
+            }
+        });
+
         // redraw circle whet user changed it radius
         mViewModel.zoneRadius.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
@@ -199,7 +231,7 @@ public class UserOnMapFragment
         });
 
         // zone created/updated - switch to normal mode with list of users
-        mViewModel.saveZoneCompleted.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        mViewModel.zoneDbOpCompleted.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 switchToNormalMode();
@@ -230,7 +262,7 @@ public class UserOnMapFragment
         mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
             @Override
             public void onCircleClick(Circle circle) {
-                if (mViewModel.getZoneEditMode() == UserOnMapViewModel.EM_NONE) {
+                if (mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_NONE) {
                     startEditGeofence(circle);
                 }
             }
@@ -243,7 +275,7 @@ public class UserOnMapFragment
      * @param latLng - new center of editable geofence
      */
     private void updateGeofenceCenter(LatLng latLng) {
-        if (mViewModel.getZoneEditMode() == UserOnMapViewModel.EM_NONE) {
+        if (mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_NONE) {
             return;
         }
         moveCameraTo(latLng);
@@ -389,13 +421,13 @@ public class UserOnMapFragment
         mViewModel.selectUser(user);
     }
 
-
-    private void changeUiLayout(boolean isEditMode) {
-        if (isEditMode) {
+    private void changeUiLayout(boolean isForEditMode) {
+        if (isForEditMode) {
             mBinding.yyy.setX(mBinding.xxx.getWidth());
             mBinding.yyy.setVisibility(View.VISIBLE);
             mBinding.xxx.animate().translationX(-mBinding.xxx.getWidth()).setDuration(300).alpha(1).start();
             mBinding.yyy.animate().translationX(0).setDuration(300).start();
+            ((MainActivity)getActivity()).hideFab();
         } else {
             mBinding.xxx.animate().translationX(0).setDuration(300).alpha(1).start();
             mBinding.yyy.animate().translationX(mBinding.xxx.getWidth()).setDuration(300).start();
@@ -415,6 +447,29 @@ public class UserOnMapFragment
         changeUiLayout(true);
         mViewModel.startNewZone();
     }
+
+    /**
+     * Show confirmation dialog and asks viewmodel to remove zone if user confirms
+     */
+    private void startRemoveZone() {
+        final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
+        confirmDialog.setParms("Removing zone", "Are you sure you want to remove zone '" + mViewModel.zoneName.get() + "'?",
+                "Ok", "Cancel",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mViewModel.removeZone();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        confirmDialog.dismiss();
+                    }
+                });
+        confirmDialog.show(getActivity().getFragmentManager(), "dialog");
+    }
+
 
     private void startEditGeofence(Circle circle) {
         changeUiLayout(true);

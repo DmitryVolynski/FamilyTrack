@@ -166,5 +166,15 @@ public interface FamilyTrackDataSource {
      * @param zone - description of zone with existing key(!!!) (geofence)
      * @param callback - optional callback
      */
-    void updateZone(@NonNull String grupUuid, @NonNull Zone zone, UpdateZoneCallback callback);
+    void updateZone(@NonNull String groupUuid, @NonNull Zone zone, UpdateZoneCallback callback);
+
+    interface RemoveZoneCallback { void onRemoveZoneCompleted(FirebaseResult<String> result); }
+
+    /**
+     * Removes zone from db
+     * @param groupUuid - group key where we will try to find zone to remove
+     * @param zoneUuid - key of deleting zone
+     * @param callback - optional callback
+     */
+    void removeZone(@NonNull String groupUuid, @NonNull String zoneUuid, RemoveZoneCallback callback);
 }

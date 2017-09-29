@@ -2,6 +2,7 @@ package com.volynski.familytrack.viewmodels;
 
 import android.content.Context;
 import android.databinding.BaseObservable;
+import android.databinding.Observable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableArrayMap;
 import android.databinding.ObservableBoolean;
@@ -10,6 +11,7 @@ import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.databinding.ObservableList;
 import android.databinding.ObservableMap;
+import android.os.Bundle;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
@@ -37,7 +39,6 @@ public class UserOnMapViewModel extends BaseObservable {
     public final static int EM_NEW = 2;
 
 
-    private int mZoneEditMode = EM_NONE;
     private final Context mContext;
     private String mCurrentUserUuid = "";
     private User mCurrentUser;
@@ -45,7 +46,7 @@ public class UserOnMapViewModel extends BaseObservable {
     private boolean mIsDataLoading = false;
     private FamilyTrackDataSource mRepository;
 
-    public ObservableBoolean saveZoneCompleted = new ObservableBoolean(false);
+    public ObservableBoolean zoneDbOpCompleted = new ObservableBoolean(false);
     public ObservableBoolean redrawZones = new ObservableBoolean(false);
     public ObservableBoolean redrawPath = new ObservableBoolean(false);
     public ObservableBoolean redrawMarkers = new ObservableBoolean(false);
@@ -66,9 +67,14 @@ public class UserOnMapViewModel extends BaseObservable {
     public final ObservableInt zoneRadius = new ObservableInt(Zone.DEFAULT_RADIUS);
     public final ObservableDouble zoneCenterLatitude = new ObservableDouble();
     public final ObservableDouble zoneCenterLongitude = new ObservableDouble();
+    public final ObservableInt zoneEditMode = new ObservableInt(EM_NONE);
+
+    // text for snackbar
+    public ObservableField<String> snackbarText = new ObservableField<>();
+
 
     private UserListNavigator mNavigator;
-    private String mZoneKey;
+    private String mZoneKey = "";
 
     public UserOnMapViewModel(Context context,
                               String currentUserUuid,
@@ -91,7 +97,6 @@ public class UserOnMapViewModel extends BaseObservable {
     /**
      * Starts loading data according to group membership of the user (groupUuid)
      * ViewModel will populate the view if current user is member of any group
-     * @param user - User object representing current user
      */
     public void start() {
 
@@ -212,40 +217,40 @@ public class UserOnMapViewModel extends BaseObservable {
             zoneRadius.set(editZone.getRadius());
             zoneCenterLatitude.set(editZone.getLatitude());
             zoneCenterLongitude.set(editZone.getLongitude());
-            mZoneEditMode = EM_EDIT;
+            zoneEditMode.set(EM_EDIT);
         }
     }
 
     public void startNewZone() {
         zoneName.set("New Zone");
         zoneRadius.set(Zone.DEFAULT_RADIUS);
-        mZoneEditMode = EM_NEW;
-    }
-
-    public int getZoneEditMode() {
-        return mZoneEditMode;
+        zoneEditMode.set(EM_NEW);
     }
 
     public void saveZone() {
         Zone zone = new Zone(mZoneKey, zoneName.get(),
                 new LatLng(zoneCenterLatitude.get(), zoneCenterLongitude.get()),
                 zoneRadius.get());
-        if (mZoneEditMode == EM_NEW) {
+        if (zoneEditMode.get() == EM_NEW) {
             mRepository.createZone(mCurrentUser.getActiveMembership().getGroupUuid(),
                     zone, new FamilyTrackDataSource.CreateZoneCallback() {
                 @Override
                 public void onCreateZoneCompleted(FirebaseResult<String> result) {
+                    snackbarText.set("Zone created");
+                    zoneEditMode.set(EM_NONE);
                     updateZonesList();
-                    saveZoneCompleted.set(!saveZoneCompleted.get());
+                    zoneDbOpCompleted.set(!zoneDbOpCompleted.get());
                 }
             });
-        } else if (mZoneEditMode == EM_EDIT) {
+        } else if (zoneEditMode.get() == EM_EDIT) {
             mRepository.updateZone(mCurrentUser.getActiveMembership().getGroupUuid(),
                     zone, new FamilyTrackDataSource.UpdateZoneCallback() {
                         @Override
                         public void onUpdateZoneCompleted(FirebaseResult<String> result) {
+                            snackbarText.set("Zone updated");
+                            zoneEditMode.set(EM_NONE);
                             updateZonesList();
-                            saveZoneCompleted.set(!saveZoneCompleted.get());
+                            zoneDbOpCompleted.set(!zoneDbOpCompleted.get());
                         }
                     });
         } else {
@@ -253,6 +258,23 @@ public class UserOnMapViewModel extends BaseObservable {
         }
     }
 
+    public void removeZone() {
+        if (zoneEditMode.get() != EM_EDIT || mZoneKey.equals("")) {
+            Timber.v("Zone key is empty or mode != EM_EDIT. Unable to remove zone");
+            return;
+        }
+
+        mRepository.removeZone(mCurrentUser.getActiveMembership().getGroupUuid(), mZoneKey,
+                new FamilyTrackDataSource.RemoveZoneCallback() {
+                    @Override
+                    public void onRemoveZoneCompleted(FirebaseResult<String> result) {
+                        snackbarText.set("Zone removed");
+                        updateZonesList();
+                        zoneEditMode.set(EM_NONE);
+                        zoneDbOpCompleted.set(!zoneDbOpCompleted.get());
+                    }
+                });
+    }
     /**
      * Reads all group-defined zones into local list
      * and change value of ObeservableBoolean redrawZones
@@ -269,6 +291,6 @@ public class UserOnMapViewModel extends BaseObservable {
     }
 
     public void cancelZoneEdit() {
-        mZoneEditMode = EM_NONE;
+        zoneEditMode.set(EM_NONE);
     }
 }

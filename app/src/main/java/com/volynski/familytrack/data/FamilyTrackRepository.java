@@ -39,6 +39,7 @@ import timber.log.Timber;
 
 public class FamilyTrackRepository implements FamilyTrackDataSource {
     private static final String TAG = FamilyTrackRepository.class.getSimpleName();
+    public static final String RESULT_OK = "OK";
 
     // column list for the contacts provider
     /**
@@ -301,7 +302,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             if (isNew) {
                 contacts.put(key, user);
             } else {
-                contacts.replace(key, user);
+                contacts.remove(key);
+                contacts.put(key, user);
             }
         }
 
@@ -459,9 +461,9 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
                 // now prepare data for updates
                 // we should update user location in three nodes:
-                // /groups/<groupUuid>/members/<userUuid> - for active group only!
-                // /registered_users/<userUuid>
-                // /history/<userUuid>/<new location>
+                //   - /groups/<groupUuid>/members/<userUuid> - for active group only!
+                //   - /registered_users/<userUuid>
+                //   - /history/<userUuid>/<new location>
                 Map<String, Object> childUpdates = new HashMap<>();
                 childUpdates.put(FamilyTrackDbRefsHelper.userRef(userUuid) + User.FIELD_LAST_KNOWN_LOCATION, location);
                 if (user.getActiveMembership() != null) {
@@ -550,5 +552,25 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         if (callback != null) {
             callback.onUpdateZoneCompleted(new FirebaseResult<String>(zone.getUuid()));
         }
+    }
+
+    @Override
+    public void removeZone(@NonNull String groupUuid,
+                           @NonNull String zoneUuid,
+                           final RemoveZoneCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.zoneOfGroup(groupUuid, zoneUuid));
+        ref.removeValue(new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                if (callback != null) {
+                    if (databaseError != null) {
+                        callback.onRemoveZoneCompleted(new FirebaseResult<String>(databaseError));
+                    } else {
+                        callback.onRemoveZoneCompleted(new FirebaseResult<String>(RESULT_OK));
+                    }
+                }
+            }
+        });
     }
 }
