@@ -1,228 +1,115 @@
 package com.volynski.familytrack.views;
 
-import android.content.Intent;
+import android.app.Activity;
+
+import android.app.ActionBar;
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.view.ViewPager;
+import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.support.v4.widget.DrawerLayout;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.places.Places;
 import com.volynski.familytrack.R;
-import com.volynski.familytrack.StringKeys;
-import com.volynski.familytrack.adapters.TabViewPageAdapter;
-import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
-import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
-import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
-import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
-import com.volynski.familytrack.views.fragments.UserListFragment;
-import com.volynski.familytrack.views.fragments.UserOnMapFragment;
-import com.volynski.familytrack.views.navigators.UserListNavigator;
 
-import java.util.List;
-
-import timber.log.Timber;
-
-public class MainActivity
-        extends AppCompatActivity
-        implements UserListNavigator, GoogleApiClient.OnConnectionFailedListener {
-
-    private static final String USER_LIST_FRAGMENT = UserListFragment.class.getSimpleName();
-    private static final String USER_ON_MAP_FRAGMENT = UserOnMapFragment.class.getSimpleName();
-
-    private String mCurrentUserUuid = "";
-    private TabLayout mTabLayout;
-    private ViewPager mViewPager;
-    private InviteUsersDialogFragment mInviteUsersDialog;
-    private GoogleApiClient mGoogleApiClient;
-    private FloatingActionButton mFab;
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Intent intent = getIntent();
-        if (intent.hasExtra(StringKeys.USER_UUID_KEY)) {
-            mCurrentUserUuid = intent.getStringExtra(StringKeys.USER_UUID_KEY);
-        } else {
-            Timber.e("Current user uuid expected but not found in intent");
-            return;
-        }
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        mFab = (FloatingActionButton) findViewById(R.id.fab);
-        mFab.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                proceedFabButton();
-                //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                //        .setAction("Action", null).show();
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
             }
         });
-        
-        setupTabView();
-        initGoogleApiClient();
-    }
 
-    private void proceedFabButton() {
-        int tpos = mTabLayout.getSelectedTabPosition();
-        switch (tpos) {
-            case 0:
-                UserListFragment f0 =
-                        (UserListFragment)findFragmentByClassName(USER_LIST_FRAGMENT);
-                if (f0 != null) {
-                    f0.inviteUser();
-                }
-                break;
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
 
-            case 1:
-                UserOnMapFragment f1 =
-                        (UserOnMapFragment)findFragmentByClassName(USER_ON_MAP_FRAGMENT);
-                if (f1 != null) {
-                    f1.startAddingGeofence();
-                    hideFab();
-
-                }
-                break;
-        }
-
-    }
-
-    private void setupTabView() {
-        // Get the ViewPager and set it's PagerAdapter so that it can display items
-        mViewPager = (ViewPager) findViewById(R.id.viewpager_main);
-        mViewPager.setAdapter(new TabViewPageAdapter(mCurrentUserUuid,
-                getSupportFragmentManager(), this, this));
-
-        // Give the TabLayout the ViewPager
-        mTabLayout = (TabLayout) findViewById(R.id.tabs_main);
-        mTabLayout.setupWithViewPager(mViewPager);
-    }
-
-    /**
-     *
-     * @param fragmentClassName
-     * @return
-     */
-    // TODO Move this method to utils class
-    private Fragment findFragmentByClassName(String fragmentClassName) {
-        Fragment result = null;
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-
-        for (Fragment fragment : fragments) {
-            if (fragment.getClass().getSimpleName().equals(fragmentClassName)) {
-                result = fragment;
-                break;
-            }
-        }
-        return result;
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        int i = 0;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-
-    private void initGoogleApiClient() {
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addApi(Places.GEO_DATA_API)
-                    .addApi(Places.PLACE_DETECTION_API)
-                    .enableAutoManage(this, this)
-                    .build();
-            //mGoogleApiClient.connect();
-        }
-    }
-
-    // ---
-    // UserListNavigator implementation
-    // ---
-    @Override
-    public void openUserDetails(String userUuid) {
-        Intent intent = new Intent(this, UserDetailsActivity.class);
-        intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
-        startActivity(intent);
-    }
-
-    @Override
-    public void removeUser(String userUuid) {
-        Timber.v("Not implemented");
-    }
-
-    @Override
-    public void userClicked(User user, String uiContext) {
-        switch(uiContext) {
-            case UserOnMapViewModel.UI_CONTEXT :
-                UserOnMapFragment f1 =
-                        (UserOnMapFragment)findFragmentByClassName(UserOnMapFragment.class.getSimpleName());
-                if (f1 != null) {
-                    mTabLayout.getTabAt(1).select();
-                    f1.userClicked(user);
-                }
-                break;
-            case UserHistoryChartViewModel.UI_CONTEXT:
-                UserHistoryChartFragment f2 =
-                        (UserHistoryChartFragment)findFragmentByClassName(UserHistoryChartFragment.class.getSimpleName());
-                if (f2 != null) {
-                    mTabLayout.getTabAt(2).select();
-                    f2.userClicked(user);
-                }
-                break;
-            default:
-                Timber.v("Unexpected case=" + uiContext);
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 
     @Override
-    public void dismissInviteUsersDialog() {
-        if (mInviteUsersDialog != null)  {
-            mInviteUsersDialog.dismiss();
-            mInviteUsersDialog = null;
-        }
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
-    /**
-     * Replaces user list fragment
-     */
     @Override
-    public void inviteUsers() {
-        Timber.v("Invite mUsers");
-        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(this, mCurrentUserUuid, this);
-        mInviteUsersDialog.show(getSupportFragmentManager(), "aa");
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
-    public View getViewForSnackbar() {
-        return findViewById(R.id.coordinatorlayout_main);
-    }
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
 
-    public void hideFab() {
-        mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
-        mFab.setVisibility(View.INVISIBLE);
-    }
+        if (id == R.id.nav_camera) {
+            // Handle the camera action
+        } else if (id == R.id.nav_gallery) {
 
-    public void restoreFab() {
-        mFab.animate().scaleX(1).scaleY(1).rotation(180).setDuration(200).start();
-        mFab.setVisibility(View.VISIBLE);
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 }

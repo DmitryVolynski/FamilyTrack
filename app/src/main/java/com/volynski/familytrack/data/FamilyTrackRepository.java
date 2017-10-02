@@ -142,6 +142,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     @Override
     public void getUserByEmail(@NonNull String userEmail, @NonNull final GetUserByEmailCallback callback) {
         DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
+
         Query query = ref.orderByChild("email").equalTo(userEmail).limitToFirst(1);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
