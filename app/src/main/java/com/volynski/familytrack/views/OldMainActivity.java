@@ -18,6 +18,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.TabViewPageAdapter;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
@@ -79,7 +80,7 @@ public class OldMainActivity
         switch (tpos) {
             case 0:
                 UserListFragment f0 =
-                        (UserListFragment)findFragmentByClassName(USER_LIST_FRAGMENT);
+                        (UserListFragment)FragmentUtil.findFragmentByClassName(this, USER_LIST_FRAGMENT);
                 if (f0 != null) {
                     f0.inviteUser();
                 }
@@ -87,7 +88,7 @@ public class OldMainActivity
 
             case 1:
                 UserOnMapFragment f1 =
-                        (UserOnMapFragment)findFragmentByClassName(USER_ON_MAP_FRAGMENT);
+                        (UserOnMapFragment)FragmentUtil.findFragmentByClassName(this, USER_ON_MAP_FRAGMENT);
                 if (f1 != null) {
                     f1.startAddingGeofence();
                     hideFab();
@@ -109,24 +110,6 @@ public class OldMainActivity
         mTabLayout.setupWithViewPager(mViewPager);
     }
 
-    /**
-     *
-     * @param fragmentClassName
-     * @return
-     */
-    // TODO Move this method to utils class
-    private Fragment findFragmentByClassName(String fragmentClassName) {
-        Fragment result = null;
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-
-        for (Fragment fragment : fragments) {
-            if (fragment.getClass().getSimpleName().equals(fragmentClassName)) {
-                result = fragment;
-                break;
-            }
-        }
-        return result;
-    }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -175,7 +158,7 @@ public class OldMainActivity
         switch(uiContext) {
             case UserOnMapViewModel.UI_CONTEXT :
                 UserOnMapFragment f1 =
-                        (UserOnMapFragment)findFragmentByClassName(UserOnMapFragment.class.getSimpleName());
+                        (UserOnMapFragment) FragmentUtil.findFragmentByClassName(this, UserOnMapFragment.class.getSimpleName());
                 if (f1 != null) {
                     mTabLayout.getTabAt(1).select();
                     f1.userClicked(user);
@@ -183,7 +166,7 @@ public class OldMainActivity
                 break;
             case UserHistoryChartViewModel.UI_CONTEXT:
                 UserHistoryChartFragment f2 =
-                        (UserHistoryChartFragment)findFragmentByClassName(UserHistoryChartFragment.class.getSimpleName());
+                        (UserHistoryChartFragment)FragmentUtil.findFragmentByClassName(this, UserHistoryChartFragment.class.getSimpleName());
                 if (f2 != null) {
                     mTabLayout.getTabAt(2).select();
                     f2.userClicked(user);

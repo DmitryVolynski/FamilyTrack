@@ -45,7 +45,7 @@ import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.google.android.gms.location.places.GeoDataClient;
-import com.volynski.familytrack.views.OldMainActivity;
+import com.volynski.familytrack.views.MainActivity;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.HashMap;
@@ -108,7 +108,7 @@ public class UserOnMapFragment
         mSnackbarCallback = new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable observable, int i) {
-                SnackbarUtil.showSnackbar(((OldMainActivity)getActivity()).getViewForSnackbar(),
+                SnackbarUtil.showSnackbar(((MainActivity)getActivity()).getViewForSnackbar(),
                         mViewModel.snackbarText.get());
             }
         };
@@ -238,6 +238,13 @@ public class UserOnMapFragment
             }
         });
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        //getFragmentManager().beginTransaction().remove(mMapFragment).commit();
     }
 
     @Override
@@ -427,11 +434,11 @@ public class UserOnMapFragment
             mBinding.yyy.setVisibility(View.VISIBLE);
             mBinding.xxx.animate().translationX(-mBinding.xxx.getWidth()).setDuration(300).alpha(1).start();
             mBinding.yyy.animate().translationX(0).setDuration(300).start();
-            ((OldMainActivity)getActivity()).hideFab();
+            ((MainActivity)getActivity()).hideFab();
         } else {
             mBinding.xxx.animate().translationX(0).setDuration(300).alpha(1).start();
             mBinding.yyy.animate().translationX(mBinding.xxx.getWidth()).setDuration(300).start();
-            ((OldMainActivity)getActivity()).restoreFab();
+            ((MainActivity)getActivity()).restoreFab();
         }
     }
     private void switchToNormalMode() {

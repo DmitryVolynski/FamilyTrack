@@ -16,9 +16,8 @@
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <fragment
+            <FrameLayout
                 android:id="@+id/map_activitymain"
-                android:name="com.google.android.gms.maps.MapFragment"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginBottom="8dp"

@@ -332,6 +332,7 @@ public class LoginActivity extends AppCompatActivity implements
         //startJobService(userUuid);
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
+        intent.putExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, MainActivity.CONTENT_MAP);
         startActivity(intent);
     }
 

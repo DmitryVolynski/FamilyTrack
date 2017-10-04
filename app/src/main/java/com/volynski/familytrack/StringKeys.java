@@ -16,6 +16,8 @@ public class StringKeys {
 
     public static final String USER_UUID_KEY = "USER_UUID";
     public static final String SHARED_PREFS_CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
+
+    public static final String MAIN_ACTIVITY_MODE_KEY = "MAIN_ACTIVITY_MODE";
 }
 
 // TODO: Доделать детальную форму контакта с редактированием, сохранением и удалением
