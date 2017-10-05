@@ -27,6 +27,7 @@ import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.MainActivityViewModel;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
+import com.volynski.familytrack.views.fragments.UserMembershipFragment;
 import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
@@ -43,6 +44,7 @@ public class MainActivity
     public static final int CONTENT_MAP = 0;
     public static final int CONTENT_USER_LIST = 1;
     private static final int CONTENT_USER_HISTORY_CHART = 2;
+    private static final int CONTENT_MEMBERSHIP = 3;
 
     private String mCurrentUserUuid;
     private int mContentId;
@@ -61,16 +63,6 @@ public class MainActivity
     }
 
     private void setupFragment(int contentId) {
-        // remove previous fragment if it exists
-        /*
-        List<Fragment> fragments = getSupportFragmentManager().getFragments();
-        if (fragments != null && fragments.size() > 0) {
-            getSupportFragmentManager()
-                    .beginTransaction()
-                    .remove(fragments.get(0))
-                    .commit();
-        }
-        */
         Fragment newFragment = null;
         switch (contentId) {
             case CONTENT_MAP:
@@ -78,6 +70,12 @@ public class MainActivity
                 break;
             case CONTENT_USER_LIST:
                 newFragment = UserListFragment.newInstance(this, mCurrentUserUuid, this);
+                break;
+            case CONTENT_USER_HISTORY_CHART:
+                newFragment = UserHistoryChartFragment.newInstance(this, mCurrentUserUuid, this);
+                break;
+            case CONTENT_MEMBERSHIP:
+                newFragment = UserMembershipFragment.newInstance(this, mCurrentUserUuid, this);
                 break;
             default:
                 Timber.v("Unsupported content id=" + contentId);
@@ -276,8 +274,12 @@ public class MainActivity
                     setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_chart):
+                    mContentId = CONTENT_USER_HISTORY_CHART;
+                    setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_membership):
+                    mContentId = CONTENT_MEMBERSHIP;
+                    setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_settings):
                     break;

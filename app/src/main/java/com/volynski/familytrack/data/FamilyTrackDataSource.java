@@ -53,6 +53,15 @@ public interface FamilyTrackDataSource {
     void getUserByPhone(@NonNull String userPhone,
                         @NonNull GetUserByPhoneCallback callback);
 
+    interface GetUserAvailableGroupsCallback { void onGetUserAvailableGroupsCompleted(FirebaseResult<>)}
+    /**
+     * Returns a list of all available groups for user
+     * @param userUuid - user key
+     * @param callback - callback to return result
+     */
+    void getUserAvailableGroups(@NonNull String userUuid,
+                       @NonNull GetUserAvailableGroupsCallback callback);
+
     interface GetGroupsAvailableToJoinCallback {void onGetGroupsAvailableToJoinCompleted(FirebaseResult<List<Group>> result); }
 
     /**

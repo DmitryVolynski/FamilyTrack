@@ -173,7 +173,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 User user = null;
                 if (dataSnapshot.getChildrenCount() > 0) {
                     user = FirebaseUtil.getUserFromSnapshot(dataSnapshot.getChildren().iterator().next());
-                };
+                }
                 callback.onGetUserByPhoneCompleted(new FirebaseResult<User>(user));
             }
 
