@@ -34,8 +34,6 @@ public class Group {
         this.mName = mName;
     }
 
-
-
     public Group(String name) {
         this.mName = name;
         mMembers = new HashMap<>();

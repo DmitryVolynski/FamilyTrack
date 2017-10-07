@@ -8,12 +8,13 @@
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserMembershipViewModel"/>
     </data>
+    <!--app:viewModels="@{viewmodel.viewModels}"-->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview_fragmentusermembership"
-            app:viewModels="@{viewmodel.viewModels}"
+            app:groupListItemViewModels="@{viewmodel.viewModels}"
             android:layout_height="match_parent"
             android:layout_width="match_parent">
         </android.support.v7.widget.RecyclerView>

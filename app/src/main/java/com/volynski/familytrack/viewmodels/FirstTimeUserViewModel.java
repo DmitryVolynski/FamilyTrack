@@ -81,7 +81,7 @@ public class FirstTimeUserViewModel extends BaseObservable {
         if (data.getData() != null) {
             availableGroups.clear();
             for (Group group : data.getData()) {
-                availableGroups.add(new GroupListItemViewModel(mContext, group));
+                availableGroups.add(new GroupListItemViewModel(mContext, group, false));
             }
         }
     }
@@ -144,7 +144,7 @@ public class FirstTimeUserViewModel extends BaseObservable {
             return;
         }
 
-        String groupUuid = viewModel.getGroup().getGroupUuid();
+        String groupUuid = viewModel.group.get().getGroupUuid();
         mRepository.addUserToGroup(userUuid, groupUuid, new FamilyTrackDataSource.AddUserToGroupCallback() {
             @Override
             public void onAddUserToGroupCompleted(FirebaseResult<String> result) {

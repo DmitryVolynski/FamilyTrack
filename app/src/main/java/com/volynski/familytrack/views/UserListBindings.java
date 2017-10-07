@@ -24,7 +24,9 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.viewmodels.GroupListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
 
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
@@ -41,6 +43,27 @@ public class UserListBindings {
                                      List<UserListItemViewModel> viewModels) {
         RecyclerViewListAdapter<UserListItemViewModel> adapter =
                 (RecyclerViewListAdapter<UserListItemViewModel>) recyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setViewModels(viewModels);
+        }
+    }
+
+    @BindingAdapter("app:usersOfGroup")
+    public static void setUsersOfGroup(RecyclerView recyclerView,
+                                       Map<String, User> users) {
+        RecyclerViewListAdapter<User> adapter =
+                (RecyclerViewListAdapter<User>) recyclerView.getAdapter();
+        if (adapter != null) {
+            List<User> list = new ArrayList<User>(users.values());
+            adapter.setViewModels(list);
+        }
+    }
+
+    @BindingAdapter("app:groupListItemViewModels")
+    public static void setGroupListItemViewModels(RecyclerView recyclerView,
+                                     List<GroupListItemViewModel> viewModels) {
+        RecyclerViewListAdapter<GroupListItemViewModel> adapter =
+                (RecyclerViewListAdapter<GroupListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
             adapter.setViewModels(viewModels);
         }

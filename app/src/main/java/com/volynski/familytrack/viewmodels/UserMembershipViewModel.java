@@ -8,16 +8,12 @@ import android.databinding.ObservableList;
 import android.util.Log;
 import android.view.View;
 
-import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
-import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
@@ -40,10 +36,7 @@ public class UserMembershipViewModel
     private UserListNavigator mNavigator;
 
     public final ObservableBoolean showDialog = new ObservableBoolean(false);
-    public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
-
-    private List<User> mUsers = new ArrayList<>();
-
+    public final ObservableList<GroupListItemViewModel> viewModels = new ObservableArrayList<>();
 
     public UserMembershipViewModel(Context context,
                              String currentUserUuid,
@@ -85,7 +78,7 @@ public class UserMembershipViewModel
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() != null) {
                     mCurrentUser = result.getData();
-                    loadUsersList();
+                    createViewModels();
                 } else {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
                 }
@@ -96,32 +89,22 @@ public class UserMembershipViewModel
     /**
      *
      */
-    private void loadUsersList() {
-        if (mCurrentUser.getActiveMembership() != null) {
-            mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(),
-                    new FamilyTrackDataSource.GetGroupByUuidCallback() {
-                        @Override
-                        public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
-                            populateUserListFromDbResult(result);
-                            mIsDataLoading = false;
-                        }
-                    });
-        }
-    }
+    private void createViewModels() {
+        mRepository.getUserGroups(mCurrentUser.getUserUuid(), new FamilyTrackDataSource.GetUserGroupsCallback() {
+            @Override
+            public void onGetUserGroupsCompleted(FirebaseResult<List<Group>> result) {
+                viewModels.clear();
+                String activeGroupUuid = (mCurrentUser.getActiveMembership() != null ?
+                    mCurrentUser.getActiveMembership().getGroupUuid() : "");
 
-    /**
-     *
-     * @param result
-     */
-    private void populateUserListFromDbResult(FirebaseResult<Group> result) {
-        mUsers.clear();
-        viewModels.clear();
-        if (result.getData() != null && result.getData().getMembers() != null) {
-            for (User user : result.getData().getMembers().values()) {
-                viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
-                mUsers.add(user);
+                if (result.getData() != null) {
+                    for (Group group : result.getData()) {
+                        viewModels.add(new GroupListItemViewModel(mContext, group,
+                                group.getGroupUuid().equals(activeGroupUuid)));
+                    }
+                }
             }
-        }
+        });
     }
 
     public void setNavigator(UserListNavigator mNavigator) {

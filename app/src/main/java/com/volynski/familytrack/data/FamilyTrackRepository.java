@@ -26,10 +26,12 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import timber.log.Timber;
 
@@ -389,6 +391,49 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             }
         }
         return result;
+    }
+
+    @Override
+    public void getUserGroups(@NonNull String userUuid, @NonNull final GetUserGroupsCallback callback) {
+        final List<Group> groups = new ArrayList<>();
+
+        getUserByUuid(userUuid, new GetUserByUuidCallback() {
+            @Override
+            public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                if (result.getException() != null) {
+                    callback.onGetUserGroupsCompleted(new FirebaseResult<List<Group>>(result.getException()));
+                }
+                final List<Group> groups = new ArrayList<Group>();
+
+                if (result.getData() != null && result.getData().getMemberships() != null) {
+                    Timber.v("Starting for, number of groups=" + result.getData().getMemberships().size());
+
+                    final CountDownLatch doneSignal =
+                            new CountDownLatch(result.getData().getMemberships().size());
+
+                    for (String key : result.getData().getMemberships().keySet()) {
+                        Membership membership = result.getData().getMemberships().get(key);
+                        // now read data of each group in list
+                        Timber.v("Call getGroupByUuid for " + membership.getGroupUuid());
+                        getGroupByUuid(membership.getGroupUuid(), new GetGroupByUuidCallback() {
+                            @Override
+                            public synchronized void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                                Timber.v("onGetGroupByUuidCompleted");
+                                if (result.getData() != null) {
+                                    groups.add(result.getData());
+                                }
+                                doneSignal.countDown();
+                                if (doneSignal.getCount() == 0) {
+                                    // all requests completed, should call callback
+                                    groups.add(new Group("fjhgfkjgf", "Fake group"));
+                                    callback.onGetUserGroupsCompleted(new FirebaseResult<List<Group>>(groups));
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        });
     }
 
     @Override

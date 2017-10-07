@@ -19,8 +19,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginLeft="16dp"
-            android:layout_marginTop="20dp"
-            app:imageUrl="@{viewmodel.user.photoUrl}"/>
+            android:layout_marginTop="20dp"/>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -34,8 +33,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
-                tools:text="Dmitry Volynski"
-                android:text="@{viewmodel.user.givenName}" />
+                tools:text="Dmitry Volynski" />
 
             <TextView
                 android:layout_width="wrap_content"

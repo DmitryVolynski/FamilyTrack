@@ -3,6 +3,7 @@ package com.volynski.familytrack.viewmodels;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -25,14 +26,14 @@ public class GroupListItemViewModel extends BaseObservable
         implements PopupMenuListener, RecyclerViewListAdapterOnClickHandler {
 
     private Context mContext;
-    private Group mGroup;
-    //private UserListNavigator mNavigator;
+    public final ObservableField<Group> group = new ObservableField<>();
     public final ObservableBoolean checked = new ObservableBoolean(false);
+    public final ObservableBoolean isActive = new ObservableBoolean(false);
 
-    public GroupListItemViewModel(Context context, Group group /*GroupListNavigator navigator*/) {
+    public GroupListItemViewModel(Context context, Group group, boolean isActive) {
         mContext = context;
-        mGroup = group;
-        //mNavigator = navigator;
+        this.group.set(group);
+        this.isActive.set(isActive);
     }
 
     @Override
@@ -62,7 +63,7 @@ public class GroupListItemViewModel extends BaseObservable
             // Here I did silent navigator assignment, this is not good for common cases
             //UserListNavigator navigator = (UserListNavigator)context;
             for (Group group : groups) {
-                result.add(new GroupListItemViewModel(context, group /*navigator*/));
+                result.add(new GroupListItemViewModel(context, group, false));
             }
         }
         return result;
@@ -74,11 +75,4 @@ public class GroupListItemViewModel extends BaseObservable
     }
     */
 
-    public Group getGroup() {
-        return mGroup;
-    }
-
-    public void setGroup(Group mGroup) {
-        this.mGroup = mGroup;
-    }
 }

@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +24,7 @@ import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentUserHistoryChartBinding;
+import com.volynski.familytrack.databinding.FragmentUserMembershipBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
@@ -40,7 +42,7 @@ public class UserMembershipFragment extends Fragment {
     private String mCurrentUserUuid;
     private LinearLayoutManager mLayoutManager;
 
-    FragmentUserHistoryChartBinding mBinding;
+    FragmentUserMembershipBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
 
     public static UserMembershipFragment newInstance(Context context,
@@ -79,21 +81,20 @@ public class UserMembershipFragment extends Fragment {
 
         setupCustomListeners();
 
-        /*
-        mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
-        mBinding.recyclerviewFrguserhistorychart.setLayoutManager(mLayoutManager);
+        mLayoutManager = new GridLayoutManager(this.getContext(), 1);
+        mBinding.recyclerviewFragmentusermembership.setLayoutManager(mLayoutManager);
 
         DividerItemDecoration dividerItemDecoration =
-                new DividerItemDecoration(getContext(), mLayoutManager.getOrientation());
+                new DividerItemDecoration(mBinding.recyclerviewFragmentusermembership.getContext(),
+                        mLayoutManager.getOrientation());
 
-        mBinding.recyclerviewFrguserhistorychart.addItemDecoration(dividerItemDecoration);
+        mBinding.recyclerviewFragmentusermembership.addItemDecoration(dividerItemDecoration);
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
-                R.layout.user_horizontal_list_item, BR.viewmodel);
+                R.layout.group_list_item, BR.viewmodel);
+        //mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
 
-        mBinding.recyclerviewFrguserhistorychart.setAdapter(mAdapter);
+        mBinding.recyclerviewFragmentusermembership.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
-        */
-
 
         return mBinding.getRoot();
     }
