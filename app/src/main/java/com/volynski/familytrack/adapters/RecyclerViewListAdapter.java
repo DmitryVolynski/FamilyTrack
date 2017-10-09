@@ -31,6 +31,8 @@ public class RecyclerViewListAdapter<T>
     private int mMenuId = -1;
     private int mViewToShowPopupId = -1;
     private boolean mPopupMenuEnabled = false;
+    private boolean mIsSingleLayout = true;
+    private ItemTypesResolver mItemTypesResolver;
 
     /**
      *
@@ -45,13 +47,29 @@ public class RecyclerViewListAdapter<T>
         mRowLayoutId = rowLayoutId;
         mBindingId = bindingId;
         mContext = context;
+        mItemTypesResolver = new SimpleItemType(rowLayoutId);
+    }
+
+    public RecyclerViewListAdapter(Context context, List<T> viewModels,
+                                   ItemTypesResolver itemTypesResolver, int bindingId) {
+        mViewModels = viewModels;
+        mBindingId = bindingId;
+        mContext = context;
+        mItemTypesResolver = itemTypesResolver;
+        mIsSingleLayout = false;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return mItemTypesResolver.getItemViewType(mViewModels.get(position));
     }
 
     @Override
     public RecyclerViewListAdapterViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
+
         ViewDataBinding binding = DataBindingUtil.inflate(layoutInflater,
-                mRowLayoutId, parent, false);
+                mItemTypesResolver.getItemViewLayoutId(viewType), parent, false);
 
         // set the view's size, margins, paddings and layout parameters
         return new RecyclerViewListAdapterViewHolder(binding);

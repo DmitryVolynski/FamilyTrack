@@ -29,8 +29,7 @@ import timber.log.Timber;
  */
 
 public class UserListViewModel
-        extends BaseObservable
-        implements View.OnClickListener {
+        extends BaseObservable {
 
     public final static String UI_CONTEXT = UserListViewModel.class.getSimpleName();
     private final static String TAG = UserListViewModel.class.getSimpleName();
@@ -69,6 +68,7 @@ public class UserListViewModel
         }
     }
 
+    /*
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -84,6 +84,7 @@ public class UserListViewModel
         }
         refreshList();
     }
+*/
 
     /**
      * Reads list of mUsers from firebase and refresh it in RecyclerView
@@ -112,6 +113,7 @@ public class UserListViewModel
         showDialog.set(true);
     }
 
+/*
     public void createNewGroup(String groupName) {
         Timber.v("Create group: " + groupName);
         User currentUser = SharedPrefsUtil.getCurrentUser(mContext);
@@ -119,6 +121,7 @@ public class UserListViewModel
         FamilyTrackDataSource dataSource = new FamilyTrackRepository(null, mContext);
         dataSource.createGroup(new Group(groupName), currentUser.getUserUuid(), null);
     }
+*/
 
     /**
      * Starts loading data according to group membership of the user

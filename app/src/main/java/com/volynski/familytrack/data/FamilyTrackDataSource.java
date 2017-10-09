@@ -55,13 +55,18 @@ public interface FamilyTrackDataSource {
 
     interface GetUserGroupsCallback { void onGetUserGroupsCompleted(FirebaseResult<List<Group>> result); }
     /**
-     * Returns a list of all available groups for user - current group + all groups that user is invited in
+     * Returns a list of all available groups for user: current + all groups that user is invited in
      * @param userUuid - user key
      * @param callback - callback to return result
      */
     void getUserGroups(@NonNull String userUuid,
                        @NonNull GetUserGroupsCallback callback);
 
+    interface ChangeUserMembershipCallback { void onChangeUserMembershipCompleted(FirebaseResult<String> result); }
+    void changeUserMembership(@NonNull String userUuid,
+                              @NonNull String fromGroupUuid,
+                              @NonNull String toGroupUuid,
+                              @NonNull ChangeUserMembershipCallback callback);
     interface GetGroupsAvailableToJoinCallback {void onGetGroupsAvailableToJoinCompleted(FirebaseResult<List<Group>> result); }
 
     /**

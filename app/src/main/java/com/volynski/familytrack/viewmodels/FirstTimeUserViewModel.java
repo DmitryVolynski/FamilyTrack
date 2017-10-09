@@ -43,7 +43,7 @@ public class FirstTimeUserViewModel extends BaseObservable {
     public final ObservableBoolean createNewGroupOption = new ObservableBoolean(true);
     public final ObservableBoolean joinExistingGroupOption = new ObservableBoolean(false);
     public final ObservableField<String> newGroupName = new ObservableField<>("My group");
-    public final ObservableList<GroupListItemViewModel> availableGroups = new ObservableArrayList<>();
+    public final ObservableList<MembershipListItemViewModel> availableGroups = new ObservableArrayList<>();
     private int mSelectedGroupIndex = -1;
 
     public FirstTimeUserViewModel(Context context,
@@ -78,12 +78,15 @@ public class FirstTimeUserViewModel extends BaseObservable {
     }
 
     private void populateAvailableGroups(FirebaseResult<List<Group>> data) {
+        // TODO: необходимы переделки кода
+        /*
         if (data.getData() != null) {
             availableGroups.clear();
             for (Group group : data.getData()) {
-                availableGroups.add(new GroupListItemViewModel(mContext, group, false));
+                availableGroups.add(new MembershipListItemViewModel(mContext, group, false));
             }
         }
+        */
     }
 
 
@@ -138,13 +141,13 @@ public class FirstTimeUserViewModel extends BaseObservable {
             return;
         }
 
-        GroupListItemViewModel viewModel = availableGroups.get(mSelectedGroupIndex);
+        MembershipListItemViewModel viewModel = availableGroups.get(mSelectedGroupIndex);
         if (viewModel == null) {
-            Timber.e("GroupListItemViewModel viewModel unexpectedly null on index " + mSelectedGroupIndex);
+            Timber.e("MembershipListItemViewModel viewModel unexpectedly null on index " + mSelectedGroupIndex);
             return;
         }
 
-        String groupUuid = viewModel.group.get().getGroupUuid();
+        String groupUuid = viewModel.item.get().getGroupUuid();
         mRepository.addUserToGroup(userUuid, groupUuid, new FamilyTrackDataSource.AddUserToGroupCallback() {
             @Override
             public void onAddUserToGroupCompleted(FirebaseResult<String> result) {
@@ -187,7 +190,7 @@ public class FirstTimeUserViewModel extends BaseObservable {
 
     public void selectGroup(int itemId) {
         int i = 0;
-        for (GroupListItemViewModel viewModel : availableGroups) {
+        for (MembershipListItemViewModel viewModel : availableGroups) {
             if (i++ == itemId) {
                 viewModel.checked.set(true);
                 mSelectedGroupIndex = itemId;

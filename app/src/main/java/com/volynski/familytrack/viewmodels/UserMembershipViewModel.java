@@ -9,9 +9,12 @@ import android.util.Log;
 import android.view.View;
 
 import com.volynski.familytrack.data.FamilyTrackDataSource;
+import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
+import com.volynski.familytrack.data.models.MembershipListItem;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.List;
@@ -35,8 +38,8 @@ public class UserMembershipViewModel
     private FamilyTrackDataSource mRepository;
     private UserListNavigator mNavigator;
 
-    public final ObservableBoolean showDialog = new ObservableBoolean(false);
-    public final ObservableList<GroupListItemViewModel> viewModels = new ObservableArrayList<>();
+    public final ObservableBoolean showLeaveGroupWarningDialog = new ObservableBoolean(false);
+    public final ObservableList<MembershipListItemViewModel> viewModels = new ObservableArrayList<>();
 
     public UserMembershipViewModel(Context context,
                              String currentUserUuid,
@@ -99,8 +102,13 @@ public class UserMembershipViewModel
 
                 if (result.getData() != null) {
                     for (Group group : result.getData()) {
-                        viewModels.add(new GroupListItemViewModel(mContext, group,
-                                group.getGroupUuid().equals(activeGroupUuid)));
+                        List<MembershipListItem> newList = MembershipListItem.createListFromGroup(group);
+                        for (MembershipListItem item : newList) {
+                            boolean isActive = (group.getGroupUuid().equals(activeGroupUuid) &&
+                                item.getType() == MembershipListItem.TYPE_GROUP);
+                            viewModels.add(new MembershipListItemViewModel(mContext, item, isActive,
+                                    UserMembershipViewModel.this));
+                        }
                     }
                 }
             }
@@ -109,5 +117,55 @@ public class UserMembershipViewModel
 
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
+    }
+
+    /**
+     * Fired when user clicked on 'LEAVE' or 'JOIN' button in appropriate group
+     * User could leave existing group|join another one if
+     *      - he is just a member of group (not admin
+     *      - he is admin but there is at least one more admin in the group that user is going to leave
+     * User couldn't leave current group if he is one and only admin
+     * @param membershipListItemViewModel - viewmodel of appropriate group
+     */
+    public void startChangeMembership(final MembershipListItemViewModel membershipListItemViewModel) {
+        // check the user if he is one and only admin in current group
+        if (mCurrentUser.getActiveMembership() == null) {
+            Timber.e("Unexpected error. User " + mCurrentUser.getUserUuid() +
+                    " should have active group to perform 'startChangeMembership' action");
+            return;
+        }
+        final String activeGroupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
+        mRepository.getGroupByUuid(activeGroupUuid,
+            new FamilyTrackDataSource.GetGroupByUuidCallback() {
+                @Override
+                public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                    Group group = result.getData();
+                    if (group == null) {
+                        Timber.e("Unexpected error. Group " + activeGroupUuid + " not found");
+                        return;
+                    }
+                    if (group.getAdminsCount(mCurrentUser.getUserUuid()) == 0) {
+                        // there is only one admin in group
+                        // can't leave current group or create new one
+                        showLeaveGroupWarningDialog.set(!showLeaveGroupWarningDialog.get());
+                    }
+                    String fromGroupUuid = activeGroupUuid;
+                    String toGroupUuid = (membershipListItemViewModel.isActive.get() ?
+                            "" : membershipListItemViewModel.item.get().getGroupUuid());
+                    //mRepository.changeUserMembership(mCurrentUser.getUserUuid(), fromGroupUuid, toGroupUuid)
+                }
+            });
+    }
+
+    public void createNewGroup(String groupName) {
+        Timber.v("Create group: " + groupName);
+
+        mRepository.createGroup(new Group(groupName), mCurrentUserUuid,
+                new FamilyTrackDataSource.CreateGroupCallback() {
+                    @Override
+                    public void onCreateGroupCompleted(FirebaseResult<Group> result) {
+                        //if ()
+                    }
+                });
     }
 }

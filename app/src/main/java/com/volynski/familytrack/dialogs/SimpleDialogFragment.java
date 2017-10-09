@@ -21,6 +21,17 @@ public class SimpleDialogFragment extends DialogFragment {
     private DialogInterface.OnClickListener mPbClickListener;
     private DialogInterface.OnClickListener mNbClickListener;
 
+
+    public void setParms(String title, String message, String positiveButtonTitle,
+                         DialogInterface.OnClickListener pbClickListener) {
+        mTitle = title;
+        mMessage = message;
+        mPositiveButtonTitle = positiveButtonTitle;
+        mNegativeButtonTitle = null;
+        mPbClickListener = pbClickListener;
+        mNbClickListener = null;
+    }
+
     public void setParms(String title, String message, String positiveButtonTitle, String negativeButtonTitle,
                          DialogInterface.OnClickListener pbClickListener, DialogInterface.OnClickListener nbClickListener) {
         mTitle = title;
@@ -34,10 +45,17 @@ public class SimpleDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setMessage(mMessage)
-                .setTitle(mTitle)
-                .setPositiveButton(mPositiveButtonTitle, mPbClickListener)
-                .setNegativeButton(mNegativeButtonTitle, mNbClickListener);
+
+        if (mPositiveButtonTitle != null && mNegativeButtonTitle != null) {
+            builder.setMessage(mMessage)
+                    .setTitle(mTitle)
+                    .setPositiveButton(mPositiveButtonTitle, mPbClickListener)
+                    .setNegativeButton(mNegativeButtonTitle, mNbClickListener);
+        } else {
+            builder.setMessage(mMessage)
+                    .setTitle(mTitle)
+                    .setPositiveButton(mPositiveButtonTitle, mPbClickListener);
+        }
         return builder.create();
     }
 

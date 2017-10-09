@@ -6,7 +6,7 @@
     <data>
         <variable
             name="viewmodel"
-            type="com.volynski.familytrack.viewmodels.GroupListItemViewModel"/>
+            type="com.volynski.familytrack.viewmodels.MembershipListItemViewModel"/>
     </data>
 
     <LinearLayout
@@ -16,35 +16,31 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:background="@{viewmodel.isActive ? @color/colorAccent : @android:color/transparent}"
+            android:background="@{viewmodel.isActive ? @drawable/shape_active_group : @drawable/shape_normal_group}"
             android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="16dp"
-                android:src="@mipmap/ic_group" />
 
             <TextView
                 android:id="@+id/textView7"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginStart="72dp"
-                android:text="@{viewmodel.group.name}"
+                android:layout_marginStart="16dp"
+                android:text="@{viewmodel.item.groupName}"
                 android:textColor="@android:color/black"
                 android:textSize="16sp"
                 tools:text="My family" />
 
+            <Button
+                android:onClick="@{()->viewmodel.changeMembership()}"
+                android:id="@+id/button_grouplistitem"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end|center_vertical"
+                android:layout_marginEnd="16dp"
+                android:text='@{viewmodel.isActive ? "leave" : "join"}'/>
+
             <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
         </FrameLayout>
-        <android.support.v7.widget.RecyclerView
-            app:usersOfGroup="@{viewmodel.group.members}"
-            android:id="@+id/recyclerview_frggrouplistitem"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-        </android.support.v7.widget.RecyclerView>
     </LinearLayout>
 </layout>

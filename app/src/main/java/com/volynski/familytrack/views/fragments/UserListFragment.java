@@ -88,16 +88,19 @@ public class UserListFragment
 
         mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
+        /*
         mViewModel.showDialog.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 UserListFragment.this.startNewGroupDialog();
             }
         });
+        */
 
         return mBinding.getRoot();
     }
 
+/*
     private void startNewGroupDialog() {
         // get a reference to the already created main layout
 
@@ -134,6 +137,7 @@ public class UserListFragment
                     }
                 });
     }
+*/
 
     public void setViewModel(UserListViewModel mViewModel) {
         this.mViewModel = mViewModel;

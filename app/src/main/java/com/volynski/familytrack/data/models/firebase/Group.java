@@ -73,6 +73,23 @@ public class Group {
         return (mMembers == null ? 0 : mMembers.size());
     }
 
+    @Exclude
+    public int getAdminsCount(String excludedUuid) {
+        int count = 0;
+        if (mMembers != null) {
+            for (String key : mMembers.keySet()) {
+                User user = mMembers.get(key);
+                if (user.getActiveMembership() != null &&
+                        user.getActiveMembership().getStatusId() == Membership.USER_JOINED &&
+                        user.getActiveMembership().getRoleId() == Membership.ROLE_ADMIN &&
+                        !user.getUserUuid().equals(excludedUuid)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
     public Map<String, Zone> getGeofences() {
         return mGeofences;
     }

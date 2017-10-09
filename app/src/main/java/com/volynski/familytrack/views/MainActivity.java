@@ -213,7 +213,14 @@ public class MainActivity
                 if (f1 != null) {
                     f1.startAddingGeofence();
                     hideFab();
-
+                }
+                break;
+            case CONTENT_MEMBERSHIP:
+                UserMembershipFragment f2 =
+                        (UserMembershipFragment) FragmentUtil
+                        .findFragmentByClassName(this, UserMembershipFragment.class.getSimpleName());
+                if (f2 != null) {
+                    f2.createNewGroup();
                 }
                 break;
             default:

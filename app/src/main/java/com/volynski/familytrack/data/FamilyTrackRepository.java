@@ -425,7 +425,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                                 doneSignal.countDown();
                                 if (doneSignal.getCount() == 0) {
                                     // all requests completed, should call callback
-                                    groups.add(new Group("fjhgfkjgf", "Fake group"));
+                                    //groups.add(new Group("fjhgfkjgf", "Fake group"));
                                     callback.onGetUserGroupsCompleted(new FirebaseResult<List<Group>>(groups));
                                 }
                             }
@@ -434,6 +434,16 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 }
             }
         });
+    }
+
+    @Override
+    public void changeUserMembership(@NonNull String userUuid,
+                                     @NonNull String fromGroupUuid,
+                                     @NonNull String toGroupUuid,
+                                     @NonNull ChangeUserMembershipCallback callback) {
+        // groups/-KtrkQ0jWp4m3dQg43V9/members/-KtrkPuXJZs21vF6mMzS/memberships/-KtrkQ0jWp4m3dQg43V9
+        // registered_users/-Ku_qk0QFapzaREjRYCZ/memberships/-KtrkQ0jWp4m3dQg43V9
+
     }
 
     @Override

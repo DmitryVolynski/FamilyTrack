@@ -6,28 +6,19 @@ import android.databinding.InverseBindingListener;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.picasso.Picasso;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
-import com.volynski.familytrack.data.models.firebase.Group;
-import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.viewmodels.GroupListItemViewModel;
+import com.volynski.familytrack.viewmodels.MembershipListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Observable;
 
 import jp.wasabeef.picasso.transformations.CropCircleTransformation;
 
@@ -61,18 +52,18 @@ public class UserListBindings {
 
     @BindingAdapter("app:groupListItemViewModels")
     public static void setGroupListItemViewModels(RecyclerView recyclerView,
-                                     List<GroupListItemViewModel> viewModels) {
-        RecyclerViewListAdapter<GroupListItemViewModel> adapter =
-                (RecyclerViewListAdapter<GroupListItemViewModel>) recyclerView.getAdapter();
+                                     List<MembershipListItemViewModel> viewModels) {
+        RecyclerViewListAdapter<MembershipListItemViewModel> adapter =
+                (RecyclerViewListAdapter<MembershipListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
             adapter.setViewModels(viewModels);
         }
     }
 
     @BindingAdapter("app:groups")
-    public static void setGroups(RecyclerView recyclerView, List<GroupListItemViewModel> viewModels) {
-        RecyclerViewListAdapter<GroupListItemViewModel>
-                adapter = (RecyclerViewListAdapter<GroupListItemViewModel>) recyclerView.getAdapter();
+    public static void setGroups(RecyclerView recyclerView, List<MembershipListItemViewModel> viewModels) {
+        RecyclerViewListAdapter<MembershipListItemViewModel>
+                adapter = (RecyclerViewListAdapter<MembershipListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
             adapter.setViewModels(viewModels);
         }

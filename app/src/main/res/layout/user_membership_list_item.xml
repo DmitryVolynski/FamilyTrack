@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.volynski.familytrack.viewmodels.MembershipListItemViewModel"/>
+        <!--type="com.volynski.familytrack.viewmodels.UserListItemViewModel" /-->
+    </data>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+        <LinearLayout
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_gravity="center"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="4dp"
+                app:srcCompat="@mipmap/ic_no_user_photo" />
+
+            <TextView
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:text="@{viewmodel.item.givenName + ' ' + viewmodel.item.familyName}"
+                tools:text="Dmitry Volynski" />
+
+            <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
+        </LinearLayout>
+    </FrameLayout>
+
+</layout>

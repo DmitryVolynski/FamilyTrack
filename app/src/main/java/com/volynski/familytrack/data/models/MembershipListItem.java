@@ -3,6 +3,9 @@ package com.volynski.familytrack.data.models;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by DmitryVolynski on 08.10.2017.
  */
@@ -117,5 +120,16 @@ public class MembershipListItem {
 
     public void setType(int mType) {
         this.mType = mType;
+    }
+
+    public static List<MembershipListItem> createListFromGroup(Group group) {
+        List<MembershipListItem> result = new ArrayList<>();
+        result.add(new MembershipListItem(group));
+        if (group.getMembers() != null) {
+            for (String key : group.getMembers().keySet()) {
+                result.add(new MembershipListItem(group.getMembers().get(key)));
+            }
+        }
+        return result;
     }
 }
