@@ -19,16 +19,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.data.models.firebase.Group;
-import com.volynski.familytrack.data.models.firebase.HistoryItem;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -41,7 +38,6 @@ import timber.log.Timber;
 
 public class FamilyTrackRepository implements FamilyTrackDataSource {
     private static final String TAG = FamilyTrackRepository.class.getSimpleName();
-    public static final String RESULT_OK = "OK";
 
     // column list for the contacts provider
     /**
@@ -188,46 +184,61 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     @Override
     public void createGroup(@NonNull final Group group, String adminUuid, final CreateGroupCallback callback) {
+        // что необходимо сделать при создании новой группы
+        //      - исключить пользователя из текущей активной группы (заменить статус на USER_DEPARTED)
+        //      - создать новую группу
+        //      - включить туда пользователя в роли ROLE_ADMIN и статусе USER_JOINED
+        // Эти изменения делаются в двух местах -
+        //      1. groups/<groupUuid>/members/<userUuid>/memberships/<groupUuid>/statusId <- USER_DEPARTED
+        //      2. registered_users/<userUuid>/memberships/<groupUuid>/statusId <- USER_DEPARTED
+        //      3. то же самое для новой группы, но со статусом USER_JOINED - в тех же двух местах
         getUserByUuid(adminUuid, new GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() != null) {
-                    DatabaseReference ref = getFirebaseConnection().getReference("groups");
-                    String groupKey = ref.push().getKey();
-                    group.setGroupUuid(groupKey);
+                    User currentUser = result.getData();
+                    String currentGroupUuid = currentUser.getActiveMembership().getGroupUuid();
 
-                    /*
-                    User newAdmin = result.getData().clone();
-                    newAdmin.setLastKnownLocation(null);
-                    */
-                    User user = result.getData();
-                    User newAdmin = new User(user.getUserUuid(), user.getFamilyName(), user.getGivenName(),
-                            user.getDisplayName(), user.getPhotoUrl(), user.getEmail(), user.getPhone(), null,
-                            (user.getLastKnownLocation() == null ? null : user.getLastKnownLocation().clone()));
-                    Membership membership = new Membership(groupKey, group.getName(),
+                    DatabaseReference ref = getFirebaseConnection().getReference(FamilyTrackDbRefsHelper.NODE_GROUPS);
+                    String newGroupKey = ref.push().getKey();
+
+                    Membership newMembership = new Membership(newGroupKey, group.getName(),
                             Membership.ROLE_ADMIN, Membership.USER_JOINED);
-                    newAdmin.setMemberships(new HashMap<String, Membership>());
-                    newAdmin.getMemberships().put(groupKey, membership);
 
-                    user.addMembership(membership);
-                    group.getMembers().put(newAdmin.getUserUuid(), newAdmin);
+                    currentUser.setMemberships(new HashMap<String, Membership>());
+                    currentUser.addMembership(newMembership);
+                    group.setGroupUuid(newGroupKey);
+                    group.addMember(currentUser);
 
-                    // create new group at /groups/groupKey and at /mUsers/userKey/group
+                    DatabaseReference newGroupRef = mFirebaseDatabase.getReference(FamilyTrackDbRefsHelper.groupRef(newGroupKey));
+                    newGroupRef.setValue(group);
+
                     Map<String, Object> childUpdates = new HashMap<>();
-                    childUpdates.put(Group.REGISTERED_USERS_GROUP_KEY + "/" + user.getUserUuid(), user);
-                    childUpdates.put("/groups/" + groupKey, group);
+                    childUpdates.put(FamilyTrackDbRefsHelper.userMembershipRef(currentUser.getUserUuid(), currentGroupUuid) +
+                            Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
+                    childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(currentUser.getUserUuid(), currentGroupUuid) +
+                            Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
+                    childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(currentUser.getUserUuid(), newGroupKey),
+                            newMembership);
+
                     mFirebaseDatabase.getReference()
                             .updateChildren(childUpdates)
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (callback != null) {
-                                callback.onCreateGroupCompleted(new FirebaseResult<Group>(group));
-                            }
-                        }
-                    });
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (callback != null) {
+                                        callback.onCreateGroupCompleted(new FirebaseResult<Group>(group));
+                                    }
+                                }
+                            });
+
                 } else {
                     Timber.v("null");
+                    if (callback != null) {
+                        callback.onCreateGroupCompleted(
+                                new FirebaseResult<Group>(FamilyTrackException.getInstance(mContext,
+                                        FamilyTrackException.DB_USER_BY_UUID_NOT_FOUND)));
+                    }
                 }
             }
         });
@@ -363,7 +374,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     user.setUserUuid(getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY).push().getKey());
                     childUpdates.put(Group.REGISTERED_USERS_GROUP_KEY + "/" + user.getUserUuid(), user);
 
-                    group.addUser(user);
+                    group.addMember(user);
                     childUpdates.put("/groups/" + group.getGroupUuid(), group);
                 } else {
                     // в системе найден зарегистрированный пользователь, но он не приглашен в группу
@@ -440,9 +451,35 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     public void changeUserMembership(@NonNull String userUuid,
                                      @NonNull String fromGroupUuid,
                                      @NonNull String toGroupUuid,
-                                     @NonNull ChangeUserMembershipCallback callback) {
+                                     final @NonNull ChangeUserMembershipCallback callback) {
         // groups/-KtrkQ0jWp4m3dQg43V9/members/-KtrkPuXJZs21vF6mMzS/memberships/-KtrkQ0jWp4m3dQg43V9
         // registered_users/-Ku_qk0QFapzaREjRYCZ/memberships/-KtrkQ0jWp4m3dQg43V9
+
+        Map<String, Object> childUpdates = new HashMap<>();
+        if (!fromGroupUuid.equals("")) {
+            childUpdates.put(FamilyTrackDbRefsHelper.userMembershipRef(userUuid, fromGroupUuid) +
+                    Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
+            childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(userUuid, fromGroupUuid) +
+                    Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
+        }
+
+        if (!toGroupUuid.equals("")) {
+            childUpdates.put(FamilyTrackDbRefsHelper.userMembershipRef(userUuid, toGroupUuid) +
+                    Membership.FIELD_STATUS_ID, Membership.USER_JOINED);
+            childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(userUuid, toGroupUuid) +
+                    Membership.FIELD_STATUS_ID, Membership.USER_JOINED);
+        }
+
+        mFirebaseDatabase.getReference()
+                .updateChildren(childUpdates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (callback != null) {
+                            callback.onChangeUserMembershipCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                        }
+                    }
+                });
 
     }
 
@@ -476,7 +513,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     public void addUserToGroup(@NonNull String userUuid,
                                @NonNull String groupUuid,
                                final AddUserToGroupCallback callback) {
-        // для перевода пользователя в состояние MEMEMBER нам необходимо:
+        // для перевода пользователя в состояние MEMMBER нам необходимо:
         //      - изменить статус пользователя в ветке registered_users/<user_key>
         //      - изменить статус пользователя в ветке groups/<group_key>/members/<user_key>/memberships/<group_key>
         Map<String, Object> childUpdates = new HashMap<>();
@@ -492,7 +529,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (callback != null) {
-                            callback.onAddUserToGroupCompleted(new FirebaseResult<String>("Ok"));
+                            callback.onAddUserToGroupCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
                         }
                     }
                 });
@@ -539,7 +576,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (callback != null) {
                                     callback.onUpdateUserLocationCompleted(
-                                            new FirebaseResult<String>("Ok"));
+                                            new FirebaseResult<String>(FirebaseResult.RESULT_OK));
                                 }
                             }
                         });
@@ -623,7 +660,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     if (databaseError != null) {
                         callback.onRemoveZoneCompleted(new FirebaseResult<String>(databaseError));
                     } else {
-                        callback.onRemoveZoneCompleted(new FirebaseResult<String>(RESULT_OK));
+                        callback.onRemoveZoneCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
                     }
                 }
             }

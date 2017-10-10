@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
 import android.databinding.ObservableList;
 import android.util.Log;
 import android.view.View;
@@ -40,6 +41,8 @@ public class UserMembershipViewModel
 
     public final ObservableBoolean showLeaveGroupWarningDialog = new ObservableBoolean(false);
     public final ObservableList<MembershipListItemViewModel> viewModels = new ObservableArrayList<>();
+    public ObservableField<String> snackbarText = new ObservableField<>();
+    //public ObservableBoolean refreshList = new ObservableBoolean(false);
 
     public UserMembershipViewModel(Context context,
                              String currentUserUuid,
@@ -129,42 +132,69 @@ public class UserMembershipViewModel
      */
     public void startChangeMembership(final MembershipListItemViewModel membershipListItemViewModel) {
         // check the user if he is one and only admin in current group
-        if (mCurrentUser.getActiveMembership() == null) {
+        if (mCurrentUser.getActiveMembership() == null && membershipListItemViewModel.isActive.get()) {
             Timber.e("Unexpected error. User " + mCurrentUser.getUserUuid() +
                     " should have active group to perform 'startChangeMembership' action");
             return;
         }
-        final String activeGroupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
-        mRepository.getGroupByUuid(activeGroupUuid,
-            new FamilyTrackDataSource.GetGroupByUuidCallback() {
-                @Override
-                public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
-                    Group group = result.getData();
-                    if (group == null) {
-                        Timber.e("Unexpected error. Group " + activeGroupUuid + " not found");
-                        return;
-                    }
-                    if (group.getAdminsCount(mCurrentUser.getUserUuid()) == 0) {
-                        // there is only one admin in group
-                        // can't leave current group or create new one
-                        showLeaveGroupWarningDialog.set(!showLeaveGroupWarningDialog.get());
-                    }
-                    String fromGroupUuid = activeGroupUuid;
-                    String toGroupUuid = (membershipListItemViewModel.isActive.get() ?
-                            "" : membershipListItemViewModel.item.get().getGroupUuid());
-                    //mRepository.changeUserMembership(mCurrentUser.getUserUuid(), fromGroupUuid, toGroupUuid)
-                }
-            });
+        if (mCurrentUser.getActiveMembership() != null) {
+            // join to new group or leave current group
+            final String activeGroupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
+            mRepository.getGroupByUuid(activeGroupUuid,
+                    new FamilyTrackDataSource.GetGroupByUuidCallback() {
+                        @Override
+                        public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                            Group group = result.getData();
+                            if (group == null) {
+                                Timber.e("Unexpected error. Group " + activeGroupUuid + " not found");
+                                return;
+                            }
+                            if (group.getAdminsCount(mCurrentUser.getUserUuid()) == 0 && group.getMembers().size() > 1) {
+                                // there is only one admin in group
+                                // can't leave current group or create new one
+                                showLeaveGroupWarningDialog.set(!showLeaveGroupWarningDialog.get());
+                                return;
+                            }
+                            finishChangeMembership(mCurrentUser.getUserUuid(), activeGroupUuid,
+                                    (membershipListItemViewModel.isActive.get() ?
+                                            "" : membershipListItemViewModel.item.get().getGroupUuid()),
+                                    group.getName(), membershipListItemViewModel.isActive.get() ?
+                                            "" : membershipListItemViewModel.item.get().getGroupName());
+                        }
+                    });
+        } else {
+            finishChangeMembership(mCurrentUser.getUserUuid(), "",
+                    membershipListItemViewModel.item.get().getGroupUuid(),
+                    "", membershipListItemViewModel.item.get().getGroupName());
+        }
     }
 
-    public void createNewGroup(String groupName) {
+    private void finishChangeMembership(String userUuid, String fromGroupUuid, String toGroupUuid,
+                                        final String fromGroupName, final String toGroupName) {
+        mRepository.changeUserMembership(mCurrentUser.getUserUuid(), fromGroupUuid, toGroupUuid,
+                new FamilyTrackDataSource.ChangeUserMembershipCallback() {
+                    @Override
+                    public void onChangeUserMembershipCompleted(FirebaseResult<String> result) {
+                        if (result.getData().equals(FirebaseResult.RESULT_OK)) {
+                            snackbarText.set(String.format("Group changed from '%1$s' to '%2$s'", fromGroupName, toGroupName));
+                            start();
+                        }
+                    }
+                });
+
+    }
+
+    public void createNewGroup(final String groupName) {
         Timber.v("Create group: " + groupName);
 
         mRepository.createGroup(new Group(groupName), mCurrentUserUuid,
                 new FamilyTrackDataSource.CreateGroupCallback() {
                     @Override
                     public void onCreateGroupCompleted(FirebaseResult<Group> result) {
-                        //if ()
+                        if (result.getData() != null) {
+                            snackbarText.set("Group '" + groupName + "' created");
+                            start();
+                        }
                     }
                 });
     }

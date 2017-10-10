@@ -61,7 +61,7 @@ public class Group {
         this.mMembers = mMembers;
     }
 
-    public void addUser(User user) {
+    public void addMember(User user) {
         if (mMembers == null) {
             mMembers = new HashMap<>();
         }

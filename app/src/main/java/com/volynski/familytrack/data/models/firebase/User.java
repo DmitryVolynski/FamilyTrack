@@ -171,4 +171,19 @@ public class User {
         }
         return result;
     }
+
+    @Exclude
+    public Membership getMembershipForGroup(String groupUuid) {
+        Membership result = null;
+        if (mMemberships != null) {
+            for (String key : mMemberships.keySet()) {
+                Membership membership = mMemberships.get(key);
+                if (membership.getGroupUuid().equals(groupUuid)) {
+                    result = membership;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
 }

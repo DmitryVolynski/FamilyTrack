@@ -338,7 +338,8 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
-        if (result.getData() == null || result.getData().getActiveMembership() == null) {
+        // TODO: проверить необходимость закомментированного условия
+        if (result.getData() == null /*|| result.getData().getActiveMembership() == null*/) {
             mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(LoginActivity.this,
                     mGoogleSignInAccount, LoginActivity.this);
             mFirstTimeDialog.show(getSupportFragmentManager(), "aa");

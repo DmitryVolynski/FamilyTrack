@@ -5,6 +5,8 @@ package com.volynski.familytrack.data.models.firebase;
  */
 
 public class Membership {
+    public static final String FIELD_STATUS_ID = "statusId";
+
     public static final int ROLE_ADMIN = 1;
     public static final int ROLE_MEMBER = 2;
     public static final int ROLE_UNDEFINED = 3;

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
+import android.databinding.ObservableList;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -35,8 +36,11 @@ import com.volynski.familytrack.databinding.FragmentUserHistoryChartBinding;
 import com.volynski.familytrack.databinding.FragmentUserMembershipBinding;
 import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.utils.SnackbarUtil;
+import com.volynski.familytrack.viewmodels.MembershipListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
+import com.volynski.familytrack.views.MainActivity;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.ArrayList;
@@ -55,6 +59,7 @@ public class UserMembershipFragment extends Fragment {
 
     FragmentUserMembershipBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
+    private Observable.OnPropertyChangedCallback mSnackbarCallback;
 
     public static UserMembershipFragment newInstance(Context context,
                                                        String currentUserUuid,
@@ -80,6 +85,25 @@ public class UserMembershipFragment extends Fragment {
         mViewModel.start();
     }
 
+    @Override
+    public void onDestroy() {
+        if (mSnackbarCallback != null) {
+            mViewModel.snackbarText.removeOnPropertyChangedCallback(mSnackbarCallback);
+        }
+        super.onDestroy();
+    }
+
+    private void setupSnackbar() {
+        mSnackbarCallback = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                SnackbarUtil.showSnackbar(((MainActivity)getActivity()).getViewForSnackbar(),
+                        mViewModel.snackbarText.get());
+            }
+        };
+        mViewModel.snackbarText.addOnPropertyChangedCallback(mSnackbarCallback);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -92,6 +116,7 @@ public class UserMembershipFragment extends Fragment {
                 false);
 
         setupCustomListeners();
+        setupSnackbar();
 
         mLayoutManager = new GridLayoutManager(this.getContext(), 2);
         //mLayoutManager.setMeasuredDimension();
@@ -118,6 +143,7 @@ public class UserMembershipFragment extends Fragment {
         mBinding.recyclerviewFragmentusermembership.addItemDecoration(dividerItemDecoration);
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
                 new GroupsAndUsersItemType(), BR.viewmodel);
+
         //mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
 
         mBinding.recyclerviewFragmentusermembership.setAdapter(mAdapter);

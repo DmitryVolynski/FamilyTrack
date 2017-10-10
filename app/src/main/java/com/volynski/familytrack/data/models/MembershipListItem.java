@@ -1,6 +1,7 @@
 package com.volynski.familytrack.data.models;
 
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 
 import java.util.ArrayList;
@@ -127,7 +128,13 @@ public class MembershipListItem {
         result.add(new MembershipListItem(group));
         if (group.getMembers() != null) {
             for (String key : group.getMembers().keySet()) {
-                result.add(new MembershipListItem(group.getMembers().get(key)));
+                User user = group.getMembers().get(key);
+                Membership membership = user.getMembershipForGroup(group.getGroupUuid());
+                if (membership != null &&
+                        (membership.getStatusId() == Membership.USER_JOINED ||
+                                membership.getStatusId() == Membership.USER_INVITED)) {
+                    result.add(new MembershipListItem(user));
+                }
             }
         }
         return result;
