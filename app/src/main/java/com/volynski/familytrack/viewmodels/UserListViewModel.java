@@ -68,23 +68,6 @@ public class UserListViewModel
         }
     }
 
-    /*
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.button_fragmentuserslist_creategroup:
-                createGroup();
-                break;
-            case R.id.button_fragmentuserslist_addusers:
-                inviteUsers();
-                break;
-            case R.id.button_fragmentuserslist_joingroup:
-                joinGroup();
-                break;
-        }
-        refreshList();
-    }
-*/
 
     /**
      * Reads list of mUsers from firebase and refresh it in RecyclerView
@@ -94,34 +77,6 @@ public class UserListViewModel
     }
 
 
-    /**
-     * Joins mUsers to selected group
-     * Shows a dialog window with all available groups (for joining)
-     * If user select one, he will be joined to selected group
-     */
-    private void joinGroup() {
-        Log.v(TAG, "joinGroup started");
-        notifyChange();
-    }
-
-    /**
-     * Creates new group in firebase DB.
-     * Current user (who created the group) becomes an Admin of this group
-     */
-    private void createGroup() {
-        Timber.v("createGroup started");
-        showDialog.set(true);
-    }
-
-/*
-    public void createNewGroup(String groupName) {
-        Timber.v("Create group: " + groupName);
-        User currentUser = SharedPrefsUtil.getCurrentUser(mContext);
-
-        FamilyTrackDataSource dataSource = new FamilyTrackRepository(null, mContext);
-        dataSource.createGroup(new Group(groupName), currentUser.getUserUuid(), null);
-    }
-*/
 
     /**
      * Starts loading data according to group membership of the user

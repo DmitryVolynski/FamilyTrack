@@ -145,7 +145,7 @@ public class RecyclerViewListAdapter<T>
                     (PopupMenuListener) RecyclerViewListAdapter.this.getViewModels().get(getAdapterPosition());
 
             if (listener != null) {
-                listener.menuCommand(item);
+                listener.menuCommand(item, binding.getRoot());
             } else {
                 Timber.e("List Item ViewModel couldn't be casted to PopupMenuListener, event lost");
             }

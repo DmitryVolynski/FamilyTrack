@@ -18,4 +18,8 @@
     <string name="action_example">Example action</string>
 
     <string name="action_settings">Settings</string>
+    <array name="spinnerEntries">
+        <item>Admin</item>
+        <item>Member</item>
+    </array>
 </resources>

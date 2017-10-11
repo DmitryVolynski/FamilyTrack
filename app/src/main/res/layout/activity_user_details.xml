@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <android.support.design.widget.AppBarLayout
-            android:id="@+id/appbar"
+            android:id="@+id/appbar_userdetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fitsSystemWindows="true"
@@ -21,52 +21,52 @@
             android:transitionGroup="true">
 
             <android.support.design.widget.CollapsingToolbarLayout
-                app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:contentScrim="@color/colorPrimary"
-                android:id="@+id/collapsing_toolbar"
+                android:id="@+id/clpstoolbar_userdetails"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
-
+                android:layout_height="wrap_content"
+                app:contentScrim="@color/colorPrimary"
+                app:expandedTitleTextAppearance="@android:color/transparent"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed">
                 <ImageView
                     android:id="@+id/imageview_userdetails_photo"
-                    app:imageUrl="@{viewmodel.user.photoUrl}"
-                    android:layout_gravity="center"
-                    android:layout_width="match_parent"
-                    android:layout_height="300dp"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginBottom="30dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="50dp"
                     android:scaleType="centerCrop"
-                    app:layout_collapseMode="parallax" />
+                    app:layout_collapseMode="parallax"
+                    android:transitionName="userPhoto"
+                    app:roundImageUrl="@{viewmodel.user.photoUrl}" />
+
                 <LinearLayout
                     android:id="@+id/meta_bar"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
+                    android:layout_marginStart="92dp"
+                    android:layout_marginTop="64dp"
                     android:orientation="vertical"
                     android:transitionGroup="true">
 
                     <TextView
-                        android:id="@+id/article_title"
-                        style="?android:attr/textAppearanceLarge"
+                        android:id="@+id/textview_userdetails_userLabel"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:fontFamily="sans-serif-condensed"
-                        android:textStyle="bold"
-                        tools:text="Test"
+                        android:lineSpacingMultiplier="0.9"
                         android:text="@{viewmodel.user.displayName}"
-                        android:textSize="42sp"
-                        android:lineSpacingMultiplier="0.9"/>
+                        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                        android:transitionName="userName"
+                        tools:text="Test" />
 
-                    <TextView
-                        android:id="@+id/article_byline"
-                        style="?android:attr/textAppearanceSmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#8fff" />
                 </LinearLayout>
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar_userdetails"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    app:layout_collapseMode="pin"/>
+                    app:layout_collapseMode="pin" />
+
 
             </android.support.design.widget.CollapsingToolbarLayout>
         </android.support.design.widget.AppBarLayout>
@@ -180,7 +180,7 @@
                 </FrameLayout>
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
                     android:layout_marginTop="8dp"
                     android:orientation="horizontal">
 
@@ -197,10 +197,33 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginEnd="40dp"
                         android:layout_marginRight="56dp"
-                        android:layout_marginStart="56dp"
+                        android:layout_marginStart="52dp"
                         android:entries="@{viewmodel.spinnerEntries}"
-                        app:selectedValue="@={viewmodel.activeGroup}"
+                        app:selectedValue="@={viewmodel.userRole}"
                         tools:text="Home, 0km" />
+                </FrameLayout>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="8dp">
+                    <TextView
+                        android:layout_gravity="center_vertical"
+                        android:text="Group"
+                        android:layout_marginRight="8dp"
+                        android:layout_marginStart="8dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+
+                    <TextView
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="56dp"
+                        android:layout_marginStart="56dp"
+                        android:layout_marginEnd="56dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                        android:text="@{viewmodel.activeGroup}"
+                        tools:text="Group name" />
                 </FrameLayout>
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -228,7 +251,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:text="@={viewmodel.user.displayName}"
-                            tools:text="Home, 0km" />
+                            tools:text="Home" />
                         <TextView
                             android:layout_marginTop="4dp"
                             android:layout_width="match_parent"
@@ -238,13 +261,23 @@
                             tools:text="55.994017, 37.195024" />
 
                     </LinearLayout>
-                    <TextView
-                        android:layout_gravity="end"
+                    <LinearLayout
                         android:layout_marginEnd="56dp"
                         android:layout_marginTop="8dp"
-                        tools:text="10 min ago"
+                        android:layout_gravity="end"
+                        android:orientation="vertical"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content">
+                        <TextView
+                            tools:text="10 min"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                        <TextView
+                            android:layout_marginTop="6dp"
+                            tools:text="5km"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" />
+                    </LinearLayout>
                 </FrameLayout>
             </LinearLayout>
 

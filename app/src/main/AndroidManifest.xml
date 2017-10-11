@@ -29,13 +29,9 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".views.OldMainActivity"
-            android:label="@string/title_activity_main"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name=".views.UserDetailsActivity"
             android:label="@string/title_activity_main"
-            android:parentActivityName=".views.OldMainActivity"
+            android:parentActivityName=".views.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".views.MainActivity"

@@ -5,7 +5,9 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -112,8 +114,21 @@ public class MainActivity
     //
 
     @Override
-    public void openUserDetails(String userUuid) {
+    public void openUserDetails(String userUuid, View rootView) {
+        Intent intent = new Intent(getApplicationContext(), UserDetailsActivity.class);
+        intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
+        intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
 
+        View transitionImage = rootView.findViewById(R.id.imageview_userlistitem_photo);
+        View transitionText = rootView.findViewById(R.id.textview_userlistitem_username);
+
+        Pair<View, String> p1 = new Pair<>(transitionImage, "userPhoto");
+        Pair<View, String> p2 = new Pair<>(transitionText, "userName");
+
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, p1, p2);
+
+        startActivity(intent, options.toBundle());
     }
 
     @Override

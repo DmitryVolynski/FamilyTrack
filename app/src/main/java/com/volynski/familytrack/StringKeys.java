@@ -13,7 +13,7 @@ public class StringKeys {
             = StringKeys.class.getPackage().getName() + ".PREFERENCE_FILE_KEY";
     public static final String SHARED_PREFS_CURRENT_USER_KEY = "CURRENT_USER";
     public static final String SHARED_PREFS_IDTOKEN_KEY = "ID_TOKEN";
-
+    public static final String CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
     public static final String USER_UUID_KEY = "USER_UUID";
     public static final String SHARED_PREFS_CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
 
@@ -29,7 +29,8 @@ public class StringKeys {
 // TODO: адаптация форм для планшета
 // TODO: Material design
 // TODO: удаление/добавление пользователей в процессе работы администратором
-// TODO: вступление/выход пользователя из группы
+// TODO: удаление группы при выходе последнего пользователя
+// вступление/выход пользователя из группы
 // TODO: разработка виджета
 // TODO: механизм эмуляции движения
 // TODO: добавление/удаление пользователей для geofences

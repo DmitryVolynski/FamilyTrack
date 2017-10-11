@@ -51,7 +51,7 @@ public class MembershipListItemViewModel extends BaseObservable
     }
 
     @Override
-    public void menuCommand(MenuItem item) {
+    public void menuCommand(MenuItem item, View rootView) {
 
     }
 

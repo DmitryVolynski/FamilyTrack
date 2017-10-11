@@ -88,56 +88,11 @@ public class UserListFragment
 
         mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
-        /*
-        mViewModel.showDialog.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                UserListFragment.this.startNewGroupDialog();
-            }
-        });
-        */
 
         return mBinding.getRoot();
     }
 
-/*
-    private void startNewGroupDialog() {
-        // get a reference to the already created main layout
 
-        LinearLayout mainLayout = mBinding.linearlayoutFragmentuserslistRootlayout;
-
-        // inflate the layout of the popup window
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
-        final View popupView = inflater.inflate(R.layout.dialog_create_group, null);
-
-        // create the popup window
-        int width =  (int) Math.round(0.8 * mainLayout.getWidth());  //LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = (int) Math.round(0.8 * mainLayout.getHeight());  //LinearLayout.LayoutParams.WRAP_CONTENT;
-
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-
-        // show the popup window
-        popupWindow.showAtLocation(mainLayout, Gravity.CENTER, 0, 0);
-        popupView.findViewById(R.id.button_dialogcreategroup_cancel)
-                .setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popupWindow.dismiss();
-            }
-        });
-
-        popupView.findViewById(R.id.button_dialogcreategroup_create)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        EditText editText = (EditText) popupView.findViewById(R.id.edittext_dialogcreategroup_groupname);
-                        mViewModel.createNewGroup(editText.getText().toString());
-                        popupWindow.dismiss();
-                    }
-                });
-    }
-*/
 
     public void setViewModel(UserListViewModel mViewModel) {
         this.mViewModel = mViewModel;

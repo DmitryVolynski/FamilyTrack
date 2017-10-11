@@ -53,7 +53,7 @@ public class UserListItemViewModel extends BaseObservable
     }
 
     @Override
-    public void menuCommand(MenuItem item) {
+    public void menuCommand(MenuItem item, View rootView) {
         if (mNavigator == null) {
             Timber.e("mNavigator is null. Navigation is not available");
             return;
@@ -66,7 +66,7 @@ public class UserListItemViewModel extends BaseObservable
                 //mNavigator.userClicked(mUser.getUserUuid());
                 //break;
             case R.id.menuitem_userpopupmenu_userdetails:
-                mNavigator.openUserDetails(mUser.getUserUuid());
+                mNavigator.openUserDetails(mUser.getUserUuid(), rootView);
                 break;
         }
     }

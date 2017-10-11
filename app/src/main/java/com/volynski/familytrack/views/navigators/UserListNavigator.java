@@ -1,5 +1,7 @@
 package com.volynski.familytrack.views.navigators;
 
+import android.view.View;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.volynski.familytrack.data.models.firebase.User;
 
@@ -11,7 +13,7 @@ import com.volynski.familytrack.data.models.firebase.User;
  */
 
 public interface UserListNavigator {
-    void openUserDetails(String userUuid);
+    void openUserDetails(String userUuid, View rootView);
     void removeUser(String userUuid);
     void inviteUsers();
     void dismissInviteUsersDialog();
