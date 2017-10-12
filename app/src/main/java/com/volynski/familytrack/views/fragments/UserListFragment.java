@@ -101,4 +101,8 @@ public class UserListFragment
     public void inviteUser() {
 
     }
+
+    public void refreshList() {
+        mViewModel.start();
+    }
 }

@@ -106,8 +106,33 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void updateUser(@NonNull User user) {
+    public void updateUser(@NonNull final User user, final UpdateUserCallback callback) {
+        getUserGroups(user.getUserUuid(), new GetUserGroupsCallback() {
+            @Override
+            public void onGetUserGroupsCompleted(FirebaseResult<List<Group>> result) {
+                Map<String, Object> childUpdates = new HashMap<>();
 
+                childUpdates.put(FamilyTrackDbRefsHelper.userRef(user.getUserUuid()), user);
+
+                if (result.getData() != null) {
+                    for (Group group : result.getData()) {
+                        childUpdates.put(FamilyTrackDbRefsHelper.userOfGroupRef(group.getGroupUuid(), user.getUserUuid()),
+                                user.cloneForGroupNode(group.getGroupUuid()));
+                    }
+                }
+
+                mFirebaseDatabase.getReference()
+                        .updateChildren(childUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (callback != null) {
+                                    callback.onUpdateUserCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                                }
+                            }
+                        });
+            }
+        });
     }
 
     @Override

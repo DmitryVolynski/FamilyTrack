@@ -186,4 +186,23 @@ public class User {
         }
         return result;
     }
+
+    @Exclude
+    public User cloneForGroupNode(String groupUuid) {
+        HashMap<String, Membership> map = new HashMap<>();
+
+        User clonedUser = new User(mUserUuid, mFamilyName, mGivenName, mDisplayName, mPhotoUrl, mEmail, mPhone,
+                map, mLastKnownLocation.clone());
+
+        if (mMemberships != null) {
+            for (String key : mMemberships.keySet()) {
+                Membership membership = mMemberships.get(key);
+                if (membership.getGroupUuid().equals(groupUuid)) {
+                    clonedUser.addMembership(membership.clone());
+                    break;
+                }
+            }
+        }
+        return clonedUser;
+    }
 }

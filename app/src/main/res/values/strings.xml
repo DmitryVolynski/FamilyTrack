@@ -18,6 +18,8 @@
     <string name="action_example">Example action</string>
 
     <string name="action_settings">Settings</string>
+    <string name="action_save">Save</string>
+    <string name="action_exclude">Remove</string>
     <array name="spinnerEntries">
         <item>Admin</item>
         <item>Member</item>

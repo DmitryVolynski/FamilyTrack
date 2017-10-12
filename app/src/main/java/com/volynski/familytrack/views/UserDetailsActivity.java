@@ -2,16 +2,15 @@ package com.volynski.familytrack.views;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.databinding.Observable;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.volynski.familytrack.R;
@@ -21,22 +20,26 @@ import com.volynski.familytrack.databinding.ActivityUserDetailsBinding;
 import com.volynski.familytrack.utils.IntentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserDetailsViewModel;
-import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
-import com.volynski.familytrack.views.fragments.UserListFragment;
-import com.volynski.familytrack.views.fragments.UserOnMapFragment;
-
-import timber.log.Timber;
+import com.volynski.familytrack.views.navigators.UserDetailsNavigator;
 
 /**
  * Created by DmitryVolynski on 07.09.2017.
  */
 
-public class UserDetailsActivity extends AppCompatActivity {
+public class UserDetailsActivity extends AppCompatActivity implements UserDetailsNavigator {
 
     private String mCurrentUserUuid = "";
     private ActivityUserDetailsBinding mBinding;
     private String mUserUuid;
     private UserDetailsViewModel mViewModel;
+
+    @Override
+    public void updateCompleted(String result) {
+        Intent intent = new Intent();
+        intent.putExtra(StringKeys.USER_UPDATE_RESULT_KEY, result);
+        setResult(RESULT_OK, intent);
+        finish();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +48,41 @@ public class UserDetailsActivity extends AppCompatActivity {
         readIntentData();
         setupBindings();
         setupToolbar();
+        setupListeners();
+    }
+
+    private void setupListeners() {
+        mViewModel.familyNameError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                mBinding.tilUserdetailsFamilyname.setError(mViewModel.familyNameError.get());
+            }
+        });
+        mViewModel.givenNameError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                mBinding.tilUserdetailsGivenname.setError(mViewModel.givenNameError.get());
+            }
+        });
+        mViewModel.displayNameError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                mBinding.tilUserdetailsDisplayname.setError(mViewModel.displayNameError.get());
+            }
+        });
+        mViewModel.phoneError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable sender, int propertyId) {
+                mBinding.tilUserdetailsPhone.setError(mViewModel.phoneError.get());
+            }
+        });
+
+        mBinding.etUserdetailsFamilyName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                mViewModel.validateUserData();
+            }
+        });
     }
 
     private void setupToolbar() {
@@ -79,10 +117,40 @@ public class UserDetailsActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.user_details_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        switch (id) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+            case (R.id.action_save_user):
+                mViewModel.updateUser();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        return true;
+    }
+
     private void setupBindings() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_user_details);
         mViewModel = new UserDetailsViewModel(this, mCurrentUserUuid, mUserUuid,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this));
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this),
+                this);
         mBinding.setViewmodel(mViewModel);
     }
 

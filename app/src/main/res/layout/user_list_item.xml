@@ -40,13 +40,14 @@
                 android:textSize="16sp"
                 android:transitionName="userName"
                 tools:text="Dmitry Volynski"
-                android:text="@{viewmodel.user.givenName}" />
+                android:text="@{viewmodel.user.displayName}" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
-                android:text="Home, 5km" />
+                tools:text="Home"
+                android:text="@{viewmodel.user.lastKnownLocation.knownLocationName}" />
         </LinearLayout>
 
         <LinearLayout
@@ -61,7 +62,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
-                android:text="15min" />
+                tools:text="15min"
+                android:text="@{viewmodel.user.lastKnownLocation.periodAsString}" />
 
             <TextView
                 android:layout_width="wrap_content"

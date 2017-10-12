@@ -66,7 +66,7 @@ public class UserListItemViewModel extends BaseObservable
                 //mNavigator.userClicked(mUser.getUserUuid());
                 //break;
             case R.id.menuitem_userpopupmenu_userdetails:
-                mNavigator.openUserDetails(mUser.getUserUuid(), rootView);
+                mNavigator.editUserDetails(mUser.getUserUuid(), rootView);
                 break;
         }
     }

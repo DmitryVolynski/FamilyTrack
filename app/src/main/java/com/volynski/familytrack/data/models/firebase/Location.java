@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.Exclude;
 
 import java.util.Calendar;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by DmitryVolynski on 24.08.2017.
@@ -129,4 +130,60 @@ public class Location {
                 cal.getTime(), mAddress, mBatteryLevel);
     }
 
+    @Exclude
+    public String getLatLngAsString() {
+        return String.format("%1$f, %2$f", mLatitude, mLongitude);
+    }
+
+    @Exclude
+    public String getPeriodAsString() {
+        String suffix = "day(s)";
+        long now = Calendar.getInstance().getTimeInMillis();
+        long n = TimeUnit.MILLISECONDS.toDays(now - mTimestamp);
+        if (n < 1) {
+            n = TimeUnit.MILLISECONDS.toMinutes(now - mTimestamp);
+            suffix = "min";
+        }
+        return String.format("%1$d %2$s", n, suffix);
+    }
+
+    @Exclude
+    public static String getDistance(User mCurrentUser, User u) {
+        String result = "-";
+        String suffix = "km";
+        if (!(mCurrentUser.getLastKnownLocation() == null ||
+                u.getLastKnownLocation() == null)) {
+            double d = Math.round(distance(mCurrentUser.getLastKnownLocation().getLatLng(),
+                    u.getLastKnownLocation().getLatLng()));
+            if (d < 1) {
+                d = Math.round(d * 1000);
+                suffix = "m";
+            } else {
+                d = Math.round(d * 10) / 10;
+            }
+            result = String.format("%1$.1f %2$s", d, suffix);
+        }
+        return result;
+    }
+
+    private static double distance(LatLng p1, LatLng p2) {
+        double theta = p1.longitude - p2.longitude;
+        double dist = Math.sin(deg2rad(p1.latitude))
+                * Math.sin(deg2rad(p2.latitude))
+                + Math.cos(deg2rad(p1.latitude))
+                * Math.cos(deg2rad(p2.latitude))
+                * Math.cos(deg2rad(theta));
+        dist = Math.acos(dist);
+        dist = rad2deg(dist);
+        dist = dist * 60 * 1.1515;
+        return (dist);
+    }
+
+    private static double deg2rad(double deg) {
+        return (deg * Math.PI / 180.0);
+    }
+
+    private static double rad2deg(double rad) {
+        return (rad * 180.0 / Math.PI);
+    }
 }

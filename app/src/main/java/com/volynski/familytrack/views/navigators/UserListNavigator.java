@@ -13,7 +13,7 @@ import com.volynski.familytrack.data.models.firebase.User;
  */
 
 public interface UserListNavigator {
-    void openUserDetails(String userUuid, View rootView);
+    void editUserDetails(String userUuid, View rootView);
     void removeUser(String userUuid);
     void inviteUsers();
     void dismissInviteUsersDialog();

@@ -26,6 +26,7 @@ import com.volynski.familytrack.databinding.ActivityMainBinding;
 import com.volynski.familytrack.databinding.NavHeaderMainBinding;
 import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.MainActivityViewModel;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
@@ -47,6 +48,8 @@ public class MainActivity
     public static final int CONTENT_USER_LIST = 1;
     private static final int CONTENT_USER_HISTORY_CHART = 2;
     private static final int CONTENT_MEMBERSHIP = 3;
+
+    private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
 
     private String mCurrentUserUuid;
     private int mContentId;
@@ -108,13 +111,33 @@ public class MainActivity
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (data == null) {
+            return;
+        }
+        switch (requestCode) {
+            case REQUEST_CODE_EDIT_USER_DETAILS:
+                SnackbarUtil.showSnackbar(getViewForSnackbar(), "User updated: " + data.getStringExtra(StringKeys.USER_UPDATE_RESULT_KEY));
+                UserListFragment f =
+                        (UserListFragment) FragmentUtil
+                                .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+                if (f != null) {
+                    f.refreshList();
+                }
+
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
 
     //
     // @UserListNavigator implementation
     //
 
     @Override
-    public void openUserDetails(String userUuid, View rootView) {
+    public void editUserDetails(String userUuid, View rootView) {
         Intent intent = new Intent(getApplicationContext(), UserDetailsActivity.class);
         intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
@@ -128,7 +151,7 @@ public class MainActivity
         ActivityOptionsCompat options = ActivityOptionsCompat.
                 makeSceneTransitionAnimation(this, p1, p2);
 
-        startActivity(intent, options.toBundle());
+        startActivityForResult(intent, REQUEST_CODE_EDIT_USER_DETAILS, options.toBundle());
     }
 
     @Override

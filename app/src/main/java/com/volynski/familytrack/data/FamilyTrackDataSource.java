@@ -32,7 +32,8 @@ public interface FamilyTrackDataSource {
      */
     void createUser(@NonNull User user, CreateUserCallback callback);
 
-    void updateUser(@NonNull User user);
+    interface UpdateUserCallback { void onUpdateUserCompleted(FirebaseResult<String> result); }
+    void updateUser(@NonNull User user, UpdateUserCallback callback);
 
     interface UpdateUserLocationCallback { void onUpdateUserLocationCompleted(FirebaseResult<String> result); }
     void updateUserLocation(@NonNull String userUuid,
