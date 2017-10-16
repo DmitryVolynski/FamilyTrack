@@ -12,8 +12,11 @@ import java.util.Map;
 
 public class Group {
     public static final String REGISTERED_USERS_GROUP_KEY = "registered_users";
+
+    public static final String FIELD_SETTINGS = "settings";
     private String mGroupUuid;
     private String mName;
+    private Settings mSettings;
     private Map<String, User> mMembers;
     private Map<String, Zone> mGeofences;
 
@@ -36,6 +39,7 @@ public class Group {
 
     public Group(String name) {
         this.mName = name;
+        this.mSettings = Settings.getDefaultInstance();
         mMembers = new HashMap<>();
     }
 
@@ -43,6 +47,7 @@ public class Group {
         this.mGroupUuid = groupUuid;
         this.mName = name;
         this.mMembers = null;
+        this.mSettings = Settings.getDefaultInstance();
     }
 
     public Group() {}
@@ -96,5 +101,13 @@ public class Group {
 
     public void setGeofences(Map<String, Zone> geofences) {
         this.mGeofences = geofences;
+    }
+
+    public Settings getSettings() {
+        return mSettings;
+    }
+
+    public void setSettings(Settings settings) {
+        this.mSettings = mSettings;
     }
 }

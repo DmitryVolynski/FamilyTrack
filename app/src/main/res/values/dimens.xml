@@ -15,4 +15,7 @@
     <dimen name="nav_header_vertical_spacing">16dp</dimen>
     
     <dimen name="nav_header_height">160dp</dimen>
+
+    <item name="map_guideline_view_mode_percent" format="float" type="dimen">0.7</item>
+    <item name="map_guideline_edit_mode_percent" format="float" type="dimen">0.3</item>
 </resources>

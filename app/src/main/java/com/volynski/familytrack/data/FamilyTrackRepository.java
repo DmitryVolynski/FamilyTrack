@@ -21,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
+import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 
@@ -690,5 +691,41 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 }
             }
         });
+    }
+
+    @Override
+    public void getSettingsByGroupUuid(@NonNull String groupUuid,
+                                       @NonNull final GetSettingsByGroupUuidCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.groupSettings(groupUuid));
+        Query query = ref.orderByValue();
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Settings s = Settings.getDefaultInstance();
+                if (dataSnapshot.getChildrenCount() > 0) {
+                    s = dataSnapshot.getValue(Settings.class);
+                }
+                callback.onGetSettingsByGroupUuidCompleted(new FirebaseResult<Settings>(s));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void updateSettingsByGroupUuid(@NonNull String groupUuid,
+                                          @NonNull Settings settings,
+                                          UpdateSettingsByGroupUuidCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.groupSettings(groupUuid));
+
+        ref.setValue(settings);
+        if (callback != null) {
+            callback.onUpdateSettingsByGroupUuidCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+        }
     }
 }

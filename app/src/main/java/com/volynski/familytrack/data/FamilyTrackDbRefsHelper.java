@@ -1,6 +1,9 @@
 package com.volynski.familytrack.data;
 
+import com.volynski.familytrack.StringKeys;
+import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.HistoryItem;
+import com.volynski.familytrack.data.models.firebase.Settings;
 
 /**
  * Created by DmitryVolynski on 06.09.2017.
@@ -59,7 +62,7 @@ public class FamilyTrackDbRefsHelper {
         return String.format(NODE_USER_MEMBERSHIPS_FORMAT_STRING, groupUuid, userUuid);
     }
 
-    // groups -KtGRD00beq29domxQQZ members -KtIE1SKww3I3S21C1dO memberships -KtGRD00beq29domxQQZ
+    // groups/-KtGRD00beq29domxQQZ/ members -KtIE1SKww3I3S21C1dO memberships -KtGRD00beq29domxQQZ
     public static String userMembershipRef(String userUuid, String groupUuid) {
         return String.format(NODE_USER_MEMBERSHIP_FORMAT_STRING, groupUuid, userUuid, groupUuid);
     }
@@ -76,4 +79,8 @@ public class FamilyTrackDbRefsHelper {
         return String.format(NODE_ZONE_OF_GROUP_FORMAT_STRING, groupUuid, zoneUuid);
     }
 
+    // groups/-KtGRD00beq29domxQQZ/settings
+    public static String groupSettings(String groupUuid) {
+        return FamilyTrackDbRefsHelper.groupRef(groupUuid) + Group.FIELD_SETTINGS;
+    }
 }

@@ -1,5 +1,7 @@
 package com.volynski.familytrack.views.fragments;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -7,12 +9,14 @@ import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,6 +45,7 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.databinding.FragmentUserOnMapBinding;
 import com.volynski.familytrack.dialogs.SimpleDialogFragment;
+import com.volynski.familytrack.utils.ResourceUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
@@ -434,6 +439,28 @@ public class UserOnMapFragment
             mBinding.yyy.setVisibility(View.VISIBLE);
             mBinding.xxx.animate().translationX(-mBinding.xxx.getWidth()).setDuration(300).alpha(1).start();
             mBinding.yyy.animate().translationX(0).setDuration(300).start();
+
+            final ConstraintLayout.LayoutParams lp =
+                    (ConstraintLayout.LayoutParams) mBinding.verticalOneThird.getLayoutParams();
+
+            TypedValue from = ResourceUtil.getTypedValue(getContext(), R.dimen.map_guideline_view_mode_percent);
+            TypedValue to = ResourceUtil.getTypedValue(getContext(), R.dimen.map_guideline_edit_mode_percent);
+            ValueAnimator animation = ValueAnimator.ofFloat(from.getFloat(), to.getFloat());
+
+            animation.setDuration(300);
+            animation.start();
+
+            animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator updatedAnimation) {
+                    // You can use the animated value in a property that uses the
+                    // same type as the animation. In this case, you can use the
+                    // float value in the translationX property.
+                    lp.guidePercent =  (float)updatedAnimation.getAnimatedValue();
+                    mBinding.verticalOneThird.setLayoutParams(lp);
+                }
+            });
+
             ((MainActivity)getActivity()).hideFab();
         } else {
             mBinding.xxx.animate().translationX(0).setDuration(300).alpha(1).start();

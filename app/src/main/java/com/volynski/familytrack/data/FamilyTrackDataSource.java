@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
+import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 
@@ -132,6 +133,27 @@ public interface FamilyTrackDataSource {
      * @param callback - callback to return result
      */
     void getGroupByUuid(@NonNull String groupUuid, @NonNull GetGroupByUuidCallback callback);
+
+    interface GetSettingsByGroupUuidCallback { void onGetSettingsByGroupUuidCompleted(FirebaseResult<Settings> result); }
+
+    /**
+     * Reads settings for group with specified uuid
+     * @param groupUuid - group uuid
+     * @param callback - callback to return result
+     */
+    void getSettingsByGroupUuid(@NonNull String groupUuid, @NonNull GetSettingsByGroupUuidCallback callback);
+
+    interface UpdateSettingsByGroupUuidCallback { void onUpdateSettingsByGroupUuidCompleted(FirebaseResult<String> result); }
+
+    /**
+     * Updates settings for group with specified uuid
+     * @param groupUuid - group uuid
+     * @param settings - new setting for group
+     * @param callback - callback
+     */
+    void updateSettingsByGroupUuid(@NonNull String groupUuid,
+                                   @NonNull Settings settings,
+                                   UpdateSettingsByGroupUuidCallback callback);
 
     // --------------------------------------------------------------------------------------------
     //

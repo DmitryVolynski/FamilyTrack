@@ -50,6 +50,7 @@ public class MainActivity
     private static final int CONTENT_MEMBERSHIP = 3;
 
     private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
+    private static final int REQUEST_CODE_EDIT_SETTINGS = 1001;
 
     private String mCurrentUserUuid;
     private int mContentId;
@@ -125,7 +126,9 @@ public class MainActivity
                 if (f != null) {
                     f.refreshList();
                 }
-
+            case REQUEST_CODE_EDIT_SETTINGS:
+                SnackbarUtil.showSnackbar(getViewForSnackbar(), "Settings updated");
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
@@ -152,6 +155,25 @@ public class MainActivity
                 makeSceneTransitionAnimation(this, p1, p2);
 
         startActivityForResult(intent, REQUEST_CODE_EDIT_USER_DETAILS, options.toBundle());
+    }
+
+    private void editSettings(String userUuid) {
+        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+        intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
+        startActivityForResult(intent, REQUEST_CODE_EDIT_SETTINGS);
+
+/*
+        View transitionImage = rootView.findViewById(R.id.imageview_userlistitem_photo);
+        View transitionText = rootView.findViewById(R.id.textview_userlistitem_username);
+
+        Pair<View, String> p1 = new Pair<>(transitionImage, "userPhoto");
+        Pair<View, String> p2 = new Pair<>(transitionText, "userName");
+
+        ActivityOptionsCompat options = ActivityOptionsCompat.
+                makeSceneTransitionAnimation(this, p1, p2);
+
+        startActivityForResult(intent, REQUEST_CODE_EDIT_USER_DETAILS, options.toBundle());
+*/
     }
 
     @Override
@@ -327,6 +349,7 @@ public class MainActivity
                     setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_settings):
+                    editSettings(mCurrentUserUuid);
                     break;
                 case (R.id.drawer_nav_about):
                     break;

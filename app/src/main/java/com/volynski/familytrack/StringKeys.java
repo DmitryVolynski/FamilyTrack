@@ -20,11 +20,14 @@ public class StringKeys {
     public static final String MAIN_ACTIVITY_MODE_KEY = "MAIN_ACTIVITY_MODE";
 
     public static final String USER_UPDATE_RESULT_KEY = "USER_UPDATE_RESULT";
+    public static final String SETTINGS_UPDATE_RESULT_KEY = "SETTINGS_UPDATE_RESULT";
 }
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением
+// TODO: доделать исключение клиента из группы
 // TODO: Изменить механизм позиционирования клиента (увеличить точность)
-// TODO: реализовать экран настроек с сохранением в БД
+// 16.10.2017 реализовать экран настроек с сохранением в БД
+// 16.10.2017 проверка данных при изменении настроек
 // TODO: чтение и использование настроек
 // реализовать левую панель навигации (Drawer)
 // TODO: отображение пути и координат в динамике
@@ -37,3 +40,4 @@ public class StringKeys {
 // TODO: механизм эмуляции движения
 // TODO: добавление/удаление пользователей для geofences
 // TODO: работа с уведомлениями по geofences
+// TODO: добавить индикатор ожидания при загрузке данных
