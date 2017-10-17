@@ -18,7 +18,6 @@ public class StringKeys {
     public static final String SHARED_PREFS_CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
 
     public static final String MAIN_ACTIVITY_MODE_KEY = "MAIN_ACTIVITY_MODE";
-
     public static final String USER_UPDATE_RESULT_KEY = "USER_UPDATE_RESULT";
     public static final String SETTINGS_UPDATE_RESULT_KEY = "SETTINGS_UPDATE_RESULT";
     public static final String SNACKBAR_TEXT_KEY = "SNACKBAR_TEXT";
