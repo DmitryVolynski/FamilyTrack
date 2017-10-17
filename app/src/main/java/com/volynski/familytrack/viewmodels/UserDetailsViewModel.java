@@ -39,6 +39,7 @@ public class UserDetailsViewModel extends BaseObservable {
     public ObservableField<String> displayNameError = new ObservableField<>();
     public ObservableField<String> phoneError = new ObservableField<>();
 
+    private String mActiveGroupUuid;
     private User mCurrentUser;
     private final Context mContext;
     private String mUserUuid = "";
@@ -104,6 +105,7 @@ public class UserDetailsViewModel extends BaseObservable {
                         }
                         if (u.getActiveMembership() != null) {
                             activeGroup.set(u.getActiveMembership().getGroupName());
+                            mActiveGroupUuid = u.getActiveMembership().getGroupUuid();
                         }
                         user.set(u);
                         distance.set(Location.getDistance(mCurrentUser, u));
@@ -120,7 +122,7 @@ public class UserDetailsViewModel extends BaseObservable {
         mRepository.updateUser(user.get(), new FamilyTrackDataSource.UpdateUserCallback() {
             @Override
             public void onUpdateUserCompleted(FirebaseResult<String> result) {
-                mNavigator.updateCompleted(result.getData());
+                mNavigator.dbopCompleted(result.getData(), "User details updated");
             }
         });
     }
@@ -159,5 +161,23 @@ public class UserDetailsViewModel extends BaseObservable {
 
     public void test() {
         int i = 0;
+    }
+
+    /**
+     * Removes current user from group.
+     * Membership records will be physically deleted from
+     *  - registered_users/<userUuid>/memberships/<groupUuid>
+     *  - groups/<groupUuid>/members/<userUuid>
+     */
+    public void removeUser() {
+        mRepository.removeUserFromGroup(mActiveGroupUuid,
+                user.get().getUserUuid(),
+                new FamilyTrackDataSource.RemoveUserFromGroupCallback() {
+                    @Override
+                    public void onRemoveUserFromGroupCompleted(FirebaseResult<String> result) {
+                        mNavigator.dbopCompleted(result.getData(), "User removed");
+                    }
+                }
+        );
     }
 }

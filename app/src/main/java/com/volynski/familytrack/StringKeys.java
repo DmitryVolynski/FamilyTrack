@@ -21,10 +21,11 @@ public class StringKeys {
 
     public static final String USER_UPDATE_RESULT_KEY = "USER_UPDATE_RESULT";
     public static final String SETTINGS_UPDATE_RESULT_KEY = "SETTINGS_UPDATE_RESULT";
+    public static final String SNACKBAR_TEXT_KEY = "SNACKBAR_TEXT";
 }
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением
-// TODO: доделать исключение клиента из группы
+// 17.10.2017 доделать исключение клиента из группы
 // TODO: Изменить механизм позиционирования клиента (увеличить точность)
 // 16.10.2017 реализовать экран настроек с сохранением в БД
 // 16.10.2017 проверка данных при изменении настроек
@@ -38,6 +39,7 @@ public class StringKeys {
 // вступление/выход пользователя из группы
 // TODO: разработка виджета
 // TODO: механизм эмуляции движения
-// TODO: добавление/удаление пользователей для geofences
+// 17.10.2017 добавление/удаление пользователей для geofences
 // TODO: работа с уведомлениями по geofences
 // TODO: добавить индикатор ожидания при загрузке данных
+// TODO: тестирование

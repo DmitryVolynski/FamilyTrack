@@ -5,5 +5,5 @@ package com.volynski.familytrack.views.navigators;
  */
 
 public interface UserDetailsNavigator {
-    void updateCompleted(String result);
+    void dbopCompleted(String result, String snackbarText);
 }

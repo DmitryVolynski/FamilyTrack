@@ -39,6 +39,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
     public void updateCompleted(String result) {
         Intent intent = new Intent();
         intent.putExtra(StringKeys.SETTINGS_UPDATE_RESULT_KEY, result);
+        intent.putExtra(StringKeys.SNACKBAR_TEXT_KEY, "Settings updated");
         setResult(RESULT_OK, intent);
         finish();
     }

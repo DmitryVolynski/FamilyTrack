@@ -68,6 +68,7 @@ public class UserOnMapFragment
             implements OnMapReadyCallback, View.OnClickListener {
     private static final String TAG = UserOnMapFragment.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final int ANIMATION_DURATION = 300;
     private static final float GEOFENCE_STROKE_WIDTH = 2;
 
     private UserOnMapViewModel mViewModel;
@@ -87,6 +88,8 @@ public class UserOnMapFragment
 
     FragmentUserOnMapBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
+    private LinearLayoutManager mGeoLayoutManager;
+    private RecyclerViewListAdapter mAdapterGeo;
 
     public static UserOnMapFragment newInstance(Context context,
                                                 String currentUserUuid,
@@ -179,9 +182,17 @@ public class UserOnMapFragment
                 R.layout.user_horizontal_list_item, BR.viewmodel);
 
         mBinding.recyclerviewFrguseronmapUserslist.setAdapter(mAdapter);
+
+        mAdapterGeo = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
+                R.layout.user_list_item_dwell_control, BR.viewmodel);
+
+        mGeoLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        mBinding.recyclerviewFrguseronmapGeosettings.setLayoutManager(mGeoLayoutManager);
+        mBinding.recyclerviewFrguseronmapGeosettings.setAdapter(mAdapterGeo);
+
         mBinding.setViewmodel(mViewModel);
 
-        mBinding.yyy.setVisibility(View.INVISIBLE);
+        mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(View.INVISIBLE);
         return mBinding.getRoot();
     }
 
@@ -434,39 +445,114 @@ public class UserOnMapFragment
     }
 
     private void changeUiLayout(boolean isForEditMode) {
+        TypedValue from = ResourceUtil.getTypedValue(getContext(),
+                R.dimen.map_guideline_view_mode_percent);
+        TypedValue to = ResourceUtil.getTypedValue(getContext(),
+                R.dimen.map_guideline_edit_mode_percent);
+
+        int trans1 = mBinding.linlayoutFrguseronmapUsers.getWidth() * (isForEditMode ? -1 : 0);
+        int trans2 = mBinding.linlayoutFrguseronmapUsers.getWidth() * (isForEditMode ? 0 : 1);
+
+        mBinding.conslayoutFrguseronmapEditgeofence
+                .setX(mBinding.linlayoutFrguseronmapUsers.getWidth());
+        mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(isForEditMode ? View.VISIBLE : View.INVISIBLE);
+        mBinding.linlayoutFrguseronmapUsers
+                .animate()
+                .translationX(trans1)
+                .setDuration(ANIMATION_DURATION)
+                .alpha(1)
+                .start();
+        mBinding.conslayoutFrguseronmapEditgeofence
+                .animate()
+                .translationX(trans2)
+                .setDuration(ANIMATION_DURATION)
+                .start();
+
+        final ConstraintLayout.LayoutParams lp =
+                (ConstraintLayout.LayoutParams) mBinding.verticalOneThird.getLayoutParams();
+
+        ValueAnimator animation;
         if (isForEditMode) {
-            mBinding.yyy.setX(mBinding.xxx.getWidth());
-            mBinding.yyy.setVisibility(View.VISIBLE);
-            mBinding.xxx.animate().translationX(-mBinding.xxx.getWidth()).setDuration(300).alpha(1).start();
-            mBinding.yyy.animate().translationX(0).setDuration(300).start();
+            animation = ValueAnimator.ofFloat(from.getFloat(), to.getFloat());
+            ((MainActivity) getActivity()).hideFab();
+        } else {
+            animation = ValueAnimator.ofFloat(to.getFloat(), from.getFloat());
+            ((MainActivity) getActivity()).restoreFab();
+        }
+
+        animation.setDuration(ANIMATION_DURATION);
+        animation.start();
+        //mMap.setLatLngBoundsForCameraTarget();
+
+        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator updatedAnimation) {
+                lp.guidePercent =  (float)updatedAnimation.getAnimatedValue();
+                mBinding.verticalOneThird.setLayoutParams(lp);
+            }
+
+        });
+        if (mCurrentGeofence != null) {
+            moveCameraTo(mCurrentGeofence.getCenter());
+        }
+
+
+/*
+        if (isForEditMode) {
+
+            mBinding.conslayoutFrguseronmapEditgeofence
+                    .setX(mBinding.linlayoutFrguseronmapUsers.getWidth());
+            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(View.VISIBLE);
+            mBinding.linlayoutFrguseronmapUsers
+                    .animate()
+                    .translationX(-mBinding.linlayoutFrguseronmapUsers.getWidth())
+                    .setDuration(ANIMATION_DURATION)
+                    .alpha(1)
+                    .start();
+            mBinding.conslayoutFrguseronmapEditgeofence
+                    .animate()
+                    .translationX(0)
+                    .setDuration(ANIMATION_DURATION)
+                    .start();
 
             final ConstraintLayout.LayoutParams lp =
                     (ConstraintLayout.LayoutParams) mBinding.verticalOneThird.getLayoutParams();
 
-            TypedValue from = ResourceUtil.getTypedValue(getContext(), R.dimen.map_guideline_view_mode_percent);
-            TypedValue to = ResourceUtil.getTypedValue(getContext(), R.dimen.map_guideline_edit_mode_percent);
             ValueAnimator animation = ValueAnimator.ofFloat(from.getFloat(), to.getFloat());
 
-            animation.setDuration(300);
+            animation.setDuration(ANIMATION_DURATION);
             animation.start();
+            //mMap.setLatLngBoundsForCameraTarget();
 
             animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator updatedAnimation) {
-                    // You can use the animated value in a property that uses the
-                    // same type as the animation. In this case, you can use the
-                    // float value in the translationX property.
                     lp.guidePercent =  (float)updatedAnimation.getAnimatedValue();
                     mBinding.verticalOneThird.setLayoutParams(lp);
                 }
+
             });
+            if (mCurrentGeofence != null) {
+                moveCameraTo(mCurrentGeofence.getCenter());
+            }
 
             ((MainActivity)getActivity()).hideFab();
         } else {
-            mBinding.xxx.animate().translationX(0).setDuration(300).alpha(1).start();
-            mBinding.yyy.animate().translationX(mBinding.xxx.getWidth()).setDuration(300).start();
+            mBinding.linlayoutFrguseronmapUsers
+                    .animate()
+                    .translationX(0)
+                    .setDuration(ANIMATION_DURATION)
+                    .alpha(1)
+                    .start();
+            mBinding.conslayoutFrguseronmapEditgeofence
+                    .animate()
+                    .translationX(mBinding.linlayoutFrguseronmapUsers.getWidth())
+                    .setDuration(ANIMATION_DURATION)
+                    .start();
             ((MainActivity)getActivity()).restoreFab();
+            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(View.INVISIBLE);
         }
+*/
     }
     private void switchToNormalMode() {
         changeUiLayout(false);

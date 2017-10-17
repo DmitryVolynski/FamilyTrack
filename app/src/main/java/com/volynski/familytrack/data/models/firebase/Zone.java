@@ -4,7 +4,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.Exclude;
 import com.volynski.familytrack.StringKeys;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 /**
  * Created by DmitryVolynski on 26.09.2017.
@@ -19,27 +21,30 @@ public class Zone {
     private int mRadius;
     private long mTimestamp;
     private String mUuid;
+    private List<String> mTrackedUsers = new ArrayList<>();
 
     public Zone() {
         //mRadius = DEFAULT_RADIUS;
         //mName = "New zone";
     }
 
-    public Zone(String key, String name, LatLng loc, int radius) {
+    public Zone(String key, String name, LatLng loc, int radius, List<String> trackedUsers) {
         mUuid = key;
         mName = name;
         mLatitude = loc.latitude;
         mLongitude = loc.longitude;
         mRadius = radius;
         mTimestamp = Calendar.getInstance().getTimeInMillis();
+        mTrackedUsers = trackedUsers;
     }
 
-    public Zone(String name, LatLng loc, int radius) {
+    public Zone(String name, LatLng loc, int radius, List<String> trackedUsers) {
         mName = name;
         mLatitude = loc.latitude;
         mLongitude = loc.longitude;
         mRadius = radius;
         mTimestamp = Calendar.getInstance().getTimeInMillis();
+        mTrackedUsers = trackedUsers;
     }
 
     public String getName() {
@@ -104,5 +109,13 @@ public class Zone {
     @Exclude
     public LatLng getLatLng() {
         return new LatLng(mLatitude, mLongitude);
+    }
+
+    public List<String> getTrackedUsers() {
+        return mTrackedUsers;
+    }
+
+    public void setTrackedUsers(List<String> trackedUsers) {
+        this.mTrackedUsers = trackedUsers;
     }
 }

@@ -117,21 +117,20 @@ public class MainActivity
         if (data == null) {
             return;
         }
+        String snackbarText = (data.hasExtra(StringKeys.SNACKBAR_TEXT_KEY) ?
+                data.getStringExtra(StringKeys.SNACKBAR_TEXT_KEY) : "");
         switch (requestCode) {
             case REQUEST_CODE_EDIT_USER_DETAILS:
-                SnackbarUtil.showSnackbar(getViewForSnackbar(), "User updated: " + data.getStringExtra(StringKeys.USER_UPDATE_RESULT_KEY));
                 UserListFragment f =
                         (UserListFragment) FragmentUtil
                                 .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
                 if (f != null) {
                     f.refreshList();
                 }
-            case REQUEST_CODE_EDIT_SETTINGS:
-                SnackbarUtil.showSnackbar(getViewForSnackbar(), "Settings updated");
-                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
+        SnackbarUtil.showSnackbar(getViewForSnackbar(), snackbarText);
     }
 
 

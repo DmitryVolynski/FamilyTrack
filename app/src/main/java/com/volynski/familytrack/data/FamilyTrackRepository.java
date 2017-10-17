@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
@@ -270,11 +271,43 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         });
     }
 
+    /**
+     * Membership records will be physically deleted from
+     *  - registered_users/<userUuid>/memberships/<groupUuid>
+     *  - groups/<groupUuid>/members/<userUuid>
+     */
     @Override
     public void removeUserFromGroup(@NonNull String groupUuid,
                                     @NonNull String userUuid,
-                                    RemoveUserFromGroupCallback callback) {
+                                    final RemoveUserFromGroupCallback callback) {
+        String key1 = FamilyTrackDbRefsHelper.userOfGroupRef(groupUuid, userUuid);
+        String key2 = FamilyTrackDbRefsHelper.groupOfUserRef(userUuid, groupUuid);
 
+        Map<String, Object> childUpdates = new HashMap<>();
+        childUpdates.put(key1, null);
+        childUpdates.put(key2, null);
+
+        getFirebaseConnection().getReference()
+                .updateChildren(childUpdates)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (callback != null) {
+                            callback.onRemoveUserFromGroupCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Timber.e(e);
+                        if (callback != null) {
+                            callback.onRemoveUserFromGroupCompleted(
+                                    new FirebaseResult<String>(FamilyTrackException.getInstance(mContext,
+                                            FamilyTrackException.DB_REMOVE_USER_FAILED)));
+                        }
+                    }
+                });
     }
 
 

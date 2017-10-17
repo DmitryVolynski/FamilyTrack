@@ -45,6 +45,7 @@ public class FamilyTrackDbRefsHelper {
         return String.format(NODE_USERS_OF_GROUP_FORMAT_STRING, groupUuid);
     }
 
+    // groups -KtGRD00beq29domxQQZ members -KtIE1SKww3I3S21C1dO
     public static String userOfGroupRef(String groupUuid, String userUuid) {
         return String.format(NODE_USER_OF_GROUP_FORMAT_STRING, groupUuid, userUuid);
     }
@@ -53,6 +54,7 @@ public class FamilyTrackDbRefsHelper {
         return String.format(NODE_GROUPS_OF_USER_FORMAT_STRING, userUuid);
     }
 
+    // registered_users/<userUuid>/memberships/<groupUuid>
     public static String groupOfUserRef(String userUuid, String groupUuid) {
         return String.format(NODE_GROUP_OF_USER_FORMAT_STRING, userUuid, groupUuid);
     }

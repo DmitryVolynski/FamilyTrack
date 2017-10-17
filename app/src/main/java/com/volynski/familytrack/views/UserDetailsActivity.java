@@ -1,5 +1,6 @@
 package com.volynski.familytrack.views;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
@@ -17,6 +18,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.databinding.ActivityUserDetailsBinding;
+import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.utils.IntentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserDetailsViewModel;
@@ -33,10 +35,10 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
     private String mUserUuid;
     private UserDetailsViewModel mViewModel;
 
-    @Override
-    public void updateCompleted(String result) {
+    public void dbopCompleted(String result, String snackbarText) {
         Intent intent = new Intent();
         intent.putExtra(StringKeys.USER_UPDATE_RESULT_KEY, result);
+        intent.putExtra(StringKeys.SNACKBAR_TEXT_KEY, snackbarText);
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -136,14 +138,39 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
             case android.R.id.home:
                 onBackPressed();
                 break;
-            case (R.id.action_save_user):
+            case R.id.action_save_user:
                 mViewModel.updateUser();
+                break;
+            case R.id.action_exclude_user:
+                startRemoveUser();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
         return true;
+    }
+
+    private void startRemoveUser() {
+        final SimpleDialogFragment confirmDialog =
+                new SimpleDialogFragment();
+        confirmDialog.setParms("Removing user",
+                String.format("Are you sure you want to remove user '%1$s' from group '%2$s' ?\nIn order to join this group later user should be invited again",
+                        mViewModel.user.get().getDisplayName(), mViewModel.activeGroup.get()),
+                "Ok", "Cancel",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        mViewModel.removeUser();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        confirmDialog.dismiss();
+                    }
+                });
+        confirmDialog.show(getFragmentManager(), "dialog");
     }
 
     private void setupBindings() {

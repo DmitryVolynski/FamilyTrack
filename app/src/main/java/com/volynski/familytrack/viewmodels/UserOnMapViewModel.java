@@ -23,6 +23,7 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
@@ -228,9 +229,10 @@ public class UserOnMapViewModel extends BaseObservable {
     }
 
     public void saveZone() {
+        List<String> trackedUsers = getTrackedUsersList();
         Zone zone = new Zone(mZoneKey, zoneName.get(),
                 new LatLng(zoneCenterLatitude.get(), zoneCenterLongitude.get()),
-                zoneRadius.get());
+                zoneRadius.get(), trackedUsers);
         if (zoneEditMode.get() == EM_NEW) {
             mRepository.createZone(mCurrentUser.getActiveMembership().getGroupUuid(),
                     zone, new FamilyTrackDataSource.CreateZoneCallback() {
@@ -256,6 +258,21 @@ public class UserOnMapViewModel extends BaseObservable {
         } else {
             Timber.v("Attempt to save zone in unknown mode");
         }
+    }
+
+    /**
+     * Scans @viewmodels for users, who should be tracked in current zone
+     * (@UserListItemViewModel.checked should be true)
+     * @return
+     */
+    private List<String> getTrackedUsersList() {
+        List<String> result = new ArrayList<>();
+        for (UserListItemViewModel item : viewModels) {
+            if (item.checked.get()) {
+                result.add(item.getUser().getUserUuid());
+            }
+        }
+        return result;
     }
 
     public void removeZone() {
