@@ -24,6 +24,7 @@ import com.google.android.gms.tasks.Task;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
+import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
@@ -50,16 +51,25 @@ public class TrackingTask
     private String mUserUuid;
     private Context mContext;
     private GoogleApiClient mGoogleApiClient;
+    private Group mActiveGroup;
 
     public TrackingTask(String userUuid, Context context, @NonNull TrackingTaskCallback callback) {
         mUserUuid = userUuid;
         mContext = context.getApplicationContext();
         mCallback = callback;
         mDataSource = new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(mContext), mContext);
+        mActiveGroup = SharedPrefsUtil.getActiveGroup(context);
     }
 
     @Override
     public void run() {
+        if (mActiveGroup == null) {
+            // user is not a member of any group - do nothing
+            Timber.v("mActiveGroup == null. TrackingTask will not run");
+            mCallback.onTaskCompleted();
+            return;
+        }
+
         initGoogleApiClient();
     }
 
@@ -90,12 +100,12 @@ public class TrackingTask
 
     @Override
     public void onConnectionSuspended(int i) {
-        Timber.v("i=" + i);
+        Timber.v("onConnectionSuspended i=" + i);
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Timber.v("Connected");
+        Timber.v("onConnected");
         doWork();
     }
 
@@ -106,12 +116,13 @@ public class TrackingTask
     }
 
     private void doWork() {
-        Timber.v("Go!");
+        Timber.v("doWork started");
         if (!mGoogleApiClient.isConnected()) {
             Timber.v("Not connected");
             mCallback.onTaskCompleted();
             return;
         }
+
         try {
             FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
             // TODO доделать определение точных координат

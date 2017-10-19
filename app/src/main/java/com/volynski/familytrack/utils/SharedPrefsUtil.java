@@ -5,8 +5,11 @@ import android.content.SharedPreferences;
 import android.os.Parcel;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.gson.Gson;
 import com.volynski.familytrack.StringKeys;
+import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.services.SettingsService;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -84,7 +87,7 @@ public class SharedPrefsUtil {
 
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(StringKeys.SHARED_PREFS_IDTOKEN_KEY, idToken);
-        editor.commit();
+        editor.apply();
     }
 
     public static void wipeUserData(Context context) {
@@ -92,12 +95,43 @@ public class SharedPrefsUtil {
                 context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove(StringKeys.SHARED_PREFS_CURRENT_USER_KEY);
-        editor.commit();
+        editor.apply();
     }
 
     public static String getGoogleAccountIdToken(Context context) {
         SharedPreferences preferences =
                 context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
         return preferences.getString(StringKeys.SHARED_PREFS_IDTOKEN_KEY, "");
+    }
+
+    public static Group getActiveGroup(Context context) {
+        Group result = null;
+
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        String groupJson = preferences.getString(StringKeys.SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY, "");
+        if (!groupJson.equals("")) {
+            result = (new Gson().fromJson(groupJson, Group.class));
+        }
+        return result;
+    }
+
+    public static void setActiveGroup(Context context, Group group) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        String groupJson = (new Gson()).toJson(group);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(StringKeys.SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY, groupJson);
+        editor.apply();
+    }
+
+    public static void removeActiveGroup(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove(StringKeys.SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY);
+        editor.apply();
     }
 }

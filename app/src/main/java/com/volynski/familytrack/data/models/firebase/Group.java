@@ -1,6 +1,7 @@
 package com.volynski.familytrack.data.models.firebase;
 
 import com.google.firebase.database.Exclude;
+import com.google.gson.Gson;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -110,4 +111,14 @@ public class Group {
     public void setSettings(Settings settings) {
         this.mSettings = mSettings;
     }
+
+    public String ToJson() {
+        return (new Gson()).toJson(this);
+    }
+
+    @Exclude
+    public static Group getInstanceFromJson(String jsonGroup) {
+        return (new Gson()).fromJson(jsonGroup, Group.class);
+    }
+
 }

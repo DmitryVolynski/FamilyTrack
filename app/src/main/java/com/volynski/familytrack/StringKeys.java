@@ -21,6 +21,7 @@ public class StringKeys {
     public static final String USER_UPDATE_RESULT_KEY = "USER_UPDATE_RESULT";
     public static final String SETTINGS_UPDATE_RESULT_KEY = "SETTINGS_UPDATE_RESULT";
     public static final String SNACKBAR_TEXT_KEY = "SNACKBAR_TEXT";
+    public static final String SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY = "SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP";
 }
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением
@@ -33,7 +34,7 @@ public class StringKeys {
 // TODO: отображение пути и координат в динамике
 // TODO: адаптация форм для планшета
 // TODO: Material design
-// TODO: удаление/добавление пользователей в процессе работы администратором
+// TODO: добавление пользователей в процессе работы администратором
 // TODO: удаление группы при выходе последнего пользователя
 // вступление/выход пользователя из группы
 // TODO: разработка виджета

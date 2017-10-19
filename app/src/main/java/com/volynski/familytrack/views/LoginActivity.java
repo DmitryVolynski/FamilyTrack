@@ -256,11 +256,7 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void checkUserExists() {
-        /**
-        FamilyTrackDataSource dataSource =
-                new FamilyTrackRepository(mGoogleSignInAccount.getIdToken(), this);
-        dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(), this);
-         */
+
         getLocationPermission();
         FamilyTrackDataSource dataSource =
                 new FamilyTrackRepository(mGoogleSignInAccount.getIdToken(), this);
@@ -353,23 +349,13 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void startJobService(String userUuid) {
-        //PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace( mGoogleApiClient, null );
-        //result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-
-        //    @Override
-        //    public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
-        //        checkObject(placeLikelihoods);
-        //        Timber.v(placeLikelihoods.get(0).getPlace().getName().toString());
-        //        //placeLikelihoods.get(0).getPlace().getName()
-        //    }
-        //});
 
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
 
         Bundle bundle = new Bundle();
         bundle.putString(StringKeys.USER_UUID_KEY, userUuid);
 
-        Job newJob = dispatcher.newJobBuilder()
+        Job trackingJob = dispatcher.newJobBuilder()
                 .setTag(TrackingService.TAG)
                 .setService(TrackingService.class)
                 .setExtras(bundle)
@@ -380,6 +366,6 @@ public class LoginActivity extends AppCompatActivity implements
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .build();
 
-        dispatcher.mustSchedule(newJob);
+        dispatcher.mustSchedule(trackingJob);
     }
 }
