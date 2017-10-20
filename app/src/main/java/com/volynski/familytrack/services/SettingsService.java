@@ -1,16 +1,18 @@
 package com.volynski.familytrack.services;
 
+import android.app.job.JobParameters;
+import android.app.job.JobService;
 import android.content.Context;
 import android.os.Bundle;
 
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+/*import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
-import com.firebase.jobdispatcher.Trigger;
+import com.firebase.jobdispatcher.Trigger;*/
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.Group;
@@ -37,30 +39,30 @@ public class SettingsService extends JobService {
     public boolean onStartJob(final JobParameters job) {
         Timber.v("Settings Service started");
 
-        String userUuid =
-                IntentUtil.extractValueFromBundle(job.getExtras(), StringKeys.USER_UUID_KEY);
+/*        final String userUuid =
+                IntentUtil.extractValueFromBundle(job.getExtras(), StringKeys.CURRENT_USER_UUID_KEY);
 
         SettingsTask task = new SettingsTask(userUuid, this, new SettingsTaskCallback() {
             @Override
             public void onTaskCompleted(int newInterval) {
                 // reschedule service if new interval > 0
                 if (newInterval > 0) {
-                    Timber.v("Rescheduling service with new interval=" + newInterval);
-                    cancelService();
-                    SettingsService.startService(SettingsService.this, newInterval, newInterval);
+                    Timber.v("Rescheduling SettingsService with new interval=" + newInterval);
+                    rescheduleService(userUuid, newInterval);
                 }
                 jobFinished(job, false);
             }
         });
-        task.run();
+        task.run();*/
         return true;
     }
 
-    private void cancelService() {
+/*    private void rescheduleService(String userUuid, int newInterval) {
         FirebaseJobDispatcher dispatcher =
                 new FirebaseJobDispatcher(new GooglePlayDriver(this));
-        dispatcher.cancel(SettingsService.TAG);
-    }
+        dispatcher.cancel(TrackingService.TAG);
+        SettingsService.startService(dispatcher, userUuid, 0, newInterval);
+    }*/
 
     @Override
     public boolean onStopJob(JobParameters job) {
@@ -68,20 +70,22 @@ public class SettingsService extends JobService {
         return false;
     }
 
-    public static void startService(Context context, int windowStart, int windowEnd ) {
-        FirebaseJobDispatcher dispatcher =
-                new FirebaseJobDispatcher(new GooglePlayDriver(context));
+/*    public static void startService(FirebaseJobDispatcher dispatcher, String userUuid,
+                                    int windowStart, int windowEnd ) {
+        Bundle bundle = new Bundle();
+        bundle.putString(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
 
-        Job trackingJob = dispatcher.newJobBuilder()
+        Job settingsJob = dispatcher.newJobBuilder()
                 .setTag(SettingsService.TAG)
                 .setService(SettingsService.class)
                 .setRecurring(true)
+                .setExtras(bundle)
                 .setLifetime(Lifetime.FOREVER)
                 .setReplaceCurrent(true)
                 .setTrigger(Trigger.executionWindow(windowStart, windowEnd))
                 .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
                 .build();
 
-        dispatcher.mustSchedule(trackingJob);
-    }
+        dispatcher.schedule(settingsJob);
+    }*/
 }

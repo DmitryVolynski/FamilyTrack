@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -19,7 +18,6 @@ import com.google.android.gms.location.places.PlaceLikelihood;
 import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
@@ -27,11 +25,6 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -50,6 +43,10 @@ public class TrackingTask
     private final FamilyTrackDataSource mDataSource;
     private String mUserUuid;
     private Context mContext;
+
+    // keeps 0 if no reschedule of location service required, new interval in minutes (>0) if we need rescheduling
+    private int mRescheduleFlag;
+
     private GoogleApiClient mGoogleApiClient;
     private Group mActiveGroup;
 
@@ -63,14 +60,30 @@ public class TrackingTask
 
     @Override
     public void run() {
-        if (mActiveGroup == null) {
+        if (mActiveGroup == null || mActiveGroup.getSettings() == null) {
             // user is not a member of any group - do nothing
             Timber.v("mActiveGroup == null. TrackingTask will not run");
-            mCallback.onTaskCompleted();
+            mCallback.onTaskCompleted(0);
+            return;
+        }
+
+        checkForServiceReschedule();
+
+        if (!mActiveGroup.getSettings().getIsTrackingOn()) {
+            // now tracking is off - do nothing
+            Timber.v("Tracking is off. Idle...");
+            mCallback.onTaskCompleted(0);
             return;
         }
 
         initGoogleApiClient();
+    }
+
+    private void checkForServiceReschedule() {
+        int currentInterval = SharedPrefsUtil.getTrackingInterval(mContext);
+        int newInterval = mActiveGroup.getSettings().getLocationUpdateInterval();
+        Timber.v(String.format("Checking old and new intervals: %1$d/%2$d", currentInterval, newInterval));
+        mRescheduleFlag = (currentInterval != newInterval ? newInterval : 0);
     }
 
     private void updateUserLocation(String userUuid,
@@ -93,7 +106,7 @@ public class TrackingTask
         mDataSource.updateUserLocation(userUuid, userLocation, new FamilyTrackDataSource.UpdateUserLocationCallback() {
             @Override
             public void onUpdateUserLocationCompleted(FirebaseResult<String> result) {
-                mCallback.onTaskCompleted();
+                mCallback.onTaskCompleted(mRescheduleFlag);
             }
         });
     }
@@ -118,8 +131,8 @@ public class TrackingTask
     private void doWork() {
         Timber.v("doWork started");
         if (!mGoogleApiClient.isConnected()) {
-            Timber.v("Not connected");
-            mCallback.onTaskCompleted();
+            Timber.v("mGoogleApiClient not connected");
+            mCallback.onTaskCompleted(mRescheduleFlag);
             return;
         }
 
@@ -131,7 +144,7 @@ public class TrackingTask
                 public void onComplete(final @NonNull Task<android.location.Location> task) {
                     if (!task.isSuccessful()) {
                         Timber.v("mFusedLocationClient.getLastLocation() != success");
-                        mCallback.onTaskCompleted();
+                        mCallback.onTaskCompleted(mRescheduleFlag);
                     }
                     PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
                     result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
@@ -144,7 +157,7 @@ public class TrackingTask
                                 updateUserLocation(mUserUuid, task.getResult(), placeLikelihoods.get(0));
                             } else {
                                 Timber.v("=0 or not isSuccess");
-                                mCallback.onTaskCompleted();
+                                mCallback.onTaskCompleted(mRescheduleFlag);
                             }
                             placeLikelihoods.release();
                         }
@@ -156,7 +169,7 @@ public class TrackingTask
                 mGoogleApiClient.disconnect();
             }
             Timber.e(ex);
-            mCallback.onTaskCompleted();
+            mCallback.onTaskCompleted(mRescheduleFlag);
         }
     }
 

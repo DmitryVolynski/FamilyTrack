@@ -14,6 +14,7 @@ import android.databinding.ObservableMap;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
@@ -112,6 +113,7 @@ public class UserOnMapViewModel extends BaseObservable {
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() != null) {
                     mCurrentUser = result.getData();
+                    doTest();
                     if (mCurrentUser.getActiveMembership() != null) {
                         populateObservables(mCurrentUser.getActiveMembership().getGroupUuid());
                     }
@@ -121,6 +123,20 @@ public class UserOnMapViewModel extends BaseObservable {
             }
         });
 
+    }
+
+    private void doTest() {
+        mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(), new FamilyTrackDataSource.GetGroupByUuidCallback() {
+            @Override
+            public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                Gson gson = new Gson();
+                //Group g1 = result.getData()
+                String s = gson.toJson(result.getData());
+
+                Group g = gson.fromJson(s, Group.class);
+                int i = 0;
+            }
+        });
     }
 
     /**

@@ -134,4 +134,51 @@ public class SharedPrefsUtil {
         editor.remove(StringKeys.SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY);
         editor.apply();
     }
+
+    public static void setTrackingInterval(Context context, int interval) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putInt(StringKeys.SHARED_PREFS_CURRENT_INTERVAL_KEY, interval);
+        editor.apply();
+    }
+
+    public static int getTrackingInterval(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        return preferences.getInt(StringKeys.SHARED_PREFS_CURRENT_INTERVAL_KEY, 0);
+    }
+    
+/*
+
+    public static void setValue(Context context, String valueKey, Object value) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        String strValue = "";
+        if (value instanceof String) { strValue = (String)value; }
+
+        //String groupJson = (new Gson()).toJson(group);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(valueKey, strValue);
+        editor.apply();
+    }
+
+    public static Object getValue(Context context, String valueKey) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        String strValue = preferences.getString(valueKey, "");
+        if (value instanceof String) { strValue = (String)value; }
+
+        //String groupJson = (new Gson()).toJson(group);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(valueKey, strValue);
+        editor.apply();
+    }
+*/
+
 }

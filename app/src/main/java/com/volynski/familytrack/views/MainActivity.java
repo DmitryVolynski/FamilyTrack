@@ -255,6 +255,7 @@ public class MainActivity
     }
 
     private void fabButtonClicked() {
+
         switch (mContentId) {
             case CONTENT_USER_LIST:
                 UserListFragment f0 =

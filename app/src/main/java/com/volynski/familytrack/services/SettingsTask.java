@@ -52,7 +52,6 @@ public class SettingsTask extends Thread {
                     mCallback.onTaskCompleted(0);
                 }
             }
-
         });
     }
 
@@ -62,14 +61,12 @@ public class SettingsTask extends Thread {
         if (newRec == null) {
             Timber.v(String.format("Unexpected error. User '%1$s' has null active group. Settings not changed", mUserUuid));
         } else {
-            if (oldRec.getSettings().equals(newRec.getSettings())) {
-                Timber.v(String.format("Unexpected error. User '%1$s' has null active group. Settings not changed", mUserUuid));
-            } else {
-                SharedPrefsUtil.setActiveGroup(mContext, newRec);
-                if (oldRec.getSettings().getSettingsUpdateInterval() !=
-                        newRec.getSettings().getSettingsUpdateInterval()) {
-                    newInterval = newRec.getSettings().getSettingsUpdateInterval() * 60; // convert minutes to seconds
-                }
+            Timber.v("Replacing group in preferences");
+            SharedPrefsUtil.setActiveGroup(mContext, newRec);
+            if (oldRec != null && oldRec.getSettings().getSettingsUpdateInterval() !=
+                    newRec.getSettings().getSettingsUpdateInterval()) {
+                newInterval = newRec.getSettings().getSettingsUpdateInterval(); // convert minutes to seconds
+                Timber.v("New settings interval detected:" + newInterval);
             }
         }
         return newInterval;

@@ -2,6 +2,7 @@ package com.volynski.familytrack.utils;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 
 import timber.log.Timber;
 
@@ -24,7 +25,7 @@ public class IntentUtil {
         return result;
     }
 
-    public static String extractValueFromBundle(Bundle bundle, String key) {
+    public static String extractValueFromBundle(PersistableBundle bundle, String key) {
         String result = "";
         if (bundle != null) {
             if (bundle.containsKey(key)) {

@@ -5,5 +5,5 @@ package com.volynski.familytrack.services;
  */
 
 public interface TrackingTaskCallback {
-    void onTaskCompleted();
+    void onTaskCompleted(int newInterval);
 }

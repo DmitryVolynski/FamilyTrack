@@ -27,14 +27,6 @@ public class Settings {
         mIsSimulationOn = isSimulationOn;
     }
 
-    public boolean isIsTrackingOn() {
-        return mIsTrackingOn;
-    }
-
-    public void setIsTrackingOn(boolean isTrackingOn) {
-        this.mIsTrackingOn = isTrackingOn;
-    }
-
     public int getLocationUpdateInterval() {
         return mLocationUpdateInterval;
     }
@@ -59,13 +51,6 @@ public class Settings {
         this.mAccuracyLevel = accuracyLevel;
     }
 
-    public boolean isIsSimulationOn() {
-        return mIsSimulationOn;
-    }
-
-    public void setIsSimulationOn(boolean isSimulationOn) {
-        this.mIsSimulationOn = isSimulationOn;
-    }
 
     /**
      * Default settings
@@ -87,5 +72,21 @@ public class Settings {
                 result = "Maximum accuracy and power consumption";
         }
         return result;
+    }
+
+    public boolean getIsTrackingOn() {
+        return mIsTrackingOn;
+    }
+
+    public void setIsTrackingOn(boolean trackingOn) {
+        this.mIsTrackingOn = trackingOn;
+    }
+
+    public boolean getIsSimulationOn() {
+        return mIsSimulationOn;
+    }
+
+    public void setIsSimulationOn(boolean simulationOn) {
+        this.mIsSimulationOn = simulationOn;
     }
 }

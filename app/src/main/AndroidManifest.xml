@@ -24,6 +24,7 @@
         <activity android:name=".views.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -31,7 +32,7 @@
             android:name=".views.SettingsActivity"
             android:label="Settings"
             android:parentActivityName=".views.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"/>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".views.UserDetailsActivity"
             android:label="@string/title_activity_main"
@@ -39,17 +40,27 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".views.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:label="@string/title_activity_main"/>
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <service
             android:name=".services.TrackingService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
+        <service
+            android:name=".services.SettingsService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE">
             <intent-filter>
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
-
+        <service
+            android:name=".services.FirebaseService"
+            android:enabled="true"
+            android:stopWithTask="false"
+            android:directBootAware="true"
+            android:exported="false"></service>
     </application>
 
 </manifest>

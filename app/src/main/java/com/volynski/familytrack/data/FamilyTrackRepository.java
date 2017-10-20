@@ -313,14 +313,15 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     @Override
     public void getGroupByUuid(@NonNull String groupUuid, @NonNull final GetGroupByUuidCallback callback) {
-        DatabaseReference ref = getFirebaseConnection().getReference("groups");
-        Query query = ref.orderByKey().equalTo(groupUuid).limitToFirst(1);
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.groupRef(groupUuid));
+        Query query = ref.orderByValue();
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // get Group object with all members
-                Group group = FirebaseUtil.getGroupFromSnapshot(dataSnapshot.getChildren().iterator().next());
+                Group group = FirebaseUtil.getGroupFromSnapshot(dataSnapshot);
                 callback.onGetGroupByUuidCompleted(new FirebaseResult<Group>(group));
             }
 

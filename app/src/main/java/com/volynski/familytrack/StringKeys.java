@@ -13,6 +13,9 @@ public class StringKeys {
             = StringKeys.class.getPackage().getName() + ".PREFERENCE_FILE_KEY";
     public static final String SHARED_PREFS_CURRENT_USER_KEY = "CURRENT_USER";
     public static final String SHARED_PREFS_IDTOKEN_KEY = "ID_TOKEN";
+    public static final String SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY = "SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP";
+    public static final String SHARED_PREFS_CURRENT_INTERVAL_KEY = "SHARED_PREFS_CURRENT_INTERVAL";
+
     public static final String CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
     public static final String USER_UUID_KEY = "USER_UUID";
     public static final String SHARED_PREFS_CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
@@ -21,7 +24,6 @@ public class StringKeys {
     public static final String USER_UPDATE_RESULT_KEY = "USER_UPDATE_RESULT";
     public static final String SETTINGS_UPDATE_RESULT_KEY = "SETTINGS_UPDATE_RESULT";
     public static final String SNACKBAR_TEXT_KEY = "SNACKBAR_TEXT";
-    public static final String SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY = "SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP";
 }
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением

@@ -109,7 +109,7 @@ public class Group {
     }
 
     public void setSettings(Settings settings) {
-        this.mSettings = mSettings;
+        this.mSettings = settings;
     }
 
     public String ToJson() {
