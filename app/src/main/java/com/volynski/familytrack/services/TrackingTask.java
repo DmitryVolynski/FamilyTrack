@@ -19,11 +19,13 @@ import com.google.android.gms.location.places.PlaceLikelihoodBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
+import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
 import timber.log.Timber;
@@ -48,42 +50,41 @@ public class TrackingTask
     private int mRescheduleFlag;
 
     private GoogleApiClient mGoogleApiClient;
-    private Group mActiveGroup;
+    private Settings mSettings;
 
     public TrackingTask(String userUuid, Context context, @NonNull TrackingTaskCallback callback) {
         mUserUuid = userUuid;
         mContext = context.getApplicationContext();
         mCallback = callback;
         mDataSource = new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(mContext), mContext);
-        mActiveGroup = SharedPrefsUtil.getActiveGroup(context);
+        mSettings = SharedPrefsUtil.getSettings(context);
     }
 
     @Override
     public void run() {
-        if (mActiveGroup == null || mActiveGroup.getSettings() == null) {
+        if (mSettings == null) {
             // user is not a member of any group - do nothing
-            Timber.v("mActiveGroup == null. TrackingTask will not run");
+            Timber.v("mSettings == null. TrackingTask will not run");
             mCallback.onTaskCompleted(0);
             return;
         }
 
-        checkForServiceReschedule();
+        Timber.v("=== Current settings=" + (new Gson()).toJson(mSettings));
 
-        if (!mActiveGroup.getSettings().getIsTrackingOn()) {
+        // checking for reschedule tracking task
+        int currentInterval = SharedPrefsUtil.getTrackingInterval(mContext);
+        int newInterval = mSettings.getLocationUpdateInterval();
+        Timber.v(String.format("Checking old and new intervals: %1$d/%2$d", currentInterval, newInterval));
+        mRescheduleFlag = (currentInterval != newInterval ? newInterval : 0);
+
+        if (!mSettings.getIsTrackingOn()) {
             // now tracking is off - do nothing
             Timber.v("Tracking is off. Idle...");
-            mCallback.onTaskCompleted(0);
+            mCallback.onTaskCompleted(mRescheduleFlag);
             return;
         }
 
         initGoogleApiClient();
-    }
-
-    private void checkForServiceReschedule() {
-        int currentInterval = SharedPrefsUtil.getTrackingInterval(mContext);
-        int newInterval = mActiveGroup.getSettings().getLocationUpdateInterval();
-        Timber.v(String.format("Checking old and new intervals: %1$d/%2$d", currentInterval, newInterval));
-        mRescheduleFlag = (currentInterval != newInterval ? newInterval : 0);
     }
 
     private void updateUserLocation(String userUuid,
@@ -146,7 +147,8 @@ public class TrackingTask
                         Timber.v("mFusedLocationClient.getLastLocation() != success");
                         mCallback.onTaskCompleted(mRescheduleFlag);
                     }
-                    PendingResult<PlaceLikelihoodBuffer> result = Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
+                    PendingResult<PlaceLikelihoodBuffer> result =
+                            Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
                     result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
                         @Override
                         public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {

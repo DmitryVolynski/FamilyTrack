@@ -2,6 +2,7 @@ package com.volynski.familytrack.data;
 
 import android.support.annotation.NonNull;
 
+import com.google.firebase.database.FirebaseDatabase;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Settings;
@@ -16,6 +17,7 @@ import java.util.List;
 
 public interface FamilyTrackDataSource {
 
+    FirebaseDatabase getFirebaseConnection();
 
     //
     // --------- user's operations

@@ -25,7 +25,7 @@ public class IntentUtil {
         return result;
     }
 
-    public static String extractValueFromBundle(PersistableBundle bundle, String key) {
+    public static String extractValueFromBundle(Bundle bundle, String key) {
         String result = "";
         if (bundle != null) {
             if (bundle.containsKey(key)) {

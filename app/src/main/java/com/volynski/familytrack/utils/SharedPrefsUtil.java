@@ -8,6 +8,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.gson.Gson;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.services.SettingsService;
 
@@ -135,6 +136,37 @@ public class SharedPrefsUtil {
         editor.apply();
     }
 
+    public static void setSettings(Context context, Settings settings) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        String groupJson = (new Gson()).toJson(settings);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(StringKeys.SHARED_PREFS_SETTINGS_KEY, groupJson);
+        editor.apply();
+    }
+
+    public static void removeSettings(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove(StringKeys.SHARED_PREFS_SETTINGS_KEY);
+        editor.apply();
+    }
+
+    public static Settings getSettings(Context context) {
+        Settings result = null;
+
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        String groupJson = preferences.getString(StringKeys.SHARED_PREFS_SETTINGS_KEY, "");
+        if (!groupJson.equals("")) {
+            result = (new Gson().fromJson(groupJson, Settings.class));
+        }
+        return result;
+    }
+
     public static void setTrackingInterval(Context context, int interval) {
         SharedPreferences preferences =
                 context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
@@ -149,7 +181,7 @@ public class SharedPrefsUtil {
                 context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
         return preferences.getInt(StringKeys.SHARED_PREFS_CURRENT_INTERVAL_KEY, 0);
     }
-    
+
 /*
 
     public static void setValue(Context context, String valueKey, Object value) {

@@ -16,6 +16,12 @@ import android.widget.TextView;
 
 //import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 //import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -40,6 +46,7 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.services.FirebaseService;
 import com.volynski.familytrack.services.SettingsService;
 import com.volynski.familytrack.services.TrackingService;
 import com.volynski.familytrack.utils.MyDebugTree;
@@ -323,9 +330,14 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void proceedToMainActivity(String userUuid) {
+        Intent serviceIntent = new Intent(this, FirebaseService.class);
+        serviceIntent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
+        startService(serviceIntent);
+
         startJobServices(userUuid);
+
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
+        intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         intent.putExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, MainActivity.CONTENT_MAP);
         startActivity(intent);
     }
@@ -347,41 +359,6 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void startJobServices(String userUuid) {
-
-/*        FirebaseJobDispatcher dispatcher =
-                new FirebaseJobDispatcher(new GooglePlayDriver(this));*/
-
-        TrackingService.startViaJobSheduler(this.getApplicationContext() , userUuid, 5);
-        //SettingsService.startService(dispatcher, userUuid, 0, 15);
-
-/*        FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
-
-        Bundle bundle = new Bundle();
-        bundle.putString(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
-
-        Job trackingJob = dispatcher.newJobBuilder()
-                .setTag(TrackingService.TAG)
-                .setService(TrackingService.class)
-                .setExtras(bundle)
-                .setRecurring(true)
-                .setLifetime(Lifetime.FOREVER)
-                .setReplaceCurrent(true)
-                .setTrigger(Trigger.executionWindow(0, 15))
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                .build();
-
-        Job settingsJob = dispatcher.newJobBuilder()
-                .setTag(SettingsService.TAG)
-                .setService(SettingsService.class)
-                .setExtras(bundle)
-                .setRecurring(true)
-                .setLifetime(Lifetime.FOREVER)
-                .setReplaceCurrent(true)
-                .setTrigger(Trigger.executionWindow(0, 15))
-                .setRetryStrategy(RetryStrategy.DEFAULT_EXPONENTIAL)
-                .build();
-
-        dispatcher.mustSchedule(trackingJob);
-        dispatcher.mustSchedule(settingsJob);*/
+        TrackingService.startService(this, userUuid, 0, 5);
     }
 }

@@ -85,7 +85,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         }
     }
 
-    private FirebaseDatabase getFirebaseConnection() {
+    @Override
+    public FirebaseDatabase getFirebaseConnection() {
         if (mFirebaseDatabase == null) {
             firebaseAuthWithGoogle(mGoogleAccountIdToken);
             mFirebaseDatabase = FirebaseDatabase.getInstance();
@@ -731,7 +732,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     public void getSettingsByGroupUuid(@NonNull String groupUuid,
                                        @NonNull final GetSettingsByGroupUuidCallback callback) {
         DatabaseReference ref = getFirebaseConnection()
-                .getReference(FamilyTrackDbRefsHelper.groupSettings(groupUuid));
+                .getReference(FamilyTrackDbRefsHelper.groupSettingsRef(groupUuid));
         Query query = ref.orderByValue();
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -755,7 +756,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                                           @NonNull Settings settings,
                                           UpdateSettingsByGroupUuidCallback callback) {
         DatabaseReference ref = getFirebaseConnection()
-                .getReference(FamilyTrackDbRefsHelper.groupSettings(groupUuid));
+                .getReference(FamilyTrackDbRefsHelper.groupSettingsRef(groupUuid));
 
         ref.setValue(settings);
         if (callback != null) {

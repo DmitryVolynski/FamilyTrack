@@ -98,8 +98,8 @@ public class MainActivity
     private void readIntentData() {
         Intent intent = getIntent();
         if (intent != null) {
-            if (intent.hasExtra(StringKeys.USER_UUID_KEY)) {
-                mCurrentUserUuid = intent.getStringExtra(StringKeys.USER_UUID_KEY);
+            if (intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
+                mCurrentUserUuid = intent.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY);
             } else {
                 Timber.e("Current user uuid expected but not found in intent");
                 return;

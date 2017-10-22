@@ -82,7 +82,7 @@ public class FamilyTrackDbRefsHelper {
     }
 
     // groups/-KtGRD00beq29domxQQZ/settings
-    public static String groupSettings(String groupUuid) {
+    public static String groupSettingsRef(String groupUuid) {
         return FamilyTrackDbRefsHelper.groupRef(groupUuid) + Group.FIELD_SETTINGS;
     }
 }
