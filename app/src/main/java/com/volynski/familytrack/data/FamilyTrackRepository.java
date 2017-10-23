@@ -313,12 +313,14 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
 
     @Override
-    public void getGroupByUuid(@NonNull String groupUuid, @NonNull final GetGroupByUuidCallback callback) {
+    public void getGroupByUuid(@NonNull String groupUuid,
+                               boolean trackGroupNode,
+                               final @NonNull GetGroupByUuidCallback callback) {
         DatabaseReference ref = getFirebaseConnection()
                 .getReference(FamilyTrackDbRefsHelper.groupRef(groupUuid));
         Query query = ref.orderByValue();
 
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // get Group object with all members
@@ -330,7 +332,13 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        };
+
+        if (trackGroupNode) {
+            query.addValueEventListener(listener);
+        } else {
+            query.addListenerForSingleValueEvent(listener);
+        }
     }
 
     /**
@@ -401,7 +409,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                             @NonNull final List<User> usersToinvite,
                             @NonNull final InviteUsersCallback callback) {
         // check that group exists
-        getGroupByUuid(groupUuid, new GetGroupByUuidCallback() {
+        getGroupByUuid(groupUuid, false, new GetGroupByUuidCallback() {
             @Override
             public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                 if (result.getData() == null) {
@@ -487,7 +495,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                         Membership membership = result.getData().getMemberships().get(key);
                         // now read data of each group in list
                         Timber.v("Call getGroupByUuid for " + membership.getGroupUuid());
-                        getGroupByUuid(membership.getGroupUuid(), new GetGroupByUuidCallback() {
+                        getGroupByUuid(membership.getGroupUuid(), false, new GetGroupByUuidCallback() {
                             @Override
                             public synchronized void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                                 Timber.v("onGetGroupByUuidCompleted");

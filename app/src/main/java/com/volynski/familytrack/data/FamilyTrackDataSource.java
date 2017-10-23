@@ -132,9 +132,10 @@ public interface FamilyTrackDataSource {
     /**
      * Reads all group data (including members) for specified group
      * @param groupUuid - group key to find specified group
+     * @param trackGroupNode - true if we need to track changes on group node
      * @param callback - callback to return result
      */
-    void getGroupByUuid(@NonNull String groupUuid, @NonNull GetGroupByUuidCallback callback);
+    void getGroupByUuid(@NonNull String groupUuid, boolean trackGroupNode, @NonNull GetGroupByUuidCallback callback);
 
     interface GetSettingsByGroupUuidCallback { void onGetSettingsByGroupUuidCompleted(FirebaseResult<Settings> result); }
 

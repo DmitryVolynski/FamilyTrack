@@ -16,12 +16,6 @@ import android.widget.TextView;
 
 //import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 //import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
-import com.firebase.jobdispatcher.Job;
-import com.firebase.jobdispatcher.Lifetime;
-import com.firebase.jobdispatcher.RetryStrategy;
-import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -46,7 +40,6 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.services.FirebaseService;
 import com.volynski.familytrack.services.SettingsService;
 import com.volynski.familytrack.services.TrackingService;
 import com.volynski.familytrack.utils.MyDebugTree;
@@ -330,7 +323,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void proceedToMainActivity(String userUuid) {
-        Intent serviceIntent = new Intent(this, FirebaseService.class);
+        Intent serviceIntent = new Intent(this, SettingsService.class);
         serviceIntent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         startService(serviceIntent);
 

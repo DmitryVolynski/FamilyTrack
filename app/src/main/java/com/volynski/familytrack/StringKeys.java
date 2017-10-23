@@ -16,6 +16,7 @@ public class StringKeys {
     public static final String SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY = "SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP";
     public static final String SHARED_PREFS_CURRENT_INTERVAL_KEY = "SHARED_PREFS_CURRENT_INTERVAL";
     public static final String SHARED_PREFS_SETTINGS_KEY = "SHARED_PREFS_SETTINGS";
+    public static final String SHARED_PREFS_SIMULATED_LATLNG_KEY = "SHARED_PREFS_SIMULATED_LATLNG";
 
     public static final String CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
     public static final String USER_UUID_KEY = "USER_UUID";
@@ -29,20 +30,25 @@ public class StringKeys {
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением
 // 17.10.2017 доделать исключение клиента из группы
-// TODO: Изменить механизм позиционирования клиента (увеличить точность)
 // 16.10.2017 реализовать экран настроек с сохранением в БД
 // 16.10.2017 проверка данных при изменении настроек
 // 22.10.2017 чтение и использование настроек
 // реализовать левую панель навигации (Drawer)
-// TODO: отображение пути и координат в динамике
-// TODO: адаптация форм для планшета
-// TODO: Material design
+// 23.10.2017 отображение пути и координат в динамике
+// вступление/выход пользователя из группы
+// 23.10.2017 механизм эмуляции движения
+// 17.10.2017 добавление/удаление пользователей для geofences
+
+// === функционал
+// TODO: Изменить механизм позиционирования клиента (увеличить точность)
 // TODO: добавление пользователей в процессе работы администратором
 // TODO: удаление группы при выходе последнего пользователя
-// вступление/выход пользователя из группы
 // TODO: разработка виджета
-// TODO: механизм эмуляции движения
-// 17.10.2017 добавление/удаление пользователей для geofences
 // TODO: работа с уведомлениями по geofences
+
+// === UI
+// TODO: опция для отображения маркеров в пути + динамическое отображение пути (либо seekBar)
+// TODO: адаптация форм для планшета
+// TODO: Material design
 // TODO: добавить индикатор ожидания при загрузке данных
 // TODO: тестирование

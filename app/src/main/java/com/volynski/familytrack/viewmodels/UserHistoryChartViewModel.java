@@ -104,7 +104,7 @@ public class UserHistoryChartViewModel extends BaseObservable {
      * @param groupUuid - group Id to get members of
      */
     private void loadUsersList(String groupUuid) {
-        mRepository.getGroupByUuid(groupUuid,
+        mRepository.getGroupByUuid(groupUuid, false,
                 new FamilyTrackDataSource.GetGroupByUuidCallback() {
                     @Override
                     public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {

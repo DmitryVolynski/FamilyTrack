@@ -109,7 +109,7 @@ public class UserListViewModel
      */
     private void loadUsersList() {
         if (mCurrentUser.getActiveMembership() != null) {
-            mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(),
+            mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(), false,
                     new FamilyTrackDataSource.GetGroupByUuidCallback() {
                         @Override
                         public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {

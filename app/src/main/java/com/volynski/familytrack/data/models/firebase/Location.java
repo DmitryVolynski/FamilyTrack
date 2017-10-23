@@ -4,6 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.firebase.database.Exclude;
 
 import java.util.Calendar;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -35,8 +36,8 @@ public class Location {
         mAddress = address;
     }
 
-    public Location(long timestamp, double longitude,
-                    double latitude, String knownLocationName, String address, int batteryLevel) {
+    public Location(long timestamp, double latitude, double longitude,
+                    String knownLocationName, String address, int batteryLevel) {
         mTimestamp = timestamp;
         mLongitude = longitude;
         mLatitude = latitude;
@@ -45,8 +46,8 @@ public class Location {
         mAddress = address;
     }
 
-    public Location(Calendar calendar, double longitude,
-                    double latitude, String knownLocationName, String address, int batteryLevel) {
+    public Location(Calendar calendar, double latitude, double longitude,
+                    String knownLocationName, String address, int batteryLevel) {
         mTimestamp = calendar.getTimeInMillis();
         mLongitude = longitude;
         mLatitude = latitude;

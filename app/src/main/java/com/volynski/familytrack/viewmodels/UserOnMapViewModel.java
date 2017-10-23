@@ -113,7 +113,6 @@ public class UserOnMapViewModel extends BaseObservable {
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() != null) {
                     mCurrentUser = result.getData();
-                    doTest();
                     if (mCurrentUser.getActiveMembership() != null) {
                         populateObservables(mCurrentUser.getActiveMembership().getGroupUuid());
                     }
@@ -125,26 +124,12 @@ public class UserOnMapViewModel extends BaseObservable {
 
     }
 
-    private void doTest() {
-        mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(), new FamilyTrackDataSource.GetGroupByUuidCallback() {
-            @Override
-            public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
-                Gson gson = new Gson();
-                //Group g1 = result.getData()
-                String s = gson.toJson(result.getData());
-
-                Group g = gson.fromJson(s, Group.class);
-                int i = 0;
-            }
-        });
-    }
-
     /**
      * Read group info and populates users & zones (geofences)
      * @param groupUuid - group Id to read
      */
     private void populateObservables(String groupUuid) {
-        mRepository.getGroupByUuid(groupUuid,
+        mRepository.getGroupByUuid(groupUuid, true,
                 new FamilyTrackDataSource.GetGroupByUuidCallback() {
                     @Override
                     public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
@@ -163,6 +148,7 @@ public class UserOnMapViewModel extends BaseObservable {
     private void populateUserListFromDbResult(FirebaseResult<Group> result) {
         if (result.getData() != null && result.getData().getMembers() != null) {
             this.users.clear();
+            this.viewModels.clear();
             for (User user : result.getData().getMembers().values()) {
                 if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
                     this.users.add(user);
@@ -202,19 +188,21 @@ public class UserOnMapViewModel extends BaseObservable {
             return;
         }
 
-        Calendar now = Calendar.getInstance();
-        Calendar start = Calendar.getInstance();
-        start.add(Calendar.DATE, -20);
-        mRepository.getUserTrack(mSelectedUser.getUserUuid(), start.getTimeInMillis(), now.getTimeInMillis(),
-                new FamilyTrackDataSource.GetUserTrackCallback() {
-                    @Override
-                    public void onGetUserTrackCompleted(FirebaseResult<List<Location>> result) {
-                        path.clear();
-                        path.addAll(result.getData());
-                        // just switch the value to inform that it's nessesary to redraw the path
-                        redrawPath.set(!redrawPath.get());
-                    }
-                });
+        long now = Calendar.getInstance().getTimeInMillis();
+        long start = getTrackPeriodStart();
+
+        if (start > 0) {
+            mRepository.getUserTrack(mSelectedUser.getUserUuid(), start, now,
+                    new FamilyTrackDataSource.GetUserTrackCallback() {
+                        @Override
+                        public void onGetUserTrackCompleted(FirebaseResult<List<Location>> result) {
+                            path.clear();
+                            path.addAll(result.getData());
+                            // just switch the value to inform that it's nessesary to redraw the path
+                            redrawPath.set(!redrawPath.get());
+                        }
+                    });
+        }
     }
 
     public User getSelectedUser() {
@@ -314,7 +302,7 @@ public class UserOnMapViewModel extends BaseObservable {
      * to force view to redraw all zones
      */
     private void updateZonesList() {
-        mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(),
+        mRepository.getGroupByUuid(mCurrentUser.getActiveMembership().getGroupUuid(), false,
                 new FamilyTrackDataSource.GetGroupByUuidCallback() {
                     @Override
                     public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
@@ -325,5 +313,39 @@ public class UserOnMapViewModel extends BaseObservable {
 
     public void cancelZoneEdit() {
         zoneEditMode.set(EM_NONE);
+    }
+
+    private long getTrackPeriodStart() {
+        String key = "";
+
+        for (String k : toggleButtons.keySet()) {
+            if (toggleButtons.get(k)) {
+                key = k;
+                break;
+            }
+        }
+
+        long result = -1;
+        Calendar now = Calendar.getInstance();
+        switch (key) {
+            case "OFF":
+                result = 0;
+                break;
+            case "1H":
+                now.add(Calendar.HOUR, -1); ;
+                break;
+            case "8H":
+                now.add(Calendar.HOUR, -8); ;
+                break;
+            case "1D":
+                now.add(Calendar.DATE, -1); ;
+                break;
+            case "1W":
+                now.add(Calendar.DATE, -7); ;
+                break;
+            default:
+                result = 0;
+        }
+        return (result < 0 ? now.getTimeInMillis() : 0);
     }
 }

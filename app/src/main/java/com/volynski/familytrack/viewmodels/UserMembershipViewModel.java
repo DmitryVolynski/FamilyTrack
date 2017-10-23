@@ -140,7 +140,7 @@ public class UserMembershipViewModel
         if (mCurrentUser.getActiveMembership() != null) {
             // join to new group or leave current group
             final String activeGroupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
-            mRepository.getGroupByUuid(activeGroupUuid,
+            mRepository.getGroupByUuid(activeGroupUuid, false,
                     new FamilyTrackDataSource.GetGroupByUuidCallback() {
                         @Override
                         public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {

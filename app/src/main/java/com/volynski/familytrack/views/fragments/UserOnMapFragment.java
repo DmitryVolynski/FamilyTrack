@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
@@ -90,6 +91,7 @@ public class UserOnMapFragment
     private RecyclerViewListAdapter mAdapter;
     private LinearLayoutManager mGeoLayoutManager;
     private RecyclerViewListAdapter mAdapterGeo;
+    private Polyline mPolyline;
 
     public static UserOnMapFragment newInstance(Context context,
                                                 String currentUserUuid,
@@ -317,7 +319,6 @@ public class UserOnMapFragment
         }
         mViewModel.zoneCenterLatitude.set(latLng.latitude);
         mViewModel.zoneCenterLongitude.set(latLng.longitude);
-
     }
 
     /**
@@ -328,11 +329,12 @@ public class UserOnMapFragment
         if (mViewModel.path == null) {
             return;
         }
-        redrawMarkers();
+        //redrawMarkers();
         PolylineOptions options = new PolylineOptions();
         User user = mViewModel.getSelectedUser();
         for (Location location : mViewModel.path) {
             options.add(location.getLatLng()).color(R.color.colorSecondaryDark);
+/*
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(location.getLatLng())
                     .title(user.getDisplayName())
@@ -340,15 +342,21 @@ public class UserOnMapFragment
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
 
             mMap.addMarker(markerOptions);
+*/
         }
-        mMap.addPolyline(options);
+        if (mPolyline != null) {
+            mPolyline.remove();
+        }
+        mPolyline = mMap.addPolyline(options);
     }
 
     /**
-     * Redraws set of markers that correspond last known locations for all users
+     * Redraws set of markers - set of last known locations for all users
      * in group.
      */
     private void redrawMarkers() {
+        LatLng newCameraPos = null;
+
         List<User> users = mViewModel.users;
         if (users == null) {
             return;
@@ -365,10 +373,20 @@ public class UserOnMapFragment
                         .title(user.getDisplayName())
                         .snippet(user.getTextForSnippet())
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-
+                if (mViewModel.getSelectedUser() != null &&
+                        mViewModel.getSelectedUser().getUserUuid().equals(user.getUserUuid()))
+                    newCameraPos = location.getLatLng();
                 mMarkers.put(user.getUserUuid(), mMap.addMarker(markerOptions));
             }
         }
+        if (newCameraPos != null) {
+            if (!mMap.getProjection().getVisibleRegion().latLngBounds.contains(newCameraPos)) {
+                // if marker of selected user is out of bounds - center map to
+                // appropriate coordinates (current location of selected user)
+                moveCameraTo(newCameraPos);
+            }
+        }
+        redrawPath();
     }
 
     /**
@@ -496,63 +514,6 @@ public class UserOnMapFragment
             moveCameraTo(mCurrentGeofence.getCenter());
         }
 
-
-/*
-        if (isForEditMode) {
-
-            mBinding.conslayoutFrguseronmapEditgeofence
-                    .setX(mBinding.linlayoutFrguseronmapUsers.getWidth());
-            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(View.VISIBLE);
-            mBinding.linlayoutFrguseronmapUsers
-                    .animate()
-                    .translationX(-mBinding.linlayoutFrguseronmapUsers.getWidth())
-                    .setDuration(ANIMATION_DURATION)
-                    .alpha(1)
-                    .start();
-            mBinding.conslayoutFrguseronmapEditgeofence
-                    .animate()
-                    .translationX(0)
-                    .setDuration(ANIMATION_DURATION)
-                    .start();
-
-            final ConstraintLayout.LayoutParams lp =
-                    (ConstraintLayout.LayoutParams) mBinding.verticalOneThird.getLayoutParams();
-
-            ValueAnimator animation = ValueAnimator.ofFloat(from.getFloat(), to.getFloat());
-
-            animation.setDuration(ANIMATION_DURATION);
-            animation.start();
-            //mMap.setLatLngBoundsForCameraTarget();
-
-            animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator updatedAnimation) {
-                    lp.guidePercent =  (float)updatedAnimation.getAnimatedValue();
-                    mBinding.verticalOneThird.setLayoutParams(lp);
-                }
-
-            });
-            if (mCurrentGeofence != null) {
-                moveCameraTo(mCurrentGeofence.getCenter());
-            }
-
-            ((MainActivity)getActivity()).hideFab();
-        } else {
-            mBinding.linlayoutFrguseronmapUsers
-                    .animate()
-                    .translationX(0)
-                    .setDuration(ANIMATION_DURATION)
-                    .alpha(1)
-                    .start();
-            mBinding.conslayoutFrguseronmapEditgeofence
-                    .animate()
-                    .translationX(mBinding.linlayoutFrguseronmapUsers.getWidth())
-                    .setDuration(ANIMATION_DURATION)
-                    .start();
-            ((MainActivity)getActivity()).restoreFab();
-            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(View.INVISIBLE);
-        }
-*/
     }
     private void switchToNormalMode() {
         changeUiLayout(false);

@@ -2,15 +2,14 @@ package com.volynski.familytrack.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Parcel;
 
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.services.SettingsService;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -180,6 +179,29 @@ public class SharedPrefsUtil {
         SharedPreferences preferences =
                 context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
         return preferences.getInt(StringKeys.SHARED_PREFS_CURRENT_INTERVAL_KEY, 0);
+    }
+
+    public static LatLng getLastKnownSimulatedLocation(Context context) {
+        LatLng result = null;
+
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        String latlngJson = preferences.getString(StringKeys.SHARED_PREFS_SIMULATED_LATLNG_KEY, "");
+        if (!latlngJson.equals("")) {
+            result = (new Gson().fromJson(latlngJson, LatLng.class));
+        }
+        return result;
+    }
+
+    public static void setLastKnownSimulatedLocation(Context context, LatLng loc) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        String latlngJson = (new Gson()).toJson(loc);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(StringKeys.SHARED_PREFS_SIMULATED_LATLNG_KEY, latlngJson);
+        editor.apply();
     }
 
 /*

@@ -26,6 +26,9 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Settings;
+import com.volynski.familytrack.services.locators.LocationProvider;
+import com.volynski.familytrack.services.locators.RealLocationProvider;
+import com.volynski.familytrack.services.locators.SimulatedLocationProvider;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
 import timber.log.Timber;
@@ -64,6 +67,7 @@ public class TrackingTask
     public void run() {
         if (mSettings == null) {
             // user is not a member of any group - do nothing
+            // or current settings not loaded into shared preferences
             Timber.v("mSettings == null. TrackingTask will not run");
             mCallback.onTaskCompleted(0);
             return;
@@ -78,15 +82,34 @@ public class TrackingTask
         mRescheduleFlag = (currentInterval != newInterval ? newInterval : 0);
 
         if (!mSettings.getIsTrackingOn()) {
-            // now tracking is off - do nothing
+            // tracking is off - do nothing
             Timber.v("Tracking is off. Idle...");
             mCallback.onTaskCompleted(mRescheduleFlag);
             return;
         }
 
+
         initGoogleApiClient();
     }
 
+    private void updateUserLocation(String userUuid, Location loc) {
+        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
+
+        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        int batteryPct = Math.round((level / (float)scale) * 100);
+
+        loc.setBatteryLevel(batteryPct);
+        mDataSource.updateUserLocation(userUuid, loc, new FamilyTrackDataSource.UpdateUserLocationCallback() {
+            @Override
+            public void onUpdateUserLocationCompleted(FirebaseResult<String> result) {
+                mCallback.onTaskCompleted(mRescheduleFlag);
+            }
+        });
+    }
+/*
     private void updateUserLocation(String userUuid,
                                     android.location.Location loc,
                                     PlaceLikelihood placeLikelihood) {
@@ -111,6 +134,7 @@ public class TrackingTask
             }
         });
     }
+*/
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -129,6 +153,7 @@ public class TrackingTask
         int i = 0;
     }
 
+    // do location detection when GoogleApi is ready & tracking mode is on
     private void doWork() {
         Timber.v("doWork started");
         if (!mGoogleApiClient.isConnected()) {
@@ -137,8 +162,28 @@ public class TrackingTask
             return;
         }
 
-        try {
-            FusedLocationProviderClient mFusedLocationClient = LocationServices.getFusedLocationProviderClient(mContext);
+        // create appropriate location provider
+        LocationProvider locationProvider = new SimulatedLocationProvider();
+        //LocationProvider locationProvider = (mSettings.getIsSimulationOn() ?
+        //    new SimulatedLocationProvider() :
+        //    new RealLocationProvider());
+
+        // get location from provider and save it
+        locationProvider.getCurrentLocation(mContext,
+                mGoogleApiClient,
+                mSettings.getAccuracyLevel(),
+                new LocationProvider.GetCurrentLocationCallback() {
+                    @Override
+                    public void onGetCurrentLocationCompleted(Location loc) {
+                        updateUserLocation(mUserUuid, loc);
+                        mGoogleApiClient.disconnect();
+                    }
+                });
+
+/*        try {
+            FusedLocationProviderClient mFusedLocationClient =
+                    LocationServices.getFusedLocationProviderClient(mContext);
+            LocationServices.SettingsApi.
             // TODO доделать определение точных координат
             mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
                 @Override
@@ -172,7 +217,7 @@ public class TrackingTask
             }
             Timber.e(ex);
             mCallback.onTaskCompleted(mRescheduleFlag);
-        }
+        }*/
     }
 
     @Override
