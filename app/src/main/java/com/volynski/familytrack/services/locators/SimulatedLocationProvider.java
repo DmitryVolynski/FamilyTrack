@@ -32,7 +32,7 @@ public class SimulatedLocationProvider implements LocationProvider {
         Random rnd = new Random(now);
 
         double distance = 30 + 50 * rnd.nextDouble();
-        double heading = rnd.nextDouble() * 90.0 - 45.0;
+        double heading = rnd.nextDouble() * 180f;
 
         // use Google Maps Android API utility library to calculate new point using distance & angle
         return SphericalUtil.computeOffset(prevLoc, distance, heading);

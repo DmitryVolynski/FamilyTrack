@@ -350,7 +350,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void getContactsToInvite(@NonNull GetContactsToInvite callback) {
+    public void getContactsToInvite(@NonNull final String groupUuid,
+                                    @NonNull final GetContactsToInviteCallback callback) {
         User user = null;
         // read contacts from ContactsContract.Data.CONTENT_URI
         Cursor cursor = mContext.getContentResolver().query(
@@ -361,7 +362,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 ContactsContract.Data.CONTACT_ID);
 
         // merge same contacts with emails & phone numbers
-        Map<String, User> contacts = new HashMap<>();
+        final Map<String, User> contacts = new HashMap<>();
         while (cursor.moveToNext()) {
             String key = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.CONTACT_ID));
             boolean isNew = !contacts.containsKey(key);
@@ -390,18 +391,45 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             }
         }
 
-        // select contacts that have phone number and email both
-        List<User> users = new ArrayList<>();
-        for (String key : contacts.keySet()) {
-            User u = contacts.get(key);
-            if (!u.getPhone().equals("") && !u.getEmail().equals("")) {
-                users.add(u);
+        getGroupByUuid(groupUuid, false, new GetGroupByUuidCallback() {
+            @Override
+            public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                List<User> users = new ArrayList<>();
+                if (result.getData() == null) {
+                    Timber.v("Group '" + groupUuid + "' not found. Unable to return valid list of available contacts");
+                    callback.onGetContactsToInviteCompleted(new FirebaseResult<List<User>>(users));
+                }
+
+                // select contacts that have phone number and email + not already invited in group
+                for (String key : contacts.keySet()) {
+                    User u = contacts.get(key);
+                    if (!u.getPhone().equals("") && !u.getEmail().equals("") &&
+                            !isUserInGroup(u, result.getData())) {
+                        users.add(u);
+                    }
+                }
+                callback.onGetContactsToInviteCompleted(new FirebaseResult<List<User>>(users));
+            }
+        });
+    }
+
+    /**
+     * Checks if user from phone contact list is already invited
+     * @param user - user from phone contacts
+     * @param group
+     * @return true if group already contains user with email that equals user email
+     */
+    private boolean isUserInGroup(User user, Group group) {
+        boolean result = false;
+        if (group.getMembers() != null) {
+            for (String key : group.getMembers().keySet()) {
+                result = user.getEmail().equals(group.getMembers().get(key).getEmail());
+                if (result) {
+                    break;
+                }
             }
         }
-
-        // TODO удалить те контакты, которые уже получили приглашение (занесены в бд)
-        FirebaseResult<List<User>> result = new FirebaseResult<List<User>>(users);
-        callback.onGetContactsToInviteCompleted(result);
+        return result;
     }
 
     @Override
@@ -446,7 +474,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     group.addMember(user);
                     childUpdates.put("/groups/" + group.getGroupUuid(), group);
                 } else {
-                    // в системе найден зарегистрированный пользователь, но он не приглашен в группу
+                    // TODO: в системе найден зарегистрированный пользователь, но он не приглашен в группу
 
                 }
                 getFirebaseConnection().getReference().updateChildren(childUpdates);

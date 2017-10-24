@@ -187,7 +187,12 @@ public class MainActivity
 
     @Override
     public void dismissInviteUsersDialog() {
-
+        UserListFragment f =
+                (UserListFragment) FragmentUtil
+                        .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+        if (f != null) {
+            f.dismissInviteUsersDialog();
+        }
     }
 
     @Override

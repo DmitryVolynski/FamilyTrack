@@ -163,7 +163,7 @@ public interface FamilyTrackDataSource {
     // contact list operations
     //
     // --------------------------------------------------------------------------------------------
-    interface GetContactsToInvite {void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result); }
+    interface GetContactsToInviteCallback {void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result); }
 
     /**
      * reads contacts from phone and returns them as list of available mUsers to invite
@@ -172,7 +172,8 @@ public interface FamilyTrackDataSource {
      *      - user from contacts should have email & phone number both
      * @param callback
      */
-    void getContactsToInvite(@NonNull GetContactsToInvite callback);
+    void getContactsToInvite(@NonNull String groupUuid,
+                             @NonNull GetContactsToInviteCallback callback);
 
     interface InviteUsersCallback {void onInviteUsersCompleted(FirebaseResult<String> result ); }
 

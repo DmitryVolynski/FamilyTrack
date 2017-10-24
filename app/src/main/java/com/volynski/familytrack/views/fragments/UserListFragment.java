@@ -1,11 +1,15 @@
 package com.volynski.familytrack.views.fragments;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.view.Gravity;
@@ -33,16 +37,21 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 public class UserListFragment
         extends Fragment {
+    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
+
     private UserListViewModel mViewModel;
-    //private String mCurrentUserUuid;
+    private String mCurrentUserUuid;
+    private UserListNavigator mUserListNavigator;
     private GridLayoutManager mLayoutManager;
 
     FragmentUserListBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
+    private InviteUsersDialogFragment mInviteUsersDialog;
 
     public static UserListFragment newInstance(Context context,
                                                String currentUserUuid,
                                                UserListNavigator navigator) {
+
         UserListFragment result = new UserListFragment();
 
         // TODO проверить это место. может быть создание модели именно здесь неверно.
@@ -50,6 +59,8 @@ public class UserListFragment
                 new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
+        result.setCurrentUserUuid(currentUserUuid);
+        result.setNavigator(navigator);
         return result;
     }
 
@@ -92,17 +103,43 @@ public class UserListFragment
         return mBinding.getRoot();
     }
 
-
-
     public void setViewModel(UserListViewModel mViewModel) {
         this.mViewModel = mViewModel;
     }
 
     public void inviteUser() {
+        if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
+                Manifest.permission.READ_CONTACTS)
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.READ_CONTACTS},
+                    PERMISSIONS_REQUEST_READ_CONTACTS);
+        }
 
+        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(getContext(),
+                mCurrentUserUuid, mUserListNavigator);
+        mInviteUsersDialog.show(getActivity().getSupportFragmentManager(), "aa");
+    }
+
+    public void dismissInviteUsersDialog() {
+        if (mInviteUsersDialog != null) {
+            mInviteUsersDialog.dismiss();
+        }
     }
 
     public void refreshList() {
         mViewModel.start();
+    }
+
+    public void setCurrentUserUuid(String currentUserUuid) {
+        this.mCurrentUserUuid = currentUserUuid;
+    }
+
+    public UserListNavigator getNavigator() {
+        return mUserListNavigator;
+    }
+
+    public void setNavigator(UserListNavigator userListNavigator) {
+        this.mUserListNavigator = userListNavigator;
     }
 }

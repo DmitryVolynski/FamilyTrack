@@ -150,11 +150,13 @@ public class UserOnMapViewModel extends BaseObservable {
             this.users.clear();
             this.viewModels.clear();
             for (User user : result.getData().getMembers().values()) {
-                if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
+                if (user.getActiveMembership() != null &&
+                        user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
                     this.users.add(user);
                     this.viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
                 }
             }
+            setupUserTrack();
             redrawMarkers.set(!redrawMarkers.get());
         }
     }

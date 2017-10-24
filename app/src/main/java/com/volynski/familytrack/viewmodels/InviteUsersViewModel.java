@@ -133,13 +133,19 @@ public class InviteUsersViewModel
     }
 
     private void loadUsersList() {
-        mRepository.getContactsToInvite(new FamilyTrackDataSource.GetContactsToInvite() {
-            @Override
-            public void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result) {
-                populateUserListFromDbResult(result);
-                mIsDataLoading = false;
-            }
-        });
+        if (mCurrentUser != null && mCurrentUser.getActiveMembership() != null) {
+            String groupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
+            mRepository.getContactsToInvite(groupUuid,
+                    new FamilyTrackDataSource.GetContactsToInviteCallback() {
+                @Override
+                public void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result) {
+                    populateUserListFromDbResult(result);
+                    mIsDataLoading = false;
+                }
+            });
+        } else {
+            Timber.v("mCurrentUser == null || mCurrentUser.getActiveMembership() == null");
+        }
     }
 
     /**

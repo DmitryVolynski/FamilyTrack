@@ -57,14 +57,13 @@ public class LoginActivity extends AppCompatActivity implements
         View.OnClickListener,
         LoginNavigator,
         FamilyTrackDataSource.GetUserByEmailCallback,
-        FamilyTrackDataSource.GetContactsToInvite {
+        FamilyTrackDataSource.GetContactsToInviteCallback {
 
     private static final int SIGNED_IN = 0;
     private static final int STATE_SIGNING_IN = 1;
     private static final int STATE_IN_PROGRESS = 2;
     private static final int RC_SIGN_IN = 0;
     private static final String TAG = LoginActivity.class.getSimpleName();
-    private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 1;
     private static final int PERMISSIONS_ACCESS_FINE_LOCATION = 2;
     private static final int PERMISSIONS_ACCESS_COARSE_LOCATION = 3;
 
@@ -255,10 +254,10 @@ public class LoginActivity extends AppCompatActivity implements
 
     private void checkUserExists() {
 
-        getLocationPermission();
+/*        getLocationPermission();
         FamilyTrackDataSource dataSource =
                 new FamilyTrackRepository(mGoogleSignInAccount.getIdToken(), this);
-        dataSource.getContactsToInvite(this);
+        dataSource.getContactsToInvite(this);*/
     }
 
     private void signOut() {
@@ -295,13 +294,6 @@ public class LoginActivity extends AppCompatActivity implements
          * device. The result of the permission request is handled by a callback,
          * onRequestPermissionsResult.
 
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                Manifest.permission.READ_CONTACTS)
-                == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.READ_CONTACTS},
-                    PERMISSIONS_REQUEST_READ_CONTACTS);
-        }
          */
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
@@ -310,14 +302,6 @@ public class LoginActivity extends AppCompatActivity implements
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_ACCESS_FINE_LOCATION);
-        }
-
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                    PERMISSIONS_ACCESS_COARSE_LOCATION);
         }
     }
 
@@ -339,8 +323,8 @@ public class LoginActivity extends AppCompatActivity implements
     public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
         // TODO: проверить необходимость закомментированного условия
         if (result.getData() == null /*|| result.getData().getActiveMembership() == null*/) {
-            mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(LoginActivity.this,
-                    mGoogleSignInAccount, LoginActivity.this);
+            mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(this,
+                    mGoogleSignInAccount, this);
             mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
         } else {
             proceedToMainActivity(result.getData().getUserUuid());

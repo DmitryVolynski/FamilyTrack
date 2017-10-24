@@ -169,8 +169,11 @@ public class UserMembershipViewModel
         }
     }
 
-    private void finishChangeMembership(String userUuid, String fromGroupUuid, String toGroupUuid,
-                                        final String fromGroupName, final String toGroupName) {
+    private void finishChangeMembership(String userUuid,
+                                        String fromGroupUuid,
+                                        String toGroupUuid,
+                                        final String fromGroupName,
+                                        final String toGroupName) {
         mRepository.changeUserMembership(mCurrentUser.getUserUuid(), fromGroupUuid, toGroupUuid,
                 new FamilyTrackDataSource.ChangeUserMembershipCallback() {
                     @Override

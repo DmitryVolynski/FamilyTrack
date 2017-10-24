@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
@@ -333,7 +334,7 @@ public class UserOnMapFragment
         PolylineOptions options = new PolylineOptions();
         User user = mViewModel.getSelectedUser();
         for (Location location : mViewModel.path) {
-            options.add(location.getLatLng()).color(R.color.colorSecondaryDark);
+            options.add(location.getLatLng());
 /*
             MarkerOptions markerOptions = new MarkerOptions()
                     .position(location.getLatLng())
@@ -348,6 +349,8 @@ public class UserOnMapFragment
             mPolyline.remove();
         }
         mPolyline = mMap.addPolyline(options);
+        mPolyline.setColor(Color.RED);
+        mPolyline.setWidth(5);
     }
 
     /**

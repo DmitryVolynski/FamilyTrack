@@ -17,6 +17,7 @@
             android:layout_height="900dp"/>
 
         <EditText
+            android:hint="Start enter name/email/phone number"
             android:id="@+id/editText_dialoginviteusers"
             android:layout_width="400dp"
             android:layout_height="wrap_content"
@@ -48,7 +49,7 @@
             app:layout_constraintVertical_bias="0.0" />
 
         <Button
-            android:id="@+id/button_dialoginviteusers_cancel"
+            android:id="@+id/button_dialoginviteusers_invite"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
@@ -61,15 +62,17 @@
             app:layout_constraintTop_toBottomOf="@+id/recyclerView_dialoginviteusers" />
 
         <Button
-            android:id="@+id/button_dialoginviteusers_invite"
+            android:id="@+id/button_dialoginviteusers_cancel"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:layout_marginEnd="8dp"
             android:text="Cancel"
+            android:onClick="@{() -> viewmodel.cancelInvite()}"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintRight_toLeftOf="@+id/button_dialoginviteusers_cancel"
-            app:layout_constraintTop_toBottomOf="@+id/recyclerView_dialoginviteusers" />
+            app:layout_constraintRight_toLeftOf="@+id/button_dialoginviteusers_invite"
+            app:layout_constraintTop_toBottomOf="@+id/recyclerView_dialoginviteusers"
+            android:layout_marginRight="8dp" />
 
     </android.support.constraint.ConstraintLayout>
 </layout>
