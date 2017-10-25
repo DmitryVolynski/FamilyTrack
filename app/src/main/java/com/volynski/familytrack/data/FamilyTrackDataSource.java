@@ -3,6 +3,7 @@ package com.volynski.familytrack.data;
 import android.support.annotation.NonNull;
 
 import com.google.firebase.database.FirebaseDatabase;
+import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Settings;
@@ -18,6 +19,12 @@ import java.util.List;
 public interface FamilyTrackDataSource {
 
     FirebaseDatabase getFirebaseConnection();
+
+    interface DeleteGeofenceEventsCallback { void onDeleteGeofenceEventsCompleted(FirebaseResult<String> result); }
+    void deleteGeofenceEvents(String userUuid, DeleteGeofenceEventsCallback callback );
+
+    interface CreateGeofenceEventCallback { void onCreateGeofenceEventCompleted(FirebaseResult<String> result); }
+    void createGeofenceEvent(String groupUuid, GeofenceEvent geofenceEvent, CreateGeofenceEventCallback callback);
 
     //
     // --------- user's operations

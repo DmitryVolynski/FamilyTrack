@@ -13,27 +13,32 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackDbRefsHelper;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
+import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
+import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import timber.log.Timber;
 
 /**
- * SettingsService provides a listener service for app settings
+ * FirebaseListenersService provides a listener service for app settings
  * It will listen to following nodes:
  *      - active group settings (groups/<activeUserGroupUuid>/settings)
  *      - current user membership (registered_users/<userUuid>/memberships)
  * If active group has changed - service will listen to new settings node
  * If settings has changed - service will replace it in SharedPreferences
  */
-public class SettingsService extends Service {
+public class FirebaseListenersService extends Service {
     private DatabaseReference mSettingsRef;
     private DatabaseReference mUserRef;
     private FamilyTrackDataSource mDataSource;
     private String mActiveGroupUuid = "";
 
-    public SettingsService() {
+    public FirebaseListenersService() {
     }
 
     @Override
@@ -68,7 +73,7 @@ public class SettingsService extends Service {
                 } else {
                     // remove settings if user not found or doesn't exist as member of any group
                     Timber.v(String.format("User '%1$s' not found. Settings cleared", userUuid));
-                    SharedPrefsUtil.removeActiveGroup(SettingsService.this);
+                    SharedPrefsUtil.removeActiveGroup(FirebaseListenersService.this);
                 }
             }
         });
@@ -87,7 +92,7 @@ public class SettingsService extends Service {
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
                     if (user.getActiveMembership() == null) {
-                        SharedPrefsUtil.removeSettings(SettingsService.this);
+                        SharedPrefsUtil.removeSettings(FirebaseListenersService.this);
                         mActiveGroupUuid = "";
                     } else {
                         if (!mActiveGroupUuid.equals(user.getActiveMembership().getGroupUuid())) {
@@ -112,15 +117,48 @@ public class SettingsService extends Service {
         mUserRef.addValueEventListener(userListener);
     }
 
+    private void createGeofenceEventListener(final String userUuid) {
+        ValueEventListener geofenceEventListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, GeofenceEvent> result = new HashMap<>();
+                result = dataSnapshot.getValue(result.getClass());
+
+                if (result != null) {
+                    Timber.v("Creating notifications for " + result.size() + " events ");
+                    mDataSource.deleteGeofenceEvents(userUuid, null);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mSettingsRef = mDataSource.getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.geofenceEventsRef(userUuid));
+
+        mSettingsRef.addValueEventListener(geofenceEventListener);
+
+    }
+
     private void createSettingsListener(final String activeGroupUuid) {
         mSettingsRef = null;
         if (!mActiveGroupUuid.equals("")) {
             ValueEventListener settingsListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+                    Settings oldSettings = SharedPrefsUtil.getSettings(FirebaseListenersService.this);
                     Settings settings = dataSnapshot.getValue(Settings.class);
+                    if (oldSettings != null &&
+                            !oldSettings.getIsTrackingOn() &&
+                            settings.getIsTrackingOn()) {
+                        // if tracking mode was off and now is on - we need to place
+                        // group geofences into shared preferences to recreate them
+                        createGeofencesInSharedPrefs(activeGroupUuid);
+                    }
                     if (settings != null) {
-                        SharedPrefsUtil.setSettings(SettingsService.this, settings);
+                        SharedPrefsUtil.setSettings(FirebaseListenersService.this, settings);
                     } else {
                         Timber.v("Unexpected error: null settings received for group " + activeGroupUuid);
                     }
@@ -137,5 +175,22 @@ public class SettingsService extends Service {
             mSettingsRef.addValueEventListener(settingsListener);
         }
 
+    }
+
+    /**
+     * Reads list of geofences from specified group and stores them in shared preferences
+     * @param groupUuid - group uuid which geofences should be read
+     */
+    private void createGeofencesInSharedPrefs(String groupUuid) {
+        mDataSource.getGroupByUuid(groupUuid, false,
+                new FamilyTrackDataSource.GetGroupByUuidCallback() {
+            @Override
+            public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                if (result.getData() != null) {
+                    SharedPrefsUtil.setGeofences(FirebaseListenersService.this,
+                            result.getData().getGeofences());
+                }
+            }
+        });
     }
 }

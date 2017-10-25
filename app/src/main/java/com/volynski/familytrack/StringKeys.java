@@ -17,6 +17,7 @@ public class StringKeys {
     public static final String SHARED_PREFS_CURRENT_INTERVAL_KEY = "SHARED_PREFS_CURRENT_INTERVAL";
     public static final String SHARED_PREFS_SETTINGS_KEY = "SHARED_PREFS_SETTINGS";
     public static final String SHARED_PREFS_SIMULATED_LATLNG_KEY = "SHARED_PREFS_SIMULATED_LATLNG";
+    public static final String SHARED_PREFS_GEOFENCES_KEY = "SHARED_PREFS_GEOFENCES";
 
     public static final String CURRENT_USER_UUID_KEY = "CURRENT_USER_UUID";
     public static final String USER_UUID_KEY = "USER_UUID";
@@ -39,13 +40,14 @@ public class StringKeys {
 // 23.10.2017 механизм эмуляции движения
 // 17.10.2017 добавление/удаление пользователей для geofences
 // 24.10.2017 удаление группы при выходе последнего пользователя - неактуально. много работы и проверок
+// 24.10.2017 добавление пользователей в процессе работы администратором
 
 // === функционал
 // TODO: Изменить механизм позиционирования клиента (увеличить точность)
-// TODO: добавление пользователей в процессе работы администратором
 // TODO: разработка виджета
 // TODO: работа с уведомлениями по geofences
 // TODO: проверка ролей
+// TODO: исключение пользователя группы свайпом
 
 // === UI
 // TODO: опция для отображения маркеров в пути + динамическое отображение пути (либо seekBar)

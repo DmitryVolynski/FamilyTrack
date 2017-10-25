@@ -33,6 +33,8 @@ public class FamilyTrackDbRefsHelper {
     private static final String NODE_ZONE_OF_GROUP_FORMAT_STRING =
             NODE_ZONES_OF_GROUP_FORMAT_STRING +  "%s/";
 
+    private static final String NODE_GEOFENCE_EVENTS = "geofence_events/";
+
     public static String groupRef(String groupUuid) {
         return String.format(NODE_GROUP_FORMAT_STRING, groupUuid);
     }
@@ -84,5 +86,10 @@ public class FamilyTrackDbRefsHelper {
     // groups/-KtGRD00beq29domxQQZ/settings
     public static String groupSettingsRef(String groupUuid) {
         return FamilyTrackDbRefsHelper.groupRef(groupUuid) + Group.FIELD_SETTINGS;
+    }
+
+    // geofence_events/<userUuid>
+    public static String geofenceEventsRef(String userUuid) {
+        return NODE_GEOFENCE_EVENTS + userUuid;
     }
 }

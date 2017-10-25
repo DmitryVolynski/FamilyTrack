@@ -13,6 +13,8 @@ import com.google.firebase.database.DatabaseError;
 
 public class FirebaseResult<T> {
     public static final String RESULT_OK = "OK";
+    public static final String RESULT_FAILED = "FAILED";
+
     private T mData;
     private FamilyTrackException mException;
 

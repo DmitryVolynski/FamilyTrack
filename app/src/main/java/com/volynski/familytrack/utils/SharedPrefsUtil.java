@@ -10,6 +10,10 @@ import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Zone;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -201,6 +205,38 @@ public class SharedPrefsUtil {
 
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(StringKeys.SHARED_PREFS_SIMULATED_LATLNG_KEY, latlngJson);
+        editor.apply();
+    }
+
+    public static Map<String, Zone> getGeofences(Context context) {
+        Map<String, Zone> result = new HashMap<>();
+
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        String geofencesJson = preferences.getString(StringKeys.SHARED_PREFS_GEOFENCES_KEY, "");
+        if (!geofencesJson.equals("")) {
+            result = new Gson().fromJson(geofencesJson, result.getClass());
+        }
+        return result;
+    }
+
+    public static void setGeofences(Context context, Map<String, Zone> geofences) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        String geofencesJson = (new Gson()).toJson(geofences);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString(StringKeys.SHARED_PREFS_GEOFENCES_KEY, geofencesJson);
+        editor.apply();
+    }
+
+    public static void removeGeofences(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove(StringKeys.SHARED_PREFS_GEOFENCES_KEY);
         editor.apply();
     }
 

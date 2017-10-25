@@ -40,7 +40,7 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.services.SettingsService;
+import com.volynski.familytrack.services.FirebaseListenersService;
 import com.volynski.familytrack.services.TrackingService;
 import com.volynski.familytrack.utils.MyDebugTree;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
@@ -307,7 +307,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void proceedToMainActivity(String userUuid) {
-        Intent serviceIntent = new Intent(this, SettingsService.class);
+        Intent serviceIntent = new Intent(this, FirebaseListenersService.class);
         serviceIntent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         startService(serviceIntent);
 

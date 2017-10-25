@@ -26,10 +26,13 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Settings;
+import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.services.locators.LocationProvider;
 import com.volynski.familytrack.services.locators.RealLocationProvider;
 import com.volynski.familytrack.services.locators.SimulatedLocationProvider;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -65,31 +68,11 @@ public class TrackingTask
 
     @Override
     public void run() {
-        if (mSettings == null) {
-            // user is not a member of any group - do nothing
-            // or current settings not loaded into shared preferences
-            Timber.v("mSettings == null. TrackingTask will not run");
-            mCallback.onTaskCompleted(0);
-            return;
-        }
-
-        Timber.v("=== Current settings=" + (new Gson()).toJson(mSettings));
-
-        // checking for reschedule tracking task
-        int currentInterval = SharedPrefsUtil.getTrackingInterval(mContext);
-        int newInterval = mSettings.getLocationUpdateInterval();
-        Timber.v(String.format("Checking old and new intervals: %1$d/%2$d", currentInterval, newInterval));
-        mRescheduleFlag = (currentInterval != newInterval ? newInterval : 0);
-
-        if (!mSettings.getIsTrackingOn()) {
-            // tracking is off - do nothing
-            Timber.v("Tracking is off. Idle...");
-            mCallback.onTaskCompleted(mRescheduleFlag);
-            return;
-        }
-
-
         initGoogleApiClient();
+    }
+
+    private void removeGeofences() {
+        //LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient,
     }
 
     private void updateUserLocation(String userUuid, Location loc) {
@@ -153,14 +136,43 @@ public class TrackingTask
         int i = 0;
     }
 
-    // do location detection when GoogleApi is ready & tracking mode is on
+    // do location detection when GoogleApi is ready
     private void doWork() {
         Timber.v("doWork started");
+
         if (!mGoogleApiClient.isConnected()) {
+            // if google api client not ready - do nothing
             Timber.v("mGoogleApiClient not connected");
             mCallback.onTaskCompleted(mRescheduleFlag);
             return;
         }
+
+        if (mSettings == null) {
+            // user is not a member of any group - do track user & remove any geofences
+            // or current settings not loaded into shared preferences
+            Timber.v("mSettings is null. TrackingTask will not run");
+            removeGeofences();
+            mCallback.onTaskCompleted(0);
+            return;
+        }
+
+        Timber.v("=== Current settings=" + (new Gson()).toJson(mSettings));
+
+        // checking for reschedule tracking task
+        int currentInterval = SharedPrefsUtil.getTrackingInterval(mContext);
+        int newInterval = mSettings.getLocationUpdateInterval();
+        Timber.v(String.format("Checking old and new intervals: %1$d/%2$d", currentInterval, newInterval));
+        mRescheduleFlag = (currentInterval != newInterval ? newInterval : 0);
+
+        if (!mSettings.getIsTrackingOn()) {
+            // tracking is off - do nothing
+            Timber.v("Tracking is off. Idle...");
+            removeGeofences();
+            mCallback.onTaskCompleted(mRescheduleFlag);
+            return;
+        }
+
+        setGeofences(SharedPrefsUtil.getGeofences(mContext));
 
         // create appropriate location provider
         LocationProvider locationProvider = new SimulatedLocationProvider();
@@ -179,45 +191,10 @@ public class TrackingTask
                         mGoogleApiClient.disconnect();
                     }
                 });
+    }
 
-/*        try {
-            FusedLocationProviderClient mFusedLocationClient =
-                    LocationServices.getFusedLocationProviderClient(mContext);
-            LocationServices.SettingsApi.
-            // TODO доделать определение точных координат
-            mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<android.location.Location>() {
-                @Override
-                public void onComplete(final @NonNull Task<android.location.Location> task) {
-                    if (!task.isSuccessful()) {
-                        Timber.v("mFusedLocationClient.getLastLocation() != success");
-                        mCallback.onTaskCompleted(mRescheduleFlag);
-                    }
-                    PendingResult<PlaceLikelihoodBuffer> result =
-                            Places.PlaceDetectionApi.getCurrentPlace(mGoogleApiClient, null);
-                    result.setResultCallback(new ResultCallback<PlaceLikelihoodBuffer>() {
-                        @Override
-                        public void onResult(@NonNull PlaceLikelihoodBuffer placeLikelihoods) {
-                            mGoogleApiClient.disconnect();
-                            Timber.v("isSuccess=" + String.valueOf(placeLikelihoods.getStatus().isSuccess()));
-                            if (placeLikelihoods.getStatus().isSuccess() && placeLikelihoods.getCount() > 0) {
-                                Timber.v(placeLikelihoods.get(0).getPlace().getName().toString());
-                                updateUserLocation(mUserUuid, task.getResult(), placeLikelihoods.get(0));
-                            } else {
-                                Timber.v("=0 or not isSuccess");
-                                mCallback.onTaskCompleted(mRescheduleFlag);
-                            }
-                            placeLikelihoods.release();
-                        }
-                    });
-                }
-            });
-        } catch (Exception ex) {
-            if (mGoogleApiClient != null) {
-                mGoogleApiClient.disconnect();
-            }
-            Timber.e(ex);
-            mCallback.onTaskCompleted(mRescheduleFlag);
-        }*/
+    private void setGeofences(Map<String, Zone> geofences) {
+
     }
 
     @Override

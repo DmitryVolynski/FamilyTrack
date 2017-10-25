@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
@@ -798,5 +799,64 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         if (callback != null) {
             callback.onUpdateSettingsByGroupUuidCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
         }
+    }
+
+    @Override
+    public void deleteGeofenceEvents(String userUuid, DeleteGeofenceEventsCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.geofenceEventsRef(userUuid));
+
+        ref.setValue(null);
+        if (callback != null) {
+            callback.onDeleteGeofenceEventsCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+        }
+    }
+
+    // чтобы не забыть как это рабоотает
+    // уведомление формируется для каждого пользователя группы в роли Admin
+    // и записывается по адресу geofence_events/<groupAdminUuid>/<event>
+    // каждый администратор получает уведомление об изменении прослушиваемого узла, читает эти данные,
+    // формирует сообщение и удаляет их
+    @Override
+    public void createGeofenceEvent(final String groupUuid, final GeofenceEvent geofenceEvent,
+                                    final CreateGeofenceEventCallback callback) {
+        getGroupByUuid(groupUuid, false, new GetGroupByUuidCallback() {
+            @Override
+            public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                if (result.getData() == null) {
+                    Timber.v("Group with key ='" + groupUuid + "' not found");
+                    if (callback != null) {
+                        callback.onCreateGeofenceEventCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_FAILED));
+                    }
+                    return;
+                }
+
+                Map<String, Object> childUpdates = new HashMap<>();
+
+                for (String key : result.getData().getMembers().keySet()) {
+                    User user = result.getData().getMembers().get(key);
+                    if (user.getActiveMembership() != null) {
+                        if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED &&
+                                user.getActiveMembership().getRoleId() == Membership.ROLE_ADMIN) {
+                            String path = FamilyTrackDbRefsHelper.geofenceEventsRef(user.getUserUuid());
+                            DatabaseReference ref = getFirebaseConnection().getReference(path);
+                            String newKey = ref.push().getKey();
+                            childUpdates.put(newKey, geofenceEvent);
+                        }
+                    }
+                }
+                mFirebaseDatabase.getReference()
+                        .updateChildren(childUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (callback != null) {
+                                    callback.onCreateGeofenceEventCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                                }
+                            }
+                        });
+
+            }
+        });
     }
 }
