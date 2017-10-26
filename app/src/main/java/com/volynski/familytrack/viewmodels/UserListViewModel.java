@@ -14,6 +14,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
+import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
@@ -135,6 +136,25 @@ public class UserListViewModel
         }
     }
 
+    public void createGeofenceEvent() {
+        GeofenceEvent event = new GeofenceEvent(mCurrentUser.getUserUuid(), mCurrentUser.getDisplayName(),
+                mCurrentUser.getFamilyName(), mCurrentUser.getGivenName(), "-Kdjhgd370", "School", 1);
+
+        mRepository.createGeofenceEvent(mCurrentUser.getActiveMembership().getGroupUuid(), event,
+                new FamilyTrackDataSource.CreateGeofenceEventCallback() {
+                    @Override
+                    public void onCreateGeofenceEventCompleted(FirebaseResult<String> result) {
+                        int i = 0;
+                    }
+                });
+        mRepository.createGeofenceEvent(mCurrentUser.getActiveMembership().getGroupUuid(), event,
+                new FamilyTrackDataSource.CreateGeofenceEventCallback() {
+                    @Override
+                    public void onCreateGeofenceEventCompleted(FirebaseResult<String> result) {
+                        int i = 0;
+                    }
+                });
+    }
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
     }

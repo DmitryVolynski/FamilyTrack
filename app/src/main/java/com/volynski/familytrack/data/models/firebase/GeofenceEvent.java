@@ -1,5 +1,7 @@
 package com.volynski.familytrack.data.models.firebase;
 
+import java.util.Calendar;
+
 /**
  * Created by DmitryVolynski on 25.10.2017.
  */
@@ -9,7 +11,7 @@ public class GeofenceEvent {
     private long mTimestamp;
     private String mUserUuid;
     private String mDisplayName;
-    private String mFirstName;
+    private String mFamilyName;
     private String mGivenName;
     private String mZoneUuid;
     private String mZoneName;
@@ -18,18 +20,30 @@ public class GeofenceEvent {
     public GeofenceEvent() {}
 
     public GeofenceEvent(long mTimestamp, String mUserUuid, String mDisplayName,
-                         String mFirstName, String mGivenName, String mZoneUuid,
+                         String mFamilyName, String mGivenName, String mZoneUuid,
                          String mZoneName, int mEventTypeId) {
         this.mTimestamp = mTimestamp;
         this.mUserUuid = mUserUuid;
         this.mDisplayName = mDisplayName;
-        this.mFirstName = mFirstName;
+        this.mFamilyName = mFamilyName;
         this.mGivenName = mGivenName;
         this.mZoneUuid = mZoneUuid;
         this.mZoneName = mZoneName;
         this.mEventTypeId = mEventTypeId;
     }
 
+    public GeofenceEvent(String mUserUuid, String mDisplayName,
+                         String mFamilyName, String mGivenName, String mZoneUuid,
+                         String mZoneName, int mEventTypeId) {
+        this.mTimestamp = Calendar.getInstance().getTimeInMillis();
+        this.mUserUuid = mUserUuid;
+        this.mDisplayName = mDisplayName;
+        this.mFamilyName = mFamilyName;
+        this.mGivenName = mGivenName;
+        this.mZoneUuid = mZoneUuid;
+        this.mZoneName = mZoneName;
+        this.mEventTypeId = mEventTypeId;
+    }
     public String getEventUuid() {
         return mEventUuid;
     }
@@ -62,12 +76,12 @@ public class GeofenceEvent {
         this.mDisplayName = mDisplayName;
     }
 
-    public String getFirstName() {
-        return mFirstName;
+    public String getFamilyName() {
+        return mFamilyName;
     }
 
-    public void setFirstName(String mFirstName) {
-        this.mFirstName = mFirstName;
+    public void setFamilyName(String mFirstName) {
+        this.mFamilyName = mFirstName;
     }
 
     public String getGivenName() {

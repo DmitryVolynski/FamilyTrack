@@ -1,5 +1,6 @@
 package com.volynski.familytrack.services;
 
+import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
@@ -7,6 +8,7 @@ import android.os.IBinder;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
@@ -17,6 +19,7 @@ import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.NotificationUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
 import java.util.HashMap;
@@ -70,6 +73,7 @@ public class FirebaseListenersService extends Service {
                     }
                     createUserListener(userUuid);
                     createSettingsListener(mActiveGroupUuid);
+                    createGeofenceEventListener(userUuid);
                 } else {
                     // remove settings if user not found or doesn't exist as member of any group
                     Timber.v(String.format("User '%1$s' not found. Settings cleared", userUuid));
@@ -122,10 +126,14 @@ public class FirebaseListenersService extends Service {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map<String, GeofenceEvent> result = new HashMap<>();
-                result = dataSnapshot.getValue(result.getClass());
+                GenericTypeIndicator<Map<String, GeofenceEvent>> genericTypeIndicator =
+                        new GenericTypeIndicator<Map<String, GeofenceEvent>>() {};
+                Map<String, GeofenceEvent> map = dataSnapshot.getValue(genericTypeIndicator);
+                result = dataSnapshot.getValue(genericTypeIndicator);
 
                 if (result != null) {
                     Timber.v("Creating notifications for " + result.size() + " events ");
+                    NotificationUtil.createNotifications(FirebaseListenersService.this, result);
                     mDataSource.deleteGeofenceEvents(userUuid, null);
                 }
             }

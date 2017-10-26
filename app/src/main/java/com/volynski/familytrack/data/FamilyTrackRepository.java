@@ -839,9 +839,10 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                         if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED &&
                                 user.getActiveMembership().getRoleId() == Membership.ROLE_ADMIN) {
                             String path = FamilyTrackDbRefsHelper.geofenceEventsRef(user.getUserUuid());
-                            DatabaseReference ref = getFirebaseConnection().getReference(path);
-                            String newKey = ref.push().getKey();
-                            childUpdates.put(newKey, geofenceEvent);
+                            //DatabaseReference ref = getFirebaseConnection().getReference(path);
+                            getFirebaseConnection().getReference(path).push().setValue(geofenceEvent);
+                            //String newKey = ref.push().getKey();
+                            //childUpdates.put(ref + newKey, geofenceEvent);
                         }
                     }
                 }

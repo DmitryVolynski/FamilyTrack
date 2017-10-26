@@ -82,6 +82,7 @@
                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1H"]}'
                             android:textOff="1H"
+
                             android:textOn="1H" />
 
                         <ToggleButton
