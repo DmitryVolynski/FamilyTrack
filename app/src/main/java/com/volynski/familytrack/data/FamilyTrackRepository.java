@@ -840,12 +840,20 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                                 user.getActiveMembership().getRoleId() == Membership.ROLE_ADMIN) {
                             String path = FamilyTrackDbRefsHelper.geofenceEventsRef(user.getUserUuid());
                             //DatabaseReference ref = getFirebaseConnection().getReference(path);
-                            getFirebaseConnection().getReference(path).push().setValue(geofenceEvent);
+                            String newKey = getFirebaseConnection().getReference(path).push().getKey();
+                            geofenceEvent.setEventUuid(newKey);
+                            getFirebaseConnection().getReference(path + newKey).setValue(geofenceEvent);
                             //String newKey = ref.push().getKey();
                             //childUpdates.put(ref + newKey, geofenceEvent);
                         }
                     }
                 }
+                if (callback != null) {
+                    callback.onCreateGeofenceEventCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                }
+
+
+/*
                 mFirebaseDatabase.getReference()
                         .updateChildren(childUpdates)
                         .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -856,8 +864,35 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                                 }
                             }
                         });
+*/
 
             }
         });
+    }
+
+    @Override
+    public void getGeofenceEventsByUserUuid(@NonNull String userUuid,
+                                            final @NonNull GetGeofenceEventsByUserUuidCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.geofenceEventsRef(userUuid));
+        Query query = ref.orderByKey();
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<GeofenceEvent> events = new ArrayList<GeofenceEvent>();
+                if (dataSnapshot.getChildren() != null) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        events.add(FirebaseUtil.getGeofenceEventFromSnapshot(snapshot));
+                    }
+                }
+                callback.onGetGeofenceEventsByUserUuidCompleted(new FirebaseResult<List<GeofenceEvent>>(events));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
     }
 }

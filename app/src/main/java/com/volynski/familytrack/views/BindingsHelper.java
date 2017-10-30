@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.viewmodels.GeofenceEventListItemViewModel;
 import com.volynski.familytrack.viewmodels.MembershipListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 
@@ -26,7 +27,7 @@ import jp.wasabeef.picasso.transformations.CropCircleTransformation;
  * Created by DmitryVolynski on 25.08.2017.
  */
 
-public class UserListBindings {
+public class BindingsHelper {
     @SuppressWarnings("unchecked")
 
     @BindingAdapter("app:viewModels")
@@ -34,6 +35,16 @@ public class UserListBindings {
                                      List<UserListItemViewModel> viewModels) {
         RecyclerViewListAdapter<UserListItemViewModel> adapter =
                 (RecyclerViewListAdapter<UserListItemViewModel>) recyclerView.getAdapter();
+        if (adapter != null) {
+            adapter.setViewModels(viewModels);
+        }
+    }
+
+    @BindingAdapter("app:geofenceEvents")
+    public static void setGeofenceEvents(RecyclerView recyclerView,
+                                     List<GeofenceEventListItemViewModel> viewModels) {
+        RecyclerViewListAdapter<GeofenceEventListItemViewModel> adapter =
+                (RecyclerViewListAdapter<GeofenceEventListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
             adapter.setViewModels(viewModels);
         }

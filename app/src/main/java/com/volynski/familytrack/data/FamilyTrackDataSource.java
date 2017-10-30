@@ -20,11 +20,21 @@ public interface FamilyTrackDataSource {
 
     FirebaseDatabase getFirebaseConnection();
 
+    //
+    // --------- geofence events operations
+    //
+    interface GetGeofenceEventsByUserUuidCallback { void onGetGeofenceEventsByUserUuidCompleted(FirebaseResult<List<GeofenceEvent>> result); }
+    void getGeofenceEventsByUserUuid(@NonNull String userUuid,
+                                     @NonNull GetGeofenceEventsByUserUuidCallback callback );
+
     interface DeleteGeofenceEventsCallback { void onDeleteGeofenceEventsCompleted(FirebaseResult<String> result); }
-    void deleteGeofenceEvents(String userUuid, DeleteGeofenceEventsCallback callback );
+    void deleteGeofenceEvents(@NonNull String userUuid,
+                              DeleteGeofenceEventsCallback callback );
 
     interface CreateGeofenceEventCallback { void onCreateGeofenceEventCompleted(FirebaseResult<String> result); }
-    void createGeofenceEvent(String groupUuid, GeofenceEvent geofenceEvent, CreateGeofenceEventCallback callback);
+    void createGeofenceEvent(@NonNull String groupUuid,
+                             @NonNull GeofenceEvent geofenceEvent,
+                             CreateGeofenceEventCallback callback);
 
     //
     // --------- user's operations

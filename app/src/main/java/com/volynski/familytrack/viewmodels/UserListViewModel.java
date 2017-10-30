@@ -17,6 +17,8 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Zone;
+import com.volynski.familytrack.services.locators.SimulatedLocationProvider;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
@@ -137,8 +139,10 @@ public class UserListViewModel
     }
 
     public void createGeofenceEvent() {
+        Zone zone = new Zone("-Kjhgfjdgh", "Test zone", SimulatedLocationProvider.RED_SQUARE_LOCATION, 200, null);
+
         GeofenceEvent event = new GeofenceEvent(mCurrentUser.getUserUuid(), mCurrentUser.getDisplayName(),
-                mCurrentUser.getFamilyName(), mCurrentUser.getGivenName(), "-Kdjhgd370", "School", 1);
+                mCurrentUser.getFamilyName(), mCurrentUser.getGivenName(), zone, 1);
 
         mRepository.createGeofenceEvent(mCurrentUser.getActiveMembership().getGroupUuid(), event,
                 new FamilyTrackDataSource.CreateGeofenceEventCallback() {

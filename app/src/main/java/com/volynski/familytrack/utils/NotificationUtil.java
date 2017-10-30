@@ -34,6 +34,9 @@ public class NotificationUtil {
         NotificationCompat.InboxStyle inboxStyle =
                 new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle("Geofence notification");
+        if (events.size() > 0) {
+            inboxStyle.setSummaryText(events.size() + " event(s)");
+        }
 
         Intent intent = new Intent(context, MainActivity.class);
 
@@ -44,7 +47,7 @@ public class NotificationUtil {
         for (String key : events.keySet()) {
             GeofenceEvent event = events.get(key);
             inboxStyle.addLine(String.format("%1$s entered '%2$s' %3$d",
-                    event.getDisplayName(), event.getZoneName(),
+                    event.getDisplayName(), event.getZone().getName(),
                     Calendar.getInstance().getTimeInMillis()));
         }
 

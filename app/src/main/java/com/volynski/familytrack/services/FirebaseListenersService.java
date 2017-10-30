@@ -134,7 +134,7 @@ public class FirebaseListenersService extends Service {
                 if (result != null) {
                     Timber.v("Creating notifications for " + result.size() + " events ");
                     NotificationUtil.createNotifications(FirebaseListenersService.this, result);
-                    mDataSource.deleteGeofenceEvents(userUuid, null);
+                    //mDataSource.deleteGeofenceEvents(userUuid, null);
                 }
             }
 

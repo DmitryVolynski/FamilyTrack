@@ -1,5 +1,7 @@
 package com.volynski.familytrack.data.models.firebase;
 
+import com.google.firebase.database.Exclude;
+
 import java.util.Calendar;
 
 /**
@@ -13,35 +15,32 @@ public class GeofenceEvent {
     private String mDisplayName;
     private String mFamilyName;
     private String mGivenName;
-    private String mZoneUuid;
-    private String mZoneName;
+    private Zone mZone;
     private int mEventTypeId;
 
     public GeofenceEvent() {}
 
     public GeofenceEvent(long mTimestamp, String mUserUuid, String mDisplayName,
-                         String mFamilyName, String mGivenName, String mZoneUuid,
-                         String mZoneName, int mEventTypeId) {
+                         String mFamilyName, String mGivenName, Zone mZone,
+                         int mEventTypeId) {
         this.mTimestamp = mTimestamp;
         this.mUserUuid = mUserUuid;
         this.mDisplayName = mDisplayName;
         this.mFamilyName = mFamilyName;
         this.mGivenName = mGivenName;
-        this.mZoneUuid = mZoneUuid;
-        this.mZoneName = mZoneName;
+        this.mZone = mZone;
         this.mEventTypeId = mEventTypeId;
     }
 
     public GeofenceEvent(String mUserUuid, String mDisplayName,
-                         String mFamilyName, String mGivenName, String mZoneUuid,
-                         String mZoneName, int mEventTypeId) {
+                         String mFamilyName, String mGivenName, Zone mZone,
+                         int mEventTypeId) {
         this.mTimestamp = Calendar.getInstance().getTimeInMillis();
         this.mUserUuid = mUserUuid;
         this.mDisplayName = mDisplayName;
         this.mFamilyName = mFamilyName;
         this.mGivenName = mGivenName;
-        this.mZoneUuid = mZoneUuid;
-        this.mZoneName = mZoneName;
+        this.mZone = mZone;
         this.mEventTypeId = mEventTypeId;
     }
     public String getEventUuid() {
@@ -92,20 +91,12 @@ public class GeofenceEvent {
         this.mGivenName = mGivenName;
     }
 
-    public String getZoneUuid() {
-        return mZoneUuid;
+    public Zone getZone() {
+        return mZone;
     }
 
-    public void setZoneUuid(String mZoneUuid) {
-        this.mZoneUuid = mZoneUuid;
-    }
-
-    public String getZoneName() {
-        return mZoneName;
-    }
-
-    public void setZoneName(String mZoneName) {
-        this.mZoneName = mZoneName;
+    public void setZone(Zone mZone) {
+        this.mZone = mZone;
     }
 
     public int getEventTypeId() {
@@ -114,5 +105,12 @@ public class GeofenceEvent {
 
     public void setEventTypeId(int mEventTypeId) {
         this.mEventTypeId = mEventTypeId;
+    }
+
+    @Exclude
+    public String getTimestampAsString() {
+        Calendar c = Calendar.getInstance();
+        c.setTimeInMillis(mTimestamp);
+        return String.format("%1$tF %1tT", c.getTime());
     }
 }

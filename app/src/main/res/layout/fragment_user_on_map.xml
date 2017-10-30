@@ -206,7 +206,7 @@
                 <TextView
                     android:textAlignment="textEnd"
                     tools:text="R:500m"
-                    android:text='@{String.format("R:%1$dm", viewmodel.zoneRadius)}'
+                    android:text='@{String.format("R:%1$dm", viewmodel.zoneRadius.get())}'
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="8dp"
@@ -270,7 +270,7 @@
                     android:layout_marginLeft="8dp"
                     android:layout_marginTop="8dp"
                     tools:text="55.2323232/36.173562"
-                    android:text='@{String.format("%1$f/%2$f", viewmodel.zoneCenterLatitude, viewmodel.zoneCenterLongitude)}'
+                    android:text='@{String.format("%1$f/%2$f", viewmodel.zoneCenterLatitude.get() , viewmodel.zoneCenterLongitude.get())}'
                     app:layout_constraintTop_toBottomOf="@+id/seekBar"
                     app:layout_constraintLeft_toRightOf="@+id/textView9"
                     android:layout_marginRight="8dp"

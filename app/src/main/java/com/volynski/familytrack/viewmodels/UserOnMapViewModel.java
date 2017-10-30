@@ -67,8 +67,8 @@ public class UserOnMapViewModel extends BaseObservable {
     // observable fields for editing new/existing zone
     public final ObservableField<String> zoneName = new ObservableField<>();
     public final ObservableInt zoneRadius = new ObservableInt(Zone.DEFAULT_RADIUS);
-    public final ObservableDouble zoneCenterLatitude = new ObservableDouble();
-    public final ObservableDouble zoneCenterLongitude = new ObservableDouble();
+    public final ObservableDouble zoneCenterLatitude = new ObservableDouble(0);
+    public final ObservableDouble zoneCenterLongitude = new ObservableDouble(0);
     public final ObservableInt zoneEditMode = new ObservableInt(EM_NONE);
 
     // text for snackbar

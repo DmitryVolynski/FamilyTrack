@@ -3,6 +3,7 @@ package com.volynski.familytrack.data;
 import android.support.constraint.solver.widgets.Snapshot;
 
 import com.google.firebase.database.DataSnapshot;
+import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
@@ -38,5 +39,10 @@ public class FirebaseUtil {
             group.getMembers().get(userKey).setUserUuid(userKey);
         }
         return group;
+    }
+
+    public static GeofenceEvent getGeofenceEventFromSnapshot(DataSnapshot snapshot) {
+        GeofenceEvent event = (GeofenceEvent) snapshot.getValue(GeofenceEvent.class);
+        return event;
     }
 }

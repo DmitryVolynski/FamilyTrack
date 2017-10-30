@@ -71,17 +71,17 @@ public class UserOnMapFragment
     private static final String TAG = UserOnMapFragment.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private static final int ANIMATION_DURATION = 300;
-    private static final float GEOFENCE_STROKE_WIDTH = 2;
+
+    public static final float GEOFENCE_STROKE_WIDTH = 2;
+    public static final int DEFAULT_ZOOM = 15;
 
     private UserOnMapViewModel mViewModel;
     private GeoDataClient mGeoDataClient;
     private PlaceDetectionClient mPlaceDetectionClient;
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
-    private MapView mMapView;
     private String mCurrentUserUuid;
     private LinearLayoutManager mLayoutManager;
-    private static final int DEFAULT_ZOOM = 15;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
     private HashMap<String, Circle> mCircles = new HashMap<>();
     private boolean mGeofenceEditingMode = false;
@@ -459,7 +459,7 @@ public class UserOnMapFragment
     public void userClicked(User user) {
         if (user.getLastKnownLocation() != null) {
             LatLng loc = user.getLastKnownLocation().getLatLng();
-            moveCameraTo(loc.latitude, loc.longitude);
+            moveCameraTo(loc);
         }
 
         mViewModel.selectUser(user);

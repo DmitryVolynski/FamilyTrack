@@ -3,6 +3,7 @@ package com.volynski.familytrack.views.navigators;
 import android.view.View;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.User;
 
 /**
@@ -18,4 +19,5 @@ public interface UserListNavigator {
     void inviteUsers();
     void dismissInviteUsersDialog();
     void userClicked(User user, String uiContext);
+    void eventClicked(GeofenceEvent event, String mUiContext);
 }

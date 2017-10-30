@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.firebase.database.Exclude;
 import com.google.maps.android.SphericalUtil;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
@@ -25,7 +24,7 @@ import timber.log.Timber;
 
 public class SimulatedLocationProvider implements LocationProvider {
     // initial location for geosimulation (Moscow's Red Square)
-    private LatLng startLocation = new LatLng(55.7554841, 37.6176549);
+    public static LatLng RED_SQUARE_LOCATION = new LatLng(55.7554841, 37.6176549);
 
     private LatLng getNextSimulatedLatLng(LatLng prevLoc) {
         long now = Calendar.getInstance().getTimeInMillis();
@@ -55,7 +54,7 @@ public class SimulatedLocationProvider implements LocationProvider {
 
         LatLng prevLoc = SharedPrefsUtil.getLastKnownSimulatedLocation(context);
         if (prevLoc == null) {
-            prevLoc = startLocation;
+            prevLoc = RED_SQUARE_LOCATION;
         }
 
         // get next simulated location

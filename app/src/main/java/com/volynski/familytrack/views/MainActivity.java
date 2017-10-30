@@ -21,6 +21,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackRepository;
+import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.ActivityMainBinding;
 import com.volynski.familytrack.databinding.NavHeaderMainBinding;
@@ -28,6 +29,7 @@ import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.MainActivityViewModel;
+import com.volynski.familytrack.views.fragments.GeofenceEventsFragment;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
 import com.volynski.familytrack.views.fragments.UserMembershipFragment;
@@ -44,10 +46,14 @@ public class MainActivity
             NavigationView.OnNavigationItemSelectedListener,
             UserListNavigator {
 
+    public static final int FAB_STYLE_ADD_ITEM = 0;
+    public static final int FAB_STYLE_REMOVE_ITEM = 1;
+
     public static final int CONTENT_MAP = 0;
     public static final int CONTENT_USER_LIST = 1;
     private static final int CONTENT_USER_HISTORY_CHART = 2;
     private static final int CONTENT_MEMBERSHIP = 3;
+    private static final int CONTENT_GEOFENCE_EVENTS = 4;
 
     private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
     private static final int REQUEST_CODE_EDIT_SETTINGS = 1001;
@@ -82,6 +88,9 @@ public class MainActivity
                 break;
             case CONTENT_MEMBERSHIP:
                 newFragment = UserMembershipFragment.newInstance(this, mCurrentUserUuid, this);
+                break;
+            case CONTENT_GEOFENCE_EVENTS:
+                newFragment = GeofenceEventsFragment.newInstance(this, mCurrentUserUuid, this);
                 break;
             default:
                 Timber.v("Unsupported content id=" + contentId);
@@ -217,6 +226,16 @@ public class MainActivity
                 break;
             default:
                 Timber.v("Unsupported content id=" + mContentId);
+        }
+    }
+
+    @Override
+    public void eventClicked(GeofenceEvent event, String mUiContext) {
+        GeofenceEventsFragment f =
+                (GeofenceEventsFragment) FragmentUtil
+                        .findFragmentByClassName(this, GeofenceEventsFragment.class.getSimpleName());
+        if (f != null) {
+            f.eventClicked(event);
         }
     }
 
@@ -359,6 +378,8 @@ public class MainActivity
                 case (R.id.drawer_nav_about):
                     break;
                 case (R.id.drawer_nav_geofences):
+                    mContentId = CONTENT_GEOFENCE_EVENTS;
+                    setupFragment(mContentId);
                     break;
                 default:
                     Timber.v("Unsupported menu id=" + id);
@@ -384,4 +405,13 @@ public class MainActivity
         mFab.setVisibility(View.VISIBLE);
     }
 
+    public void setFabStyle(int fabStyle) {
+        int resId = R.drawable.ic_action_add;
+        switch (fabStyle) {
+            case FAB_STYLE_REMOVE_ITEM:
+                resId = R.drawable.ic_delete_inverse;
+                break;
+        }
+        mFab.setImageResource(resId);
+    }
 }
