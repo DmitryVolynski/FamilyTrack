@@ -802,6 +802,18 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
+    public void deleteGeofenceEvent(String userUuid, String eventUuid,
+                                    DeleteGeofenceEventsCallback callback) {
+        DatabaseReference ref = getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.geofenceEventRef(userUuid, eventUuid));
+
+        ref.setValue(null);
+        if (callback != null) {
+            callback.onDeleteGeofenceEventsCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+        }
+    }
+
+    @Override
     public void deleteGeofenceEvents(String userUuid, DeleteGeofenceEventsCallback callback) {
         DatabaseReference ref = getFirebaseConnection()
                 .getReference(FamilyTrackDbRefsHelper.geofenceEventsRef(userUuid));

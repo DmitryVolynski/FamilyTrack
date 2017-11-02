@@ -5,6 +5,7 @@ import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
 import android.databinding.ObservableList;
 import android.util.Log;
 
@@ -35,6 +36,8 @@ public class GeofenceEventsViewModel extends BaseObservable {
     private FamilyTrackDataSource mRepository;
     private UserListNavigator mNavigator;
 
+    // text for snackbar
+    public ObservableField<String> snackbarText = new ObservableField<>();
     public ObservableBoolean redrawZone = new ObservableBoolean(false);
     public Zone zoneToShow;
 
@@ -63,7 +66,6 @@ public class GeofenceEventsViewModel extends BaseObservable {
     /**
      * Starts loading data according to group membership of the user
      * ViewModel will populate the view if current user is member of any group
-     * @param user - User object representing current user
      */
     public void start() {
 
@@ -119,12 +121,11 @@ public class GeofenceEventsViewModel extends BaseObservable {
             }
             if (mEvents.size() > 0) {
                 selectEvent(mEvents.get(0));
+            } else {
+                zoneToShow = null;
+                redrawZone.set(!redrawZone.get());
             }
         }
-    }
-
-    public void clearEvents() {
-
     }
 
     public void selectEvent(GeofenceEvent event) {
@@ -135,5 +136,30 @@ public class GeofenceEventsViewModel extends BaseObservable {
             itemViewModel.checked.set(itemViewModel.event.get().getEventUuid().equals(event.getEventUuid()));
             itemViewModel.notifyChange();
         }
+    }
+
+    public void deleteEvents() {
+        mRepository.deleteGeofenceEvents(mCurrentUserUuid, new FamilyTrackDataSource.DeleteGeofenceEventsCallback() {
+            @Override
+            public void onDeleteGeofenceEventsCompleted(FirebaseResult<String> result) {
+                if (result.getData().equals(FirebaseResult.RESULT_OK)) {
+                    snackbarText.set("Events deleted");
+                    loadEventsList();
+                }
+            }
+        });
+    }
+
+    public void deleteEvent(String eventUuid) {
+        mRepository.deleteGeofenceEvent(mCurrentUserUuid, eventUuid,
+                new FamilyTrackDataSource.DeleteGeofenceEventsCallback() {
+                    @Override
+                    public void onDeleteGeofenceEventsCompleted(FirebaseResult<String> result) {
+                        if (result.getData().equals(FirebaseResult.RESULT_OK)) {
+                            snackbarText.set("Event deleted");
+                            loadEventsList();
+                        }
+                    }
+                });
     }
 }

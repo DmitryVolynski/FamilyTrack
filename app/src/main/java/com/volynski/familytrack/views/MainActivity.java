@@ -307,6 +307,13 @@ public class MainActivity
                     f2.createNewGroup();
                 }
                 break;
+            case CONTENT_GEOFENCE_EVENTS:
+                GeofenceEventsFragment f3 =
+                        (GeofenceEventsFragment) FragmentUtil
+                        .findFragmentByClassName(this, GeofenceEventsFragment.class.getSimpleName());
+                if (f3 != null) {
+                    f3.deleteEvents();
+                }
             default:
                 Timber.v("Unsupported content id=" + mContentId);
         }

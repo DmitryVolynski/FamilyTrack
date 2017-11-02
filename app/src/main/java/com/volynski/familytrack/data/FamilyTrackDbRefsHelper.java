@@ -92,4 +92,10 @@ public class FamilyTrackDbRefsHelper {
     public static String geofenceEventsRef(String userUuid) {
         return NODE_GEOFENCE_EVENTS + userUuid + "/";
     }
+
+    // geofence_events/<userUuid>/<eventUuid>
+    public static String geofenceEventRef(String userUuid, String eventuuid) {
+        return NODE_GEOFENCE_EVENTS + userUuid + "/" + eventuuid + "/";
+    }
+
 }

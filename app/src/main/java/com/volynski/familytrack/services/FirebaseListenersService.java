@@ -1,10 +1,24 @@
 package com.volynski.familytrack.services;
 
-import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Places;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -15,14 +29,18 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackDbRefsHelper;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
+import com.volynski.familytrack.data.FirebaseUtil;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.utils.NotificationUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -34,14 +52,79 @@ import timber.log.Timber;
  *      - current user membership (registered_users/<userUuid>/memberships)
  * If active group has changed - service will listen to new settings node
  * If settings has changed - service will replace it in SharedPreferences
+ *
+ * Алгоритм работы с геозонами:
+ *  - при старте сервиса создаем listener на зоны и создаем их
+ *  - при смене группы удаляем старые зоны, считываем новые и создаем их
+ *  - при изменении реквизитов зоны пересоздаем их
  */
-public class FirebaseListenersService extends Service {
+public class FirebaseListenersService
+        extends Service
+        implements
+            GoogleApiClient.ConnectionCallbacks,
+            GoogleApiClient.OnConnectionFailedListener,
+            ResultCallback<Status> {
+
     private DatabaseReference mSettingsRef;
     private DatabaseReference mUserRef;
+    private DatabaseReference mGeofenceEventsRef;
+    private DatabaseReference mGroupGeofencesRef;
+
     private FamilyTrackDataSource mDataSource;
     private String mActiveGroupUuid = "";
+    private String mCurrentUserUuid;
+
+    private ValueEventListener mCurrentUserListener;
+    private ValueEventListener mGeofenceEventsListener;
+    private ValueEventListener mSettingsListener;
+    private ValueEventListener mGroupGeofencesListener;
+
+    private GoogleApiClient mGoogleApiClient;
+    private PendingIntent mGeofencePendingIntent;
 
     public FirebaseListenersService() {
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        createUserListener(mCurrentUserUuid);
+        createSettingsListener(mActiveGroupUuid);
+        createGeofenceEventsListener(mCurrentUserUuid);
+        createGroupGeofencesListener(mActiveGroupUuid);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    private void initGoogleApiClient() {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this.getApplicationContext())
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(Places.PLACE_DETECTION_API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            mGoogleApiClient.connect();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
+        }
+
+        mUserRef.removeEventListener(mCurrentUserListener);
+        mSettingsRef.removeEventListener(mSettingsListener);
+        mGeofenceEventsRef.removeEventListener(mGeofenceEventsListener);
     }
 
     @Override
@@ -54,16 +137,16 @@ public class FirebaseListenersService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         int result = START_STICKY;
 
-        final String userUuid = (intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY) ?
+        mCurrentUserUuid = (intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY) ?
                 intent.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY) : "");
 
-        if (userUuid.equals("")) {
+        if (mCurrentUserUuid.equals("")) {
             Timber.v("UserUuid from SharedPrefs is empty. Can't start settings listener service");
             return result;
         }
 
         mDataSource = new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this),this);
-        mDataSource.getUserByUuid(userUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
+        mDataSource.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 final User user = result.getData();
@@ -71,17 +154,79 @@ public class FirebaseListenersService extends Service {
                     if (result.getData() != null && result.getData().getActiveMembership() != null) {
                         mActiveGroupUuid = result.getData().getActiveMembership().getGroupUuid();
                     }
-                    createUserListener(userUuid);
-                    createSettingsListener(mActiveGroupUuid);
-                    createGeofenceEventListener(userUuid);
+                    initGoogleApiClient();
                 } else {
                     // remove settings if user not found or doesn't exist as member of any group
-                    Timber.v(String.format("User '%1$s' not found. Settings cleared", userUuid));
+                    Timber.v(String.format("User '%1$s' not found. Settings cleared", mCurrentUserUuid));
                     SharedPrefsUtil.removeActiveGroup(FirebaseListenersService.this);
                 }
             }
         });
         return result;
+    }
+
+    private void createGroupGeofencesListener(String groupUuid) {
+        if (mGroupGeofencesListener != null) {
+            mGroupGeofencesRef.removeEventListener(mGroupGeofencesListener);
+        }
+
+        mGroupGeofencesListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Zone> zones = new ArrayList<Zone>();
+                if (dataSnapshot.getChildren() != null) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        zones.add((Zone)snapshot.getValue(Zone.class));
+                    }
+                }
+                registerGeofences(zones);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        mGroupGeofencesRef = mDataSource.getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.zonesOfGroup(groupUuid));
+    }
+
+
+    private void registerGeofences(List<Zone> zones) {
+        // remove all previous geofences
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            unregisterGeofences();
+            LocationServices.GeofencingApi.addGeofences(
+                    mGoogleApiClient,
+                    getGeofencingRequest(zones),
+                    getGeofencePendingIntent()
+            ).setResultCallback(this);
+        } else {
+            Timber.v("ACCESS_FINE_LOCATION not granted. Unable to use geofences");
+        }
+    }
+
+    private void unregisterGeofences() {
+        LocationServices.GeofencingApi.removeGeofences(
+                mGoogleApiClient,
+                // This is the same pending intent that was used in addGeofences().
+                getGeofencePendingIntent()
+        ).setResultCallback(this); // Result processed in onResult().
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        // Reuse the PendingIntent if we already have it.
+        if (mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+        Intent intent = new Intent(this, FirebaseListenersService.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        return PendingIntent.getService(this, 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
     }
 
     @Override
@@ -90,16 +235,18 @@ public class FirebaseListenersService extends Service {
     }
 
     private void createUserListener(final String userUuid) {
-        ValueEventListener userListener = new ValueEventListener() {
+        mCurrentUserListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
                     if (user.getActiveMembership() == null) {
+                        // user has left the group - clear current settings
                         SharedPrefsUtil.removeSettings(FirebaseListenersService.this);
                         mActiveGroupUuid = "";
                     } else {
                         if (!mActiveGroupUuid.equals(user.getActiveMembership().getGroupUuid())) {
+                            // get setting for new user group
                             mActiveGroupUuid = user.getActiveMembership().getGroupUuid();
                             createSettingsListener(mActiveGroupUuid);
                         }
@@ -118,11 +265,11 @@ public class FirebaseListenersService extends Service {
         mUserRef = mDataSource.getFirebaseConnection()
                 .getReference(FamilyTrackDbRefsHelper.userRef(userUuid));
 
-        mUserRef.addValueEventListener(userListener);
+        mUserRef.addValueEventListener(mCurrentUserListener);
     }
 
-    private void createGeofenceEventListener(final String userUuid) {
-        ValueEventListener geofenceEventListener = new ValueEventListener() {
+    private void createGeofenceEventsListener(final String userUuid) {
+        mGeofenceEventsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Map<String, GeofenceEvent> result = new HashMap<>();
@@ -134,7 +281,6 @@ public class FirebaseListenersService extends Service {
                 if (result != null) {
                     Timber.v("Creating notifications for " + result.size() + " events ");
                     NotificationUtil.createNotifications(FirebaseListenersService.this, result);
-                    //mDataSource.deleteGeofenceEvents(userUuid, null);
                 }
             }
 
@@ -143,17 +289,17 @@ public class FirebaseListenersService extends Service {
 
             }
         };
-        mSettingsRef = mDataSource.getFirebaseConnection()
+        mGeofenceEventsRef = mDataSource.getFirebaseConnection()
                 .getReference(FamilyTrackDbRefsHelper.geofenceEventsRef(userUuid));
 
-        mSettingsRef.addValueEventListener(geofenceEventListener);
+        mGeofenceEventsRef.addValueEventListener(mGeofenceEventsListener);
 
     }
 
     private void createSettingsListener(final String activeGroupUuid) {
         mSettingsRef = null;
         if (!mActiveGroupUuid.equals("")) {
-            ValueEventListener settingsListener = new ValueEventListener() {
+            mSettingsListener = new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Settings oldSettings = SharedPrefsUtil.getSettings(FirebaseListenersService.this);
@@ -180,7 +326,7 @@ public class FirebaseListenersService extends Service {
             mSettingsRef = mDataSource.getFirebaseConnection()
                     .getReference(FamilyTrackDbRefsHelper.groupSettingsRef(activeGroupUuid));
 
-            mSettingsRef.addValueEventListener(settingsListener);
+            mSettingsRef.addValueEventListener(mSettingsListener);
         }
 
     }
@@ -200,5 +346,35 @@ public class FirebaseListenersService extends Service {
                 }
             }
         });
+    }
+
+    @Override
+    public void onResult(@NonNull Status status) {
+
+    }
+
+    private GeofencingRequest getGeofencingRequest(List<Zone> zones) {
+        GeofencingRequest result = null;
+        if (zones != null) {
+            List<Geofence> geofences = new ArrayList<>();
+            for (Zone zone : zones) {
+                if (zone.getTrackedUsers().contains(mCurrentUserUuid)) {
+                    geofences.add(new Geofence.Builder()
+                            .setRequestId(zone.getUuid())
+                            .setCircularRegion(zone.getLatitude(), zone.getLongitude(), zone.getRadius())
+                            .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
+                            .build());
+                }
+            }
+
+            if (geofences.size() > 0) {
+                GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+                builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+                builder.addGeofences(geofences);
+                result = builder.build();
+            }
+        }
+        return result;
     }
 }

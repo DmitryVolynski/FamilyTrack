@@ -28,6 +28,9 @@ public interface FamilyTrackDataSource {
                                      @NonNull GetGeofenceEventsByUserUuidCallback callback );
 
     interface DeleteGeofenceEventsCallback { void onDeleteGeofenceEventsCompleted(FirebaseResult<String> result); }
+    void deleteGeofenceEvent(@NonNull String userUuid,
+                              @NonNull String eventuuid,
+                              DeleteGeofenceEventsCallback callback );
     void deleteGeofenceEvents(@NonNull String userUuid,
                               DeleteGeofenceEventsCallback callback );
 

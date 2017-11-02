@@ -225,6 +225,10 @@ public class UserOnMapViewModel extends BaseObservable {
             zoneCenterLatitude.set(editZone.getLatitude());
             zoneCenterLongitude.set(editZone.getLongitude());
             zoneEditMode.set(EM_EDIT);
+
+            for (UserListItemViewModel item : viewModels) {
+                item.checked.set(editZone.getTrackedUsers().contains(item.getUser().getUserUuid()));
+            }
         }
     }
 

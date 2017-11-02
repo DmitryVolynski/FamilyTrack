@@ -14,6 +14,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,11 +36,15 @@ import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.databinding.FragmentGeofenceEventsBinding;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.utils.SnackbarUtil;
+import com.volynski.familytrack.viewmodels.GeofenceEventListItemViewModel;
 import com.volynski.familytrack.viewmodels.GeofenceEventsViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.MainActivity;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -58,6 +64,7 @@ public class GeofenceEventsFragment extends Fragment
     private UserListNavigator mUserListNavigator;
     private LinearLayoutManager mLayoutManager;
     private Circle mCurrentGeofence;
+    private Observable.OnPropertyChangedCallback mSnackbarCallback;
 
     FragmentGeofenceEventsBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
@@ -95,6 +102,17 @@ public class GeofenceEventsFragment extends Fragment
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
+        View view = setupFragmentContent(inflater, container, savedInstanceState);
+        setupMapFragment();
+        setupListeners();
+        setupSnackbar();
+
+        return view;
+    }
+
+    private View setupFragmentContent(LayoutInflater inflater,
+                                      ViewGroup container,
+                                      Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_geofence_events,
                 container,
@@ -110,16 +128,47 @@ public class GeofenceEventsFragment extends Fragment
         mBinding.recyclerviewFrggeofenceevents.addItemDecoration(dividerItemDecoration);
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
                 R.layout.geofence_event_list_item, BR.viewmodel);
-        //mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
-
         mBinding.recyclerviewFrggeofenceevents.setAdapter(mAdapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView,
+                                  RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                String eventUuid = ((List<GeofenceEventListItemViewModel>)mAdapter.getViewModels())
+                        .get(viewHolder.getAdapterPosition()).event.get().getEventUuid();
+                mViewModel.deleteEvent(eventUuid);
+            }
+        }).attachToRecyclerView(mBinding.recyclerviewFrggeofenceevents);
+
         mBinding.setViewmodel(mViewModel);
 
         ((MainActivity)getActivity()).setFabStyle(MainActivity.FAB_STYLE_REMOVE_ITEM);
-
-        setupMapFragment();
-        setupListeners();
         return mBinding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mSnackbarCallback != null) {
+            mViewModel.snackbarText.removeOnPropertyChangedCallback(mSnackbarCallback);
+        }
+        super.onDestroy();
+    }
+
+    private void setupSnackbar() {
+        mSnackbarCallback = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                SnackbarUtil.showSnackbar(((MainActivity)getActivity()).getViewForSnackbar(),
+                        mViewModel.snackbarText.get());
+            }
+        };
+        mViewModel.snackbarText.addOnPropertyChangedCallback(mSnackbarCallback);
     }
 
     private void setupListeners() {
@@ -131,14 +180,15 @@ public class GeofenceEventsFragment extends Fragment
         });
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        //mViewModel.redrawZone.removeOnPropertyChangedCallback();
-    }
-
     //
     private void showZoneFromSelectedEvent() {
+        if (mViewModel.zoneToShow == null && mCurrentGeofence != null) {
+            // nothing to show, just hide circle if it still visible
+            mCurrentGeofence.remove();
+            mCurrentGeofence = null;
+            return;
+        }
+
         if (mCurrentGeofence == null) {
             CircleOptions circleOptions = new CircleOptions()
                     .center(mViewModel.zoneToShow.getLatLng())
@@ -195,5 +245,12 @@ public class GeofenceEventsFragment extends Fragment
 
     public void eventClicked(GeofenceEvent event) {
         mViewModel.selectEvent(event);
+    }
+
+    /**
+     * deletes all events for current user
+     */
+    public void deleteEvents() {
+        mViewModel.deleteEvents();
     }
 }

@@ -172,7 +172,7 @@ public class TrackingTask
             return;
         }
 
-        setGeofences(SharedPrefsUtil.getGeofences(mContext));
+        //setGeofences(SharedPrefsUtil.getGeofences(mContext));
 
         // create appropriate location provider
         LocationProvider locationProvider = new SimulatedLocationProvider();
