@@ -28,7 +28,7 @@ public class SharedPrefsUtil {
     /**
      * Saves User object in shared preferences using json format
      * @param context
-     * @param user - User object of current authenticated user with Firebase-generated uuid
+     * @param userUuid - User object of current authenticated user with Firebase-generated uuid
      */
     public static void setCurrentUserUuid(Context context, String userUuid) {
         SharedPreferences preferences =
@@ -82,7 +82,8 @@ public class SharedPrefsUtil {
 
     /**
      * Creates a User object with data from GoogleSignInAccount
-     * @param account - GoogleSignInAccount object of authenticated user
+     * @param context
+     * @param idToken - GoogleSignInAccount object of authenticated user
      * @return
      */
     public static void setGoogleAccountIdToken(Context context, String idToken) {
@@ -238,6 +239,21 @@ public class SharedPrefsUtil {
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove(StringKeys.SHARED_PREFS_GEOFENCES_KEY);
         editor.apply();
+    }
+
+    public static void setFirebaseConnectionStatus(Context context, boolean value) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean(StringKeys.SHARED_PREFS_CONNECTION_STATUS_KEY, value);
+        editor.apply();
+    }
+
+    public static boolean getFirebaseConnectionStatus(Context context) {
+        SharedPreferences preferences =
+                context.getSharedPreferences(StringKeys.SHARED_PREFS_FILE_KEY, MODE_PRIVATE);
+        return preferences.getBoolean(StringKeys.SHARED_PREFS_CONNECTION_STATUS_KEY, false);
     }
 
 /*

@@ -29,4 +29,6 @@
         <item>Admin</item>
         <item>Member</item>
     </array>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>

@@ -3,7 +3,9 @@ package com.volynski.familytrack.data.models.firebase;
 import com.google.firebase.database.Exclude;
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +59,27 @@ public class Group {
         this.mGroupUuid = groupUuid;
         this.mName = name;
         this.mMembers = members;
+    }
+
+    /**
+     * Returns only members that joined to this group
+     * Invited  and deleted users are excluded
+     * @return
+     */
+    @Exclude
+    public List<User> getActiveMembersForWidget() {
+        List<User> result = new ArrayList<>();
+        // add fake user as zero element of list for widget header
+        result.add(User.getFakeUser());
+        if (mMembers != null) {
+            for (String key : mMembers.keySet()) {
+                User user = mMembers.get(key);
+                if (user.getActiveMembership() != null &&
+                        user.getActiveMembership().getStatusId() == Membership.USER_JOINED)
+                    result.add(user);
+            }
+        }
+        return result;
     }
 
     public Map<String, User> getMembers() {

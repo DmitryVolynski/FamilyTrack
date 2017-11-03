@@ -4,6 +4,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -65,19 +66,23 @@ public class FirebaseListenersService
             GoogleApiClient.OnConnectionFailedListener,
             ResultCallback<Status> {
 
+    private static final String FIREBASE_CONNECTION_STATUS_REF = ".info/connected";
+
     private DatabaseReference mSettingsRef;
     private DatabaseReference mUserRef;
     private DatabaseReference mGeofenceEventsRef;
     private DatabaseReference mGroupGeofencesRef;
+    private DatabaseReference mFirebaseConnectionStatusRef;
 
     private FamilyTrackDataSource mDataSource;
     private String mActiveGroupUuid = "";
     private String mCurrentUserUuid;
 
-    private ValueEventListener mCurrentUserListener;
-    private ValueEventListener mGeofenceEventsListener;
-    private ValueEventListener mSettingsListener;
-    private ValueEventListener mGroupGeofencesListener;
+    private ValueEventListener mCurrentUserListener;        // listen to current user changes (track group changes)
+    private ValueEventListener mGeofenceEventsListener;     // listen to new geofence events to create notifications
+    private ValueEventListener mSettingsListener;           // listen to settings changes
+    private ValueEventListener mGroupGeofencesListener;     // listen to active group changes (zone list)
+    private ValueEventListener mConnectionStatusListener;   // listen to firebase connection status
 
     private GoogleApiClient mGoogleApiClient;
     private PendingIntent mGeofencePendingIntent;
@@ -91,6 +96,7 @@ public class FirebaseListenersService
         createSettingsListener(mActiveGroupUuid);
         createGeofenceEventsListener(mCurrentUserUuid);
         createGroupGeofencesListener(mActiveGroupUuid);
+        createConnectionStatusListener();
     }
 
     @Override
@@ -106,8 +112,7 @@ public class FirebaseListenersService
     private void initGoogleApiClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this.getApplicationContext())
-                    .addApi(Places.GEO_DATA_API)
-                    .addApi(Places.PLACE_DETECTION_API)
+                    .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
@@ -125,6 +130,7 @@ public class FirebaseListenersService
         mUserRef.removeEventListener(mCurrentUserListener);
         mSettingsRef.removeEventListener(mSettingsListener);
         mGeofenceEventsRef.removeEventListener(mGeofenceEventsListener);
+        mFirebaseConnectionStatusRef.removeEventListener(mConnectionStatusListener);
     }
 
     @Override
@@ -165,6 +171,10 @@ public class FirebaseListenersService
         return result;
     }
 
+    /**
+     *
+     * @param groupUuid
+     */
     private void createGroupGeofencesListener(String groupUuid) {
         if (mGroupGeofencesListener != null) {
             mGroupGeofencesRef.removeEventListener(mGroupGeofencesListener);
@@ -190,15 +200,33 @@ public class FirebaseListenersService
 
         mGroupGeofencesRef = mDataSource.getFirebaseConnection()
                 .getReference(FamilyTrackDbRefsHelper.zonesOfGroup(groupUuid));
+
+        mGroupGeofencesRef.addValueEventListener(mGroupGeofencesListener);
     }
 
 
+    /**
+     *
+     * @param zones
+     */
     private void registerGeofences(List<Zone> zones) {
         // remove all previous geofences
+        unregisterGeofences();
+
+        Settings settings = SharedPrefsUtil.getSettings(this);
+        if (settings == null) {
+            Timber.v("No settings found in shared preferences. Can't create geofences");
+            return;
+        }
+
+        if (settings.getIsSimulationOn() || !settings.getIsTrackingOn()) {
+            Timber.v("Simulation is on or tracking is off. No geofences created");
+            return;
+        }
+
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            unregisterGeofences();
             LocationServices.GeofencingApi.addGeofences(
                     mGoogleApiClient,
                     getGeofencingRequest(zones),
@@ -222,7 +250,7 @@ public class FirebaseListenersService
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         }
-        Intent intent = new Intent(this, FirebaseListenersService.class);
+        Intent intent = new Intent(this, GeofenceIntentService.class);
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
         // calling addGeofences() and removeGeofences().
         return PendingIntent.getService(this, 0, intent, PendingIntent.
@@ -234,6 +262,10 @@ public class FirebaseListenersService
         super.onCreate();
     }
 
+    /**
+     *
+     * @param userUuid
+     */
     private void createUserListener(final String userUuid) {
         mCurrentUserListener = new ValueEventListener() {
             @Override
@@ -268,6 +300,32 @@ public class FirebaseListenersService
         mUserRef.addValueEventListener(mCurrentUserListener);
     }
 
+    /**
+     *
+     */
+    private void createConnectionStatusListener() {
+        mConnectionStatusListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                SharedPrefsUtil.setFirebaseConnectionStatus(FirebaseListenersService.this,
+                        dataSnapshot.getValue(Boolean.class));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Timber.e("Connection canceled: " + databaseError.getMessage());
+            }
+        };
+
+        mFirebaseConnectionStatusRef = mDataSource.getFirebaseConnection()
+                .getReference(FIREBASE_CONNECTION_STATUS_REF);
+        mFirebaseConnectionStatusRef.addValueEventListener(mConnectionStatusListener);
+    }
+
+    /**
+     *
+     * @param userUuid
+     */
     private void createGeofenceEventsListener(final String userUuid) {
         mGeofenceEventsListener = new ValueEventListener() {
             @Override
@@ -296,6 +354,10 @@ public class FirebaseListenersService
 
     }
 
+    /**
+     *
+     * @param activeGroupUuid
+     */
     private void createSettingsListener(final String activeGroupUuid) {
         mSettingsRef = null;
         if (!mActiveGroupUuid.equals("")) {
@@ -353,6 +415,11 @@ public class FirebaseListenersService
 
     }
 
+    /**
+     *
+     * @param zones
+     * @return
+     */
     private GeofencingRequest getGeofencingRequest(List<Zone> zones) {
         GeofencingRequest result = null;
         if (zones != null) {

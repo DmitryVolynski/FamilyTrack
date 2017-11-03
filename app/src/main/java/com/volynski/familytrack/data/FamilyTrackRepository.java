@@ -173,6 +173,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         Query query = ref.orderByChild("email").equalTo(userEmail).limitToFirst(1);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
+
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = null;

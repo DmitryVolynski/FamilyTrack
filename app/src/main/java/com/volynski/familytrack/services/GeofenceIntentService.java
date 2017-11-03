@@ -63,6 +63,7 @@ public class GeofenceIntentService extends IntentService {
 
     }
 
+
     public GeofenceIntentService(String name) {
         super(name);
     }
