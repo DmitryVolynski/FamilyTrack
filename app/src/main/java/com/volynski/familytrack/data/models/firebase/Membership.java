@@ -1,5 +1,8 @@
 package com.volynski.familytrack.data.models.firebase;
 
+import com.google.firebase.database.Exclude;
+import com.volynski.familytrack.R;
+
 /**
  * Created by DmitryVolynski on 04.09.2017.
  */

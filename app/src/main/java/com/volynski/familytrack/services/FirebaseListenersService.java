@@ -2,6 +2,7 @@ package com.volynski.familytrack.services;
 
 import android.app.PendingIntent;
 import android.app.Service;
+import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -38,6 +39,8 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.utils.NotificationUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.widget.FamilyTrackWidgetProvider;
+import com.volynski.familytrack.widget.FamilyTrackWidgetService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,6 +73,7 @@ public class FirebaseListenersService
 
     private DatabaseReference mSettingsRef;
     private DatabaseReference mUserRef;
+    private DatabaseReference mGroupRef;
     private DatabaseReference mGeofenceEventsRef;
     private DatabaseReference mGroupGeofencesRef;
     private DatabaseReference mFirebaseConnectionStatusRef;
@@ -79,6 +83,7 @@ public class FirebaseListenersService
     private String mCurrentUserUuid;
 
     private ValueEventListener mCurrentUserListener;        // listen to current user changes (track group changes)
+    private ValueEventListener mGroupListener;              // listen to current user's group changes (track group changes)
     private ValueEventListener mGeofenceEventsListener;     // listen to new geofence events to create notifications
     private ValueEventListener mSettingsListener;           // listen to settings changes
     private ValueEventListener mGroupGeofencesListener;     // listen to active group changes (zone list)
@@ -93,11 +98,13 @@ public class FirebaseListenersService
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         createUserListener(mCurrentUserUuid);
+        createGroupListener(mActiveGroupUuid);
         createSettingsListener(mActiveGroupUuid);
         createGeofenceEventsListener(mCurrentUserUuid);
         createGroupGeofencesListener(mActiveGroupUuid);
         createConnectionStatusListener();
     }
+
 
     @Override
     public void onConnectionSuspended(int i) {
@@ -128,6 +135,7 @@ public class FirebaseListenersService
         }
 
         mUserRef.removeEventListener(mCurrentUserListener);
+        mGroupRef.removeEventListener(mGroupListener);
         mSettingsRef.removeEventListener(mSettingsListener);
         mGeofenceEventsRef.removeEventListener(mGeofenceEventsListener);
         mFirebaseConnectionStatusRef.removeEventListener(mConnectionStatusListener);
@@ -276,11 +284,13 @@ public class FirebaseListenersService
                         // user has left the group - clear current settings
                         SharedPrefsUtil.removeSettings(FirebaseListenersService.this);
                         mActiveGroupUuid = "";
+                        createGroupListener(mActiveGroupUuid);
                     } else {
                         if (!mActiveGroupUuid.equals(user.getActiveMembership().getGroupUuid())) {
                             // get setting for new user group
                             mActiveGroupUuid = user.getActiveMembership().getGroupUuid();
                             createSettingsListener(mActiveGroupUuid);
+                            createGroupListener(mActiveGroupUuid);
                         }
                     }
                 } else {
@@ -298,6 +308,38 @@ public class FirebaseListenersService
                 .getReference(FamilyTrackDbRefsHelper.userRef(userUuid));
 
         mUserRef.addValueEventListener(mCurrentUserListener);
+    }
+
+    private void createGroupListener(String groupUuid) {
+        if (mGroupListener != null) {
+            mGroupRef.removeEventListener(mGroupListener);
+            mGroupListener = null;
+        }
+
+        if (mActiveGroupUuid.equals("")) {
+            Timber.v("mActiveGroupUuid is empty. No group listener was created");
+            SharedPrefsUtil.removeActiveGroup(FirebaseListenersService.this);
+            notifyWidgets();
+        } else {
+            mGroupListener = new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Group group = dataSnapshot.getValue(Group.class);
+                    SharedPrefsUtil.setActiveGroup(FirebaseListenersService.this, group);
+                    notifyWidgets();
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            };
+
+            mGroupRef = mDataSource.getFirebaseConnection()
+                    .getReference(FamilyTrackDbRefsHelper.groupRef(mActiveGroupUuid));
+
+            mGroupRef.addValueEventListener(mGroupListener);
+        }
     }
 
     /**
@@ -443,5 +485,15 @@ public class FirebaseListenersService
             }
         }
         return result;
+    }
+
+    /**
+     * Notify widgets to update list of users
+     */
+    private void notifyWidgets() {
+        Intent intent = new Intent(this, FamilyTrackWidgetProvider.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.putExtra(StringKeys.SHARED_PREFS_CURRENT_USER_ACTIVE_GROUP_KEY, "ss");
+        sendBroadcast(intent);
     }
 }

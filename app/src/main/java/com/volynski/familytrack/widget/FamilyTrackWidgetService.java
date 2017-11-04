@@ -2,13 +2,22 @@ package com.volynski.familytrack.widget;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
 
+import com.squareup.picasso.Picasso;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.models.firebase.Group;
+import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+
+import java.io.IOException;
+
+import jp.wasabeef.picasso.transformations.CropCircleTransformation;
+import timber.log.Timber;
 
 
 /**
@@ -52,6 +61,9 @@ class FamilyTrackRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
 
     @Override
     public RemoteViews getViewAt(int i) {
+        Bitmap photo = BitmapFactory.decodeResource(mContext.getResources(),
+                R.mipmap.ic_no_user_photo);
+
         RemoteViews view = null;
 
         if (mGroup == null ||
@@ -59,17 +71,45 @@ class FamilyTrackRemoteViewsFactory implements RemoteViewsService.RemoteViewsFac
             return null;
         }
 
-        User user = mGroup.getActiveMembersForWidget().get(i);
-
         if (i == 0) {
             // return view for widget header
             view = new RemoteViews(mContext.getPackageName(), R.layout.widget_header);
+            view.setTextViewText(R.id.widget_item_text,
+                    "FamilyTrack/[" + mGroup.getName() + "]");
         } else {
-            // return view for normal item (ingredient or step)
-            view = new RemoteViews(mContext.getPackageName(), R.layout.widget_item);
+            // return view for normal item (group user)
+            User user = mGroup.getActiveMembersForWidget().get(i);
+            view = new RemoteViews(mContext.getPackageName(),
+                    R.layout.widget_list_item);
+            view.setTextViewText(R.id.textview_widgetlistitem_username,
+                    user.getDisplayName());
+
+            String locationName = (user.getLastKnownLocation() == null ?
+                    "Location unknown" : user.getLastKnownLocation().getKnownLocationName());
+            view.setTextViewText(R.id.textview_widgetlistitem_location, locationName);
+
+            int roleId = (user.getActiveMembership() != null ?
+                    user.getActiveMembership().getRoleId() : Membership.ROLE_UNDEFINED);
+            int resId = mContext.getResources().getIdentifier("ROLE_" + roleId,
+                    "string", mContext.getPackageName());
+
+            String lastKnownTime = (user.getLastKnownLocation() == null ?
+                    "Time unknown" : user.getLastKnownLocation().getPeriodAsString());
+            view.setTextViewText(R.id.textview_widgetlistitem_time, lastKnownTime);
+
+            if (!user.getPhotoUrl().equals("")) {
+                try {
+                    photo = Picasso.with(mContext)
+                            .load(user.getPhotoUrl())
+                            .transform(new CropCircleTransformation())
+                            .get();
+                } catch (IOException ex) {
+                    Timber.e(ex);
+                }
+            }
+            view.setImageViewBitmap(R.id.imageview_widgetlistitem_photo, photo);
         }
 
-        view.setTextViewText(R.id.widget_item_text, "Test");
         return view;
     }
 

@@ -141,11 +141,17 @@ public class Location {
         String suffix = "day(s)";
         long now = Calendar.getInstance().getTimeInMillis();
         long n = TimeUnit.MILLISECONDS.toDays(now - mTimestamp);
-        if (n < 1) {
-            n = TimeUnit.MILLISECONDS.toMinutes(now - mTimestamp);
-            suffix = "min";
+        if (n > 0) {
+            return String.format("%1$d day(s)", n);
+        } else {
+            n = TimeUnit.MILLISECONDS.toHours(now - mTimestamp);
+            if (n > 0) {
+                return String.format("%1$d hour(s)", n);
+            } else {
+                n = TimeUnit.MILLISECONDS.toMinutes(now - mTimestamp);
+                return String.format("%1$d min(s)", n);
+            }
         }
-        return String.format("%1$d %2$s", n, suffix);
     }
 
     @Exclude

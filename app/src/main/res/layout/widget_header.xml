@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/widget_item_text"
-    android:textAlignment="textEnd"
-    android:background="#7aaa"
-    android:textColor="@android:color/white"
-    tools:text="Ingredients"
     style="@style/Base.TextAppearance.AppCompat.Headline"
-    android:fontFamily="sans-serif-condensed"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@color/colorAccent"
+    android:fontFamily="sans-serif-condensed"
+    android:paddingBottom="8dp"
+    android:paddingStart="8dp"
+    android:paddingTop="8dp"
+    android:textColor="@android:color/white"
+    tools:text="FamilyTrack">
 
 </TextView>
