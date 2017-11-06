@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="map_guideline_view_mode_percent" format="float" type="dimen">0.7</item>
+    <item name="map_guideline_edit_mode_percent" format="float" type="dimen">0.4</item>
+</resources>

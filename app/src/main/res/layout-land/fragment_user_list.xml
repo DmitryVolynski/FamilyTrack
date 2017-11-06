@@ -11,6 +11,8 @@
     <LinearLayout
         android:id="@+id/linearlayout_fragmentuserslist_rootlayout"
         android:orientation="vertical"
+        android:layout_marginStart="72dp"
+        android:layout_marginEnd="72dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <Button

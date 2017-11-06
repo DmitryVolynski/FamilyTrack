@@ -1,8 +1,10 @@
 package com.volynski.familytrack.views;
 
+import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -28,12 +30,16 @@ import com.volynski.familytrack.databinding.NavHeaderMainBinding;
 import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
+import com.volynski.familytrack.viewmodels.AbstractViewModel;
 import com.volynski.familytrack.viewmodels.MainActivityViewModel;
+import com.volynski.familytrack.viewmodels.UserListViewModel;
+import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.fragments.GeofenceEventsFragment;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
 import com.volynski.familytrack.views.fragments.UserMembershipFragment;
 import com.volynski.familytrack.views.fragments.UserOnMapFragment;
+import com.volynski.familytrack.views.fragments.ViewModelHolder;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.List;
@@ -57,6 +63,7 @@ public class MainActivity
 
     private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
     private static final int REQUEST_CODE_EDIT_SETTINGS = 1001;
+    private static final String TAG = "viewmodel";
 
     private String mCurrentUserUuid;
     private int mContentId;
@@ -69,19 +76,42 @@ public class MainActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        readIntentData();
+        if (savedInstanceState == null) {
+            readIntentData();
+        } else {
+            mContentId = savedInstanceState.getInt(StringKeys.MAIN_ACTIVITY_MODE_KEY);
+            mCurrentUserUuid = savedInstanceState.getString(StringKeys.CURRENT_USER_UUID_KEY);
+        }
         setupCommonContent();
-        setupFragment(mContentId);
+        setupFragment(mContentId, false);
     }
 
-    private void setupFragment(int contentId) {
-        Fragment newFragment = null;
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(StringKeys.MAIN_ACTIVITY_MODE_KEY, mContentId);
+        outState.putString(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
+    }
+
+    private void setupFragment(int contentId, boolean forceReload) {
+        Fragment newFragment =
+                getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
+
         switch (contentId) {
             case CONTENT_MAP:
-                newFragment = UserOnMapFragment.newInstance(this, mCurrentUserUuid, this);
+                if (newFragment == null || forceReload) {
+                    newFragment = UserOnMapFragment.newInstance(mCurrentUserUuid);
+                }
+                ((UserOnMapFragment) newFragment)
+                        .setViewModel((UserOnMapViewModel) findOrCreateViewModel(contentId));
                 break;
             case CONTENT_USER_LIST:
-                newFragment = UserListFragment.newInstance(this, mCurrentUserUuid, this);
+
+                if (newFragment == null || forceReload) {
+                    newFragment = UserListFragment.newInstance(mCurrentUserUuid);
+                }
+                ((UserListFragment)newFragment)
+                        .setViewModel((UserListViewModel) findOrCreateViewModel(contentId));
                 break;
             case CONTENT_USER_HISTORY_CHART:
                 newFragment = UserHistoryChartFragment.newInstance(this, mCurrentUserUuid, this);
@@ -95,6 +125,7 @@ public class MainActivity
             default:
                 Timber.v("Unsupported content id=" + contentId);
         }
+
         if (newFragment != null) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -103,6 +134,65 @@ public class MainActivity
                     .commit();
         }
     }
+
+
+    @NonNull
+    private Object findOrCreateViewModel(int contentId) {
+        // In a configuration change we might have a ViewModel present. It's retained using the
+        // Fragment Manager.
+        Object viewModel;
+        Context context = getApplicationContext();
+        switch (contentId) {
+            case CONTENT_USER_LIST:
+                ViewModelHolder<UserListViewModel> userListVM =
+                        (ViewModelHolder<UserListViewModel>) getSupportFragmentManager()
+                                .findFragmentByTag(TAG);
+
+                if (userListVM != null && userListVM.getViewmodel() != null) {
+                    // If the model was retained, return it.
+                    viewModel = userListVM.getViewmodel();
+                    ((UserListViewModel) viewModel).setCreatedFromViewHolder(true);
+                    return viewModel;
+                } else {
+                    // There is no ViewModel yet, create it.
+                    viewModel = new UserListViewModel(context,
+                            mCurrentUserUuid,
+                            new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context),
+                            this);
+                    ((UserListViewModel) viewModel).setCreatedFromViewHolder(false);
+                    // and bind it to this Activity's lifecycle using the Fragment Manager.
+                }
+                break;
+            case CONTENT_MAP:
+                ViewModelHolder<UserOnMapViewModel> userOnMapVM =
+                        (ViewModelHolder<UserOnMapViewModel>) getSupportFragmentManager()
+                                .findFragmentByTag(TAG);
+
+                if (userOnMapVM != null && userOnMapVM.getViewmodel() != null) {
+                    // If the model was retained, return it.
+                    viewModel = userOnMapVM.getViewmodel();
+                    ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(true);
+                    return viewModel;
+                } else {
+                    // There is no ViewModel yet, create it.
+                    viewModel = new UserOnMapViewModel(context,
+                            mCurrentUserUuid,
+                            new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context),
+                            this);
+                    ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(false);
+                    // and bind it to this Activity's lifecycle using the Fragment Manager.
+                }
+                break;
+            default:
+                viewModel = null;
+        }
+        getSupportFragmentManager()
+                .beginTransaction()
+                .add(ViewModelHolder.createContainer(viewModel), TAG)
+                .commit();
+        return viewModel;
+    }
+
 
     private void readIntentData() {
         Intent intent = getIntent();
@@ -169,19 +259,6 @@ public class MainActivity
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         startActivityForResult(intent, REQUEST_CODE_EDIT_SETTINGS);
-
-/*
-        View transitionImage = rootView.findViewById(R.id.imageview_userlistitem_photo);
-        View transitionText = rootView.findViewById(R.id.textview_userlistitem_username);
-
-        Pair<View, String> p1 = new Pair<>(transitionImage, "userPhoto");
-        Pair<View, String> p2 = new Pair<>(transitionText, "userName");
-
-        ActivityOptionsCompat options = ActivityOptionsCompat.
-                makeSceneTransitionAnimation(this, p1, p2);
-
-        startActivityForResult(intent, REQUEST_CODE_EDIT_USER_DETAILS, options.toBundle());
-*/
     }
 
     @Override
@@ -365,19 +442,19 @@ public class MainActivity
             switch (id) {
                 case (R.id.drawer_nav_map):
                     mContentId = CONTENT_MAP;
-                    setupFragment(mContentId);
+                    setupFragment(mContentId, true);
                     break;
                 case (R.id.drawer_nav_users):
                     mContentId = CONTENT_USER_LIST;
-                    setupFragment(mContentId);
+                    setupFragment(mContentId, true);
                     break;
                 case (R.id.drawer_nav_chart):
                     mContentId = CONTENT_USER_HISTORY_CHART;
-                    setupFragment(mContentId);
+                    setupFragment(mContentId, true);
                     break;
                 case (R.id.drawer_nav_membership):
                     mContentId = CONTENT_MEMBERSHIP;
-                    setupFragment(mContentId);
+                    setupFragment(mContentId, true);
                     break;
                 case (R.id.drawer_nav_settings):
                     editSettings(mCurrentUserUuid);
@@ -386,7 +463,7 @@ public class MainActivity
                     break;
                 case (R.id.drawer_nav_geofences):
                     mContentId = CONTENT_GEOFENCE_EVENTS;
-                    setupFragment(mContentId);
+                    setupFragment(mContentId, true);
                     break;
                 default:
                     Timber.v("Unsupported menu id=" + id);

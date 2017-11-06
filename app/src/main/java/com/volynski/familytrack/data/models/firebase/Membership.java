@@ -18,6 +18,9 @@ public class Membership {
     public static final int USER_JOINED = 2;
     public static final int USER_CREATED = 3;
     public static final int USER_DEPARTED = 3;
+    private static final String ROLE_ADMIN_NAME = "Admin";
+    private static final String ROLE_MEMBER_NAME = "Member";
+    private static final String ROLE_UNDEFINED_NAME = "Unknown";
 
     private String mGroupUuid;
     private String mGroupName;
@@ -67,5 +70,19 @@ public class Membership {
 
     public Membership clone() {
         return new Membership(mGroupUuid, mGroupName, mRoleId, mStatusId);
+    }
+
+    @Exclude
+    public String getRoleName() {
+        switch (mRoleId) {
+            case ROLE_ADMIN:
+                return ROLE_ADMIN_NAME;
+            case ROLE_MEMBER:
+                return ROLE_MEMBER_NAME;
+            case ROLE_UNDEFINED:
+                return ROLE_UNDEFINED_NAME;
+            default:
+                return ROLE_UNDEFINED_NAME;
+        }
     }
 }

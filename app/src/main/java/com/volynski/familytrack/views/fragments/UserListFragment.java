@@ -22,12 +22,15 @@ import android.widget.PopupWindow;
 
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+
+import timber.log.Timber;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -48,26 +51,33 @@ public class UserListFragment
     private RecyclerViewListAdapter mAdapter;
     private InviteUsersDialogFragment mInviteUsersDialog;
 
-    public static UserListFragment newInstance(Context context,
-                                               String currentUserUuid,
-                                               UserListNavigator navigator) {
+    public static UserListFragment newInstance(String currentUserUuid) {
+        Bundle args = new Bundle();
+        args.putString(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
 
         UserListFragment result = new UserListFragment();
+        result.setArguments(args);
 
-        // TODO проверить это место. может быть создание модели именно здесь неверно.
-        UserListViewModel viewModel = new UserListViewModel(context, currentUserUuid,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-        viewModel.setNavigator(navigator);
-        result.setViewModel(viewModel);
-        result.setCurrentUserUuid(currentUserUuid);
-        result.setNavigator(navigator);
         return result;
     }
+
+/*
+    public static UserListFragment newInstance(String currentUserUuid,
+                                               UserListViewModel viewModel) {
+        UserListFragment fragment = newInstance(currentUserUuid);
+        fragment.setViewModel(viewModel);
+        return fragment;
+    }
+*/
 
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start();
+        if (getArguments() == null) {
+            Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
+            return;
+        }
+        mViewModel.start(getArguments().getString(StringKeys.CURRENT_USER_UUID_KEY));
     }
 
     @Override
@@ -93,10 +103,10 @@ public class UserListFragment
                         mLayoutManager.getOrientation());
 
         mBinding.recyclerviewFragmentuserslistUserslist.addItemDecoration(dividerItemDecoration);
+
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
                 R.layout.user_list_item, BR.viewmodel);
         mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
-
         mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
 
@@ -128,7 +138,7 @@ public class UserListFragment
     }
 
     public void refreshList() {
-        mViewModel.start();
+        mViewModel.start(getArguments().getString(StringKeys.CURRENT_USER_UUID_KEY));
     }
 
     public void setCurrentUserUuid(String currentUserUuid) {

@@ -106,6 +106,9 @@ public class UserDetailsViewModel extends BaseObservable {
                         if (u.getActiveMembership() != null) {
                             activeGroup.set(u.getActiveMembership().getGroupName());
                             mActiveGroupUuid = u.getActiveMembership().getGroupUuid();
+                            userRole.set(u.getActiveMembership().getRoleName());
+                        } else {
+                            activeGroup.set("Not set");
                         }
                         user.set(u);
                         distance.set(Location.getDistance(mCurrentUser, u));

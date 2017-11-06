@@ -38,12 +38,14 @@ public class TabViewPageAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         Fragment result = null;
         switch (position) {
+/*
             case 0:
                 result = UserListFragment.newInstance(context, mCurrentUserUuid, mNavigator);
                 break;
             case 1:
                 result = UserOnMapFragment.newInstance(context, mCurrentUserUuid, mNavigator);
                 break;
+*/
             case 2:
                 result = UserHistoryChartFragment.newInstance(context, mCurrentUserUuid, mNavigator);
                 break;

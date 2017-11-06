@@ -34,19 +34,21 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 22.08.2017.
  */
 
-public class UserOnMapViewModel extends BaseObservable {
+public class UserOnMapViewModel extends AbstractViewModel {
     public final static String UI_CONTEXT = "UserOnMapViewModel";
     public final static int EM_NONE = 0;
     public final static int EM_EDIT = 1;
     public final static int EM_NEW = 2;
 
 
+/*
     private final Context mContext;
     private String mCurrentUserUuid = "";
     private User mCurrentUser;
+*/
     private User mSelectedUser;
-    private boolean mIsDataLoading = false;
-    private FamilyTrackDataSource mRepository;
+//    private boolean mIsDataLoading = false;
+//    private FamilyTrackDataSource mRepository;
 
     public ObservableBoolean zoneDbOpCompleted = new ObservableBoolean(false);
     public ObservableBoolean redrawZones = new ObservableBoolean(false);
@@ -80,10 +82,15 @@ public class UserOnMapViewModel extends BaseObservable {
 
     public UserOnMapViewModel(Context context,
                               String currentUserUuid,
-                             FamilyTrackDataSource dataSource) {
+                              FamilyTrackDataSource dataSource,
+                              UserListNavigator navigator) {
+        super(context, currentUserUuid, dataSource);
+/*
         mCurrentUserUuid = currentUserUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
+*/
+        mNavigator = navigator;
 
         initToggleButtons();
     }
@@ -107,7 +114,7 @@ public class UserOnMapViewModel extends BaseObservable {
             return;
         }
 
-        mIsDataLoading = true;
+        isDataLoading.set(true);
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -135,7 +142,7 @@ public class UserOnMapViewModel extends BaseObservable {
                     public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                         populateUserListFromDbResult(result);
                         populateZonesFromDbResult(result);
-                        mIsDataLoading = false;
+                        isDataLoading.set(false);
                     }
                 });
     }

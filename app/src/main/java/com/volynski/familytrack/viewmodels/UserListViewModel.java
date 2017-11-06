@@ -6,6 +6,7 @@ import android.database.Observable;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
+import android.databinding.ObservableField;
 import android.databinding.ObservableList;
 import android.util.Log;
 import android.view.View;
@@ -32,68 +33,41 @@ import timber.log.Timber;
  */
 
 public class UserListViewModel
-        extends BaseObservable {
+        extends AbstractViewModel {
 
     public final static String UI_CONTEXT = UserListViewModel.class.getSimpleName();
-    private final static String TAG = UserListViewModel.class.getSimpleName();
-    private final Context mContext;
-    private String mCurrentUserUuid = "";
-    private User mCurrentUser;
-    private boolean mIsDataLoading;
-    private FamilyTrackDataSource mRepository;
     private UserListNavigator mNavigator;
 
-    public final ObservableBoolean showDialog = new ObservableBoolean(false);
-    public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
+    public final ObservableBoolean showDialog =
+            new ObservableBoolean(false);
+    public final ObservableList<UserListItemViewModel> viewModels =
+            new ObservableArrayList<>();
+    public final ObservableField<String> groupName =
+            new ObservableField<>("");
 
     private List<User> mUsers = new ArrayList<>();
 
-
     public UserListViewModel(Context context,
                              String currentUserUuid,
-                             FamilyTrackDataSource dataSource) {
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
+                             FamilyTrackDataSource dataSource,
+                             UserListNavigator navigator) {
+        super(context, currentUserUuid, dataSource);
+        mNavigator = navigator;
     }
-
-    /**
-     * Shows a dialog with a list of all available mUsers
-     * User list extracted from phone contacts
-     * Set of selected mUsers will be added to current group with state 'Joining'
-     */
-    public void inviteUsers() {
-        Timber.v("Invite mUsers");
-        if (mNavigator != null) {
-            mNavigator.inviteUsers();
-        } else {
-            Timber.e("mNavigator is null");
-        }
-    }
-
-
-    /**
-     * Reads list of mUsers from firebase and refresh it in RecyclerView
-     */
-    private void refreshList() {
-        Log.v(TAG, "refreshList started");
-    }
-
-
 
     /**
      * Starts loading data according to group membership of the user
      * ViewModel will populate the view if current user is member of any group
      * @param user - User object representing current user
      */
-    public void start() {
-
+    public void start(String currentUserUuid) {
+        mCurrentUserUuid = currentUserUuid;
         if (mCurrentUserUuid.equals("")) {
             Timber.e("Can't start viewmodel. UserUuid is empty");
             return;
         }
 
-        mIsDataLoading = true;
+        isDataLoading.set(true);
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -102,6 +76,7 @@ public class UserListViewModel
                     loadUsersList();
                 } else {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    isDataLoading.set(false);
                 }
             }
         });
@@ -117,7 +92,7 @@ public class UserListViewModel
                         @Override
                         public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                             populateUserListFromDbResult(result);
-                            mIsDataLoading = false;
+                            isDataLoading.set(false);
                         }
                     });
         }
@@ -131,6 +106,7 @@ public class UserListViewModel
         mUsers.clear();
         viewModels.clear();
         if (result.getData() != null && result.getData().getMembers() != null) {
+            groupName.set(result.getData().getName());
             for (User user : result.getData().getMembers().values()) {
                 viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
                 mUsers.add(user);
@@ -159,6 +135,7 @@ public class UserListViewModel
                     }
                 });
     }
+
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
     }

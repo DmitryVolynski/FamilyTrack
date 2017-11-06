@@ -40,6 +40,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.Location;
@@ -80,7 +81,7 @@ public class UserOnMapFragment
     private PlaceDetectionClient mPlaceDetectionClient;
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
-    private String mCurrentUserUuid;
+    //private String mCurrentUserUuid;
     private LinearLayoutManager mLayoutManager;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
     private HashMap<String, Circle> mCircles = new HashMap<>();
@@ -94,16 +95,13 @@ public class UserOnMapFragment
     private RecyclerViewListAdapter mAdapterGeo;
     private Polyline mPolyline;
 
-    public static UserOnMapFragment newInstance(Context context,
-                                                String currentUserUuid,
-                                                UserListNavigator navigator) {
+    public static UserOnMapFragment newInstance(String currentUserUuid) {
+        Bundle args = new Bundle();
+        args.putString(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
+
         UserOnMapFragment result = new UserOnMapFragment();
+        result.setArguments(args);
 
-        UserOnMapViewModel viewModel = new UserOnMapViewModel(context, currentUserUuid,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-
-        viewModel.setNavigator(navigator);
-        result.setViewModel(viewModel);
         return result;
     }
 
@@ -162,7 +160,7 @@ public class UserOnMapFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
+        //mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
 
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_on_map,
@@ -174,7 +172,8 @@ public class UserOnMapFragment
         setupSnackbar();
         setupCustomListeners();
 
-        mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        mLayoutManager = new LinearLayoutManager(getContext(),
+                LinearLayoutManager.HORIZONTAL, false);
         mBinding.recyclerviewFrguseronmapUserslist.setLayoutManager(mLayoutManager);
 
         DividerItemDecoration dividerItemDecoration =
@@ -189,7 +188,8 @@ public class UserOnMapFragment
         mAdapterGeo = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
                 R.layout.user_list_item_dwell_control, BR.viewmodel);
 
-        mGeoLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+        mGeoLayoutManager = new LinearLayoutManager(getContext(),
+                LinearLayoutManager.VERTICAL, false);
         mBinding.recyclerviewFrguseronmapGeosettings.setLayoutManager(mGeoLayoutManager);
         mBinding.recyclerviewFrguseronmapGeosettings.setAdapter(mAdapterGeo);
 
@@ -397,6 +397,9 @@ public class UserOnMapFragment
      * Previous set of zones will be revoved
      */
     private void redrawZones() {
+        if (!isAdded()) {
+            return;
+        }
         Map<String, Zone> zones = mViewModel.zones;
         for (String key : mCircles.keySet()) {
             mCircles.get(key).remove();
@@ -466,29 +469,58 @@ public class UserOnMapFragment
     }
 
     private void changeUiLayout(boolean isForEditMode) {
+        boolean isLandscape = getContext().getResources().getBoolean(R.bool.is_landscape);
+
+        int trans1;
+        int trans2;
+
         TypedValue from = ResourceUtil.getTypedValue(getContext(),
                 R.dimen.map_guideline_view_mode_percent);
         TypedValue to = ResourceUtil.getTypedValue(getContext(),
                 R.dimen.map_guideline_edit_mode_percent);
 
-        int trans1 = mBinding.linlayoutFrguseronmapUsers.getWidth() * (isForEditMode ? -1 : 0);
-        int trans2 = mBinding.linlayoutFrguseronmapUsers.getWidth() * (isForEditMode ? 0 : 1);
+        // move layouts
+        if (!isLandscape) {
+            int width = mBinding.linlayoutFrguseronmapUsers.getWidth();
+            trans1 = width * (isForEditMode ? -1 : 0);
+            trans2 = width * (isForEditMode ? 0 : 1);
 
-        mBinding.conslayoutFrguseronmapEditgeofence
-                .setX(mBinding.linlayoutFrguseronmapUsers.getWidth());
-        mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(isForEditMode ? View.VISIBLE : View.INVISIBLE);
-        mBinding.linlayoutFrguseronmapUsers
-                .animate()
-                .translationX(trans1)
-                .setDuration(ANIMATION_DURATION)
-                .alpha(1)
-                .start();
-        mBinding.conslayoutFrguseronmapEditgeofence
-                .animate()
-                .translationX(trans2)
-                .setDuration(ANIMATION_DURATION)
-                .start();
+            mBinding.conslayoutFrguseronmapEditgeofence
+                    .setX(mBinding.linlayoutFrguseronmapUsers.getWidth());
+            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(isForEditMode ? View.VISIBLE : View.INVISIBLE);
+            mBinding.linlayoutFrguseronmapUsers
+                    .animate()
+                    .translationX(trans1)
+                    .setDuration(ANIMATION_DURATION)
+                    .alpha(1)
+                    .start();
+            mBinding.conslayoutFrguseronmapEditgeofence
+                    .animate()
+                    .translationX(trans2)
+                    .setDuration(ANIMATION_DURATION)
+                    .start();
+        } else {
+            int height = mBinding.linlayoutFrguseronmapUsers.getHeight();
+            trans1 = height * (isForEditMode ? -1 : 0);
+            trans2 = height * (isForEditMode ? 0 : 1);
 
+            mBinding.conslayoutFrguseronmapEditgeofence
+                    .setY(mBinding.linlayoutFrguseronmapUsers.getHeight());
+            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(isForEditMode ? View.VISIBLE : View.INVISIBLE);
+            mBinding.linlayoutFrguseronmapUsers
+                    .animate()
+                    .translationY(trans1)
+                    .setDuration(ANIMATION_DURATION)
+                    .alpha(1)
+                    .start();
+            mBinding.conslayoutFrguseronmapEditgeofence
+                    .animate()
+                    .translationY(trans2)
+                    .setDuration(ANIMATION_DURATION)
+                    .start();
+        }
+
+        // move guide line to free more space for zone edit
         final ConstraintLayout.LayoutParams lp =
                 (ConstraintLayout.LayoutParams) mBinding.verticalOneThird.getLayoutParams();
 
@@ -508,11 +540,13 @@ public class UserOnMapFragment
         animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator updatedAnimation) {
-                lp.guidePercent =  (float)updatedAnimation.getAnimatedValue();
+                lp.guidePercent = (float)updatedAnimation.getAnimatedValue();
                 mBinding.verticalOneThird.setLayoutParams(lp);
             }
 
         });
+
+        // and finally center camera on editable geofence
         if (mCurrentGeofence != null) {
             moveCameraTo(mCurrentGeofence.getCenter());
         }
