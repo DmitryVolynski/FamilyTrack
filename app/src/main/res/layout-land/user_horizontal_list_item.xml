@@ -12,13 +12,15 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
 
         <ImageView
             android:layout_width="@dimen/user_photo_normal_width"
             android:layout_height="@dimen/user_photo_normal_height"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
             app:roundImageUrl="@{viewmodel.user.photoUrl}" />
 
         <TextView
@@ -27,7 +29,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
-            android:layout_marginStart="4dp"
             android:text="@{viewmodel.user.givenName}"
             android:textColor="@android:color/black"
             android:textSize="16sp"

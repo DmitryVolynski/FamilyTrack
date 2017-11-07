@@ -17,6 +17,7 @@ import android.view.Window;
 
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
@@ -28,6 +29,8 @@ import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
+
+import timber.log.Timber;
 
 /**
  * Created by DmitryVolynski on 31.08.2017.
@@ -69,28 +72,28 @@ public class InviteUsersDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Select mUsers to invite");
+        dialog.setTitle("Select users to invite");
         //dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
         return dialog;
     }
 
-    public static InviteUsersDialogFragment newInstance(Context context,
-                                                        String currentUserUuid,
-                                                        UserListNavigator navigator) {
-        InviteUsersDialogFragment result = new InviteUsersDialogFragment();
+    public static InviteUsersDialogFragment newInstance(String currentUserUuid) {
+        Bundle args = new Bundle();
+        args.putString(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
 
-        InviteUsersViewModel viewModel =
-                new InviteUsersViewModel(context, currentUserUuid,
-                        new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-        viewModel.setNavigator(navigator);
-        result.setViewModel(viewModel);
+        InviteUsersDialogFragment result = new InviteUsersDialogFragment();
+        result.setArguments(args);
         return result;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start();
+        if (getArguments() == null) {
+            Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
+            return;
+        }
+        mViewModel.start(getArguments().getString(StringKeys.CURRENT_USER_UUID_KEY));
     }
 
     public void setViewModel(InviteUsersViewModel mViewModel) {

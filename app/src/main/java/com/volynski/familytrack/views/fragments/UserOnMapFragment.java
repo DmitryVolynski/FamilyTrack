@@ -127,7 +127,14 @@ public class UserOnMapFragment
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start();
+        if (mViewModel.isCreatedFromViewHolder()) {
+            if (mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_EDIT ||
+                    mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_NEW) {
+                changeUiLayout(true);
+            }
+        } else {
+            mViewModel.start();
+        }
     }
 
     @Override
@@ -172,8 +179,10 @@ public class UserOnMapFragment
         setupSnackbar();
         setupCustomListeners();
 
+        boolean isLandscape = getResources().getBoolean(R.bool.is_landscape);
+
         mLayoutManager = new LinearLayoutManager(getContext(),
-                LinearLayoutManager.HORIZONTAL, false);
+                (isLandscape ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL), false);
         mBinding.recyclerviewFrguseronmapUserslist.setLayoutManager(mLayoutManager);
 
         DividerItemDecoration dividerItemDecoration =
@@ -474,11 +483,13 @@ public class UserOnMapFragment
         int trans1;
         int trans2;
 
-        TypedValue from = ResourceUtil.getTypedValue(getContext(),
+        TypedValue fromRightGuideLine = ResourceUtil.getTypedValue(getContext(),
                 R.dimen.map_guideline_view_mode_percent);
-        TypedValue to = ResourceUtil.getTypedValue(getContext(),
+        TypedValue toRightGuideLine = ResourceUtil.getTypedValue(getContext(),
                 R.dimen.map_guideline_edit_mode_percent);
 
+        mBinding.linlayoutFrguseronmapUsers.setVisibility(isForEditMode ? View.INVISIBLE : View.VISIBLE);
+        mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(isForEditMode ? View.VISIBLE : View.INVISIBLE);
         // move layouts
         if (!isLandscape) {
             int width = mBinding.linlayoutFrguseronmapUsers.getWidth();
@@ -487,7 +498,6 @@ public class UserOnMapFragment
 
             mBinding.conslayoutFrguseronmapEditgeofence
                     .setX(mBinding.linlayoutFrguseronmapUsers.getWidth());
-            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(isForEditMode ? View.VISIBLE : View.INVISIBLE);
             mBinding.linlayoutFrguseronmapUsers
                     .animate()
                     .translationX(trans1)
@@ -506,7 +516,6 @@ public class UserOnMapFragment
 
             mBinding.conslayoutFrguseronmapEditgeofence
                     .setY(mBinding.linlayoutFrguseronmapUsers.getHeight());
-            mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(isForEditMode ? View.VISIBLE : View.INVISIBLE);
             mBinding.linlayoutFrguseronmapUsers
                     .animate()
                     .translationY(trans1)
@@ -521,27 +530,56 @@ public class UserOnMapFragment
         }
 
         // move guide line to free more space for zone edit
-        final ConstraintLayout.LayoutParams lp =
+        final ConstraintLayout.LayoutParams lpRight =
                 (ConstraintLayout.LayoutParams) mBinding.verticalOneThird.getLayoutParams();
 
-        ValueAnimator animation;
+        ValueAnimator animationRight;
+        ValueAnimator animationLeft;
+
         if (isForEditMode) {
-            animation = ValueAnimator.ofFloat(from.getFloat(), to.getFloat());
+            animationRight = ValueAnimator.ofFloat(fromRightGuideLine.getFloat(), toRightGuideLine.getFloat());
             ((MainActivity) getActivity()).hideFab();
         } else {
-            animation = ValueAnimator.ofFloat(to.getFloat(), from.getFloat());
+            animationRight = ValueAnimator.ofFloat(toRightGuideLine.getFloat(), fromRightGuideLine.getFloat());
             ((MainActivity) getActivity()).restoreFab();
         }
 
-        animation.setDuration(ANIMATION_DURATION);
-        animation.start();
-        //mMap.setLatLngBoundsForCameraTarget();
+        if (isLandscape) {
+            TypedValue fromLeftGuideLine = ResourceUtil.getTypedValue(getContext(),
+                    R.dimen.map_leftguideline_view_mode_percent);
+            TypedValue toLeftGuideLine = ResourceUtil.getTypedValue(getContext(),
+                    R.dimen.map_leftguideline_edit_mode_percent);
 
-        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            if (isForEditMode) {
+                animationLeft = ValueAnimator.ofFloat(fromLeftGuideLine.getFloat(), toLeftGuideLine.getFloat());
+            } else {
+                animationLeft = ValueAnimator.ofFloat(toLeftGuideLine.getFloat(), fromLeftGuideLine.getFloat());
+            }
+            animationLeft.setDuration(ANIMATION_DURATION);
+            animationLeft.start();
+
+            final ConstraintLayout.LayoutParams lpLeft =
+                    (ConstraintLayout.LayoutParams) mBinding.verticalOneTen.getLayoutParams();
+
+            animationLeft.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator updatedAnimation) {
+                    lpLeft.guidePercent = (float)updatedAnimation.getAnimatedValue();
+                    mBinding.verticalOneTen.setLayoutParams(lpLeft);
+                }
+
+            });
+
+        }
+
+        animationRight.setDuration(ANIMATION_DURATION);
+        animationRight.start();
+
+        animationRight.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator updatedAnimation) {
-                lp.guidePercent = (float)updatedAnimation.getAnimatedValue();
-                mBinding.verticalOneThird.setLayoutParams(lp);
+                lpRight.guidePercent = (float)updatedAnimation.getAnimatedValue();
+                mBinding.verticalOneThird.setLayoutParams(lpRight);
             }
 
         });

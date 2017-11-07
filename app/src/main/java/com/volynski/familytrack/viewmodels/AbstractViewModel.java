@@ -41,5 +41,4 @@ public abstract class AbstractViewModel extends BaseObservable {
     public void setCreatedFromViewHolder(boolean createdFromViewHolder) {
         this.mCreatedFromViewHolder = createdFromViewHolder;
     }
-
 }

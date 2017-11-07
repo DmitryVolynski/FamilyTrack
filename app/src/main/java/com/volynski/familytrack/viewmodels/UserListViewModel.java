@@ -58,7 +58,7 @@ public class UserListViewModel
     /**
      * Starts loading data according to group membership of the user
      * ViewModel will populate the view if current user is member of any group
-     * @param user - User object representing current user
+     * @param currentUserUuid - User object representing current user
      */
     public void start(String currentUserUuid) {
         mCurrentUserUuid = currentUserUuid;
@@ -139,4 +139,8 @@ public class UserListViewModel
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
     }
+    public UserListNavigator getNavigator() {
+        return mNavigator;
+    }
+
 }

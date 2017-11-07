@@ -89,7 +89,10 @@ public class UserHistoryChartFragment extends Fragment implements View.OnClickLi
         setupToggleButtons();
         setupCustomListeners();
 
-        mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+        boolean isLandscape = getResources().getBoolean(R.bool.is_landscape);
+        mLayoutManager = new LinearLayoutManager(getContext(),
+                (isLandscape ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL), false);
+
         mBinding.recyclerviewFrguserhistorychart.setLayoutManager(mLayoutManager);
 
         DividerItemDecoration dividerItemDecoration =
@@ -148,11 +151,11 @@ public class UserHistoryChartFragment extends Fragment implements View.OnClickLi
 
 
     private void setupToggleButtons() {
-        mBinding.tbutFrguserhistorychartOff.setOnClickListener(this);
-        mBinding.tbutFrguserhistorychart1h.setOnClickListener(this);
-        mBinding.tbutFrguserhistorychart8h.setOnClickListener(this);
-        mBinding.tbutFrguserhistorychart1d.setOnClickListener(this);
-        mBinding.tbutFrguserhistorychart1w.setOnClickListener(this);
+        mBinding.tbutOff.setOnClickListener(this);
+        mBinding.tbut1h.setOnClickListener(this);
+        mBinding.tbut8h.setOnClickListener(this);
+        mBinding.tbut1d.setOnClickListener(this);
+        mBinding.tbut1w.setOnClickListener(this);
     }
 
     public void userClicked(User user) {

@@ -26,17 +26,12 @@ import timber.log.Timber;
 
 
 public class InviteUsersViewModel
-        extends BaseObservable
+        extends AbstractViewModel
         implements View.OnClickListener {
 
     public final static String UI_CONTEXT = InviteUsersViewModel.class.getSimpleName();
     private final static String TAG = UserListViewModel.class.getSimpleName();
-    private final Context mContext;
-    private String mCurrentUserUuid = "";
-    private User mCurrentUser;
-    private boolean mIsDataLoading = false;
     private UserListNavigator mNavigator;
-    private FamilyTrackDataSource mRepository;
 
     private List<User> mUnfilteredUserList = new ArrayList<>();
 
@@ -44,11 +39,12 @@ public class InviteUsersViewModel
     public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
     public final ObservableField<String> searchString = new ObservableField<>("");
 
-    public InviteUsersViewModel(Context context, String currentUserUuid,
-                             FamilyTrackDataSource dataSource) {
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
+    public InviteUsersViewModel(Context context,
+                                String currentUserUuid,
+                                FamilyTrackDataSource dataSource,
+                                UserListNavigator navigator) {
+        super(context, currentUserUuid, dataSource);
+        mNavigator = navigator;
         searchString.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
@@ -112,13 +108,14 @@ public class InviteUsersViewModel
     /**
      * Starts loading data from contact list of the phone
      */
-    public void start() {
+    public void start(String currentUserUuid) {
+        mCurrentUserUuid = currentUserUuid;
         if (mCurrentUserUuid.equals("")) {
             Timber.e("Can't start viewmodel. UserUuid is empty");
             return;
         }
 
-        mIsDataLoading = true;
+        isDataLoading.set(true);
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -140,7 +137,7 @@ public class InviteUsersViewModel
                 @Override
                 public void onGetContactsToInviteCompleted(FirebaseResult<List<User>> result) {
                     populateUserListFromDbResult(result);
-                    mIsDataLoading = false;
+                    isDataLoading.set(false);
                 }
             });
         } else {

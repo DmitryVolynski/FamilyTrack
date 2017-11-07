@@ -18,8 +18,8 @@
         <ImageView
             android:id="@+id/imageview_userlistitem_photo"
             android:layout_gravity="center_vertical"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/user_photo_normal_width"
+            android:layout_height="@dimen/user_photo_normal_height"
             android:layout_marginLeft="16dp"
             android:transitionName="userPhoto"
             app:roundImageUrl="@{viewmodel.user.photoUrl}"

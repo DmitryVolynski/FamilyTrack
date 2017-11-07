@@ -57,9 +57,10 @@ public class MainActivity
 
     public static final int CONTENT_MAP = 0;
     public static final int CONTENT_USER_LIST = 1;
-    private static final int CONTENT_USER_HISTORY_CHART = 2;
-    private static final int CONTENT_MEMBERSHIP = 3;
-    private static final int CONTENT_GEOFENCE_EVENTS = 4;
+    public static final int CONTENT_USER_HISTORY_CHART = 2;
+    public static final int CONTENT_MEMBERSHIP = 3;
+    public static final int CONTENT_GEOFENCE_EVENTS = 4;
+    public static final int CONTENT_INVITE_USERS = 5;
 
     private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
     private static final int REQUEST_CODE_EDIT_SETTINGS = 1001;
@@ -93,25 +94,24 @@ public class MainActivity
         outState.putString(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
     }
 
-    private void setupFragment(int contentId, boolean forceReload) {
+    private void setupFragment(int contentId, boolean forceRecreate) {
         Fragment newFragment =
                 getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
 
+        Object viewModel = PersistedFragmentsUtil.findOrCreateViewModel(this,
+                        contentId, mCurrentUserUuid, this,  forceRecreate);
         switch (contentId) {
             case CONTENT_MAP:
-                if (newFragment == null || forceReload) {
+                if (newFragment == null || forceRecreate) {
                     newFragment = UserOnMapFragment.newInstance(mCurrentUserUuid);
                 }
-                ((UserOnMapFragment) newFragment)
-                        .setViewModel((UserOnMapViewModel) findOrCreateViewModel(contentId));
+                ((UserOnMapFragment) newFragment).setViewModel((UserOnMapViewModel)viewModel);
                 break;
             case CONTENT_USER_LIST:
-
-                if (newFragment == null || forceReload) {
+                if (newFragment == null || forceRecreate) {
                     newFragment = UserListFragment.newInstance(mCurrentUserUuid);
                 }
-                ((UserListFragment)newFragment)
-                        .setViewModel((UserListViewModel) findOrCreateViewModel(contentId));
+                ((UserListFragment)newFragment).setViewModel((UserListViewModel)viewModel);
                 break;
             case CONTENT_USER_HISTORY_CHART:
                 newFragment = UserHistoryChartFragment.newInstance(this, mCurrentUserUuid, this);
@@ -136,8 +136,9 @@ public class MainActivity
     }
 
 
+/*
     @NonNull
-    private Object findOrCreateViewModel(int contentId) {
+    private Object findOrCreateViewModel(int contentId, boolean forceRecreate) {
         // In a configuration change we might have a ViewModel present. It's retained using the
         // Fragment Manager.
         Object viewModel;
@@ -148,7 +149,7 @@ public class MainActivity
                         (ViewModelHolder<UserListViewModel>) getSupportFragmentManager()
                                 .findFragmentByTag(TAG);
 
-                if (userListVM != null && userListVM.getViewmodel() != null) {
+                if (!forceRecreate && userListVM != null && userListVM.getViewmodel() != null) {
                     // If the model was retained, return it.
                     viewModel = userListVM.getViewmodel();
                     ((UserListViewModel) viewModel).setCreatedFromViewHolder(true);
@@ -168,7 +169,7 @@ public class MainActivity
                         (ViewModelHolder<UserOnMapViewModel>) getSupportFragmentManager()
                                 .findFragmentByTag(TAG);
 
-                if (userOnMapVM != null && userOnMapVM.getViewmodel() != null) {
+                if (!forceRecreate && userOnMapVM != null && userOnMapVM.getViewmodel() != null) {
                     // If the model was retained, return it.
                     viewModel = userOnMapVM.getViewmodel();
                     ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(true);
@@ -193,6 +194,7 @@ public class MainActivity
         return viewModel;
     }
 
+*/
 
     private void readIntentData() {
         Intent intent = getIntent();

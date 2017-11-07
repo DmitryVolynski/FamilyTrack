@@ -10,6 +10,8 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.view.Gravity;
@@ -27,7 +29,10 @@ import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.viewmodels.InviteUsersViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
+import com.volynski.familytrack.views.MainActivity;
+import com.volynski.familytrack.views.PersistedFragmentsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import timber.log.Timber;
@@ -44,7 +49,7 @@ public class UserListFragment
 
     private UserListViewModel mViewModel;
     private String mCurrentUserUuid;
-    private UserListNavigator mUserListNavigator;
+    //private UserListNavigator mUserListNavigator;
     private GridLayoutManager mLayoutManager;
 
     FragmentUserListBinding mBinding;
@@ -77,7 +82,8 @@ public class UserListFragment
             Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
             return;
         }
-        mViewModel.start(getArguments().getString(StringKeys.CURRENT_USER_UUID_KEY));
+        mCurrentUserUuid = getArguments().getString(StringKeys.CURRENT_USER_UUID_KEY);
+        mViewModel.start(mCurrentUserUuid);
     }
 
     @Override
@@ -126,9 +132,19 @@ public class UserListFragment
                     PERMISSIONS_REQUEST_READ_CONTACTS);
         }
 
-        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(getContext(),
-                mCurrentUserUuid, mUserListNavigator);
-        mInviteUsersDialog.show(getActivity().getSupportFragmentManager(), "aa");
+        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(mCurrentUserUuid);
+
+        InviteUsersViewModel viewModel =
+                (InviteUsersViewModel)PersistedFragmentsUtil.findOrCreateViewModel(
+                        (AppCompatActivity)getActivity(),
+                        MainActivity.CONTENT_INVITE_USERS,
+                        mCurrentUserUuid,
+                        mViewModel.getNavigator(),
+                        false);
+
+        mInviteUsersDialog.setViewModel(viewModel);
+        mInviteUsersDialog.show(getActivity().getSupportFragmentManager(),
+                viewModel.getClass().getSimpleName());
     }
 
     public void dismissInviteUsersDialog() {
@@ -145,6 +161,7 @@ public class UserListFragment
         this.mCurrentUserUuid = currentUserUuid;
     }
 
+/*
     public UserListNavigator getNavigator() {
         return mUserListNavigator;
     }
@@ -152,4 +169,5 @@ public class UserListFragment
     public void setNavigator(UserListNavigator userListNavigator) {
         this.mUserListNavigator = userListNavigator;
     }
+*/
 }

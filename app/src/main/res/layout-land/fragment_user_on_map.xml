@@ -21,11 +21,9 @@
                 android:id="@+id/map_activitymain"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_margin="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/conslayout_frguseronmap_editgeofence"
+                app:layout_constraintEnd_toStartOf="@+id/verticalOneThird"
                 app:layout_constraintLeft_toRightOf="@id/verticalOneTen"
                 app:layout_constraintStart_toStartOf="@+id/verticalOneTen"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -36,7 +34,7 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:visibility="visible"
-                app:layout_constraintGuide_percent="0.7"/>
+                app:layout_constraintGuide_percent="0.8"/>
 
             <android.support.constraint.Guideline
                 android:id="@+id/verticalOneTen"
@@ -44,78 +42,66 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:visibility="visible"
-                app:layout_constraintGuide_percent="0.1"/>
-            <TableLayout
+                app:layout_constraintGuide_percent="0.15"/>
+            <GridLayout
                 android:id="@+id/tbllayout_frguseronmap"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintRight_toRightOf="@+id/verticalOneTen"
+                app:layout_constraintEnd_toEndOf="@id/verticalOneTen"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
+                android:columnCount="1"
                 android:orientation="vertical">
-
-                <TableRow android:layout_weight="1">
-
-                    <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_off"
-                        android:layout_width="64dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:checked='@{viewmodel.toggleButtons["OFF"]}'
-                        android:textOff="OFF"
-                        android:textOn="OFF" />
-                </TableRow>
-                <TableRow android:layout_weight="1">
-
-                    <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_1h"
-                        android:layout_width="64dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:checked='@{viewmodel.toggleButtons["1H"]}'
-
-                        android:textOff="1H"
-                        android:textOn="1H" />
-                </TableRow>
-                <TableRow android:layout_weight="1">
-
-                    <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_8h"
-                        android:layout_width="64dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:checked='@{viewmodel.toggleButtons["8H"]}'
-                        android:textOff="8H"
-                        android:textOn="8H" />
-                </TableRow>
-                <TableRow android:layout_weight="1">
-
-                    <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_1d"
-                        android:layout_width="64dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="8dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:checked='@{viewmodel.toggleButtons["1D"]}'
-                        android:textOff="1D"
-                        android:textOn="1D" />
-                </TableRow>
-                <TableRow android:layout_weight="1">
-                    <ToggleButton
-                        android:id="@+id/tbut_frguseronmap_1w"
-                        android:layout_width="64dp"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/toggle_button_selector"
-                        android:checked='@{viewmodel.toggleButtons["1W"]}'
-                        android:textOff="1W"
-                        android:textOn="1W" />
-                </TableRow>
-            </TableLayout>
+                <ToggleButton
+                    android:layout_gravity="center"
+                    android:layout_rowWeight="1"
+                    android:layout_column="0"
+                    android:id="@+id/tbut_frguseronmap_off"
+                    android:background="@drawable/toggle_button_selector"
+                    android:checked='@{viewmodel.toggleButtons["OFF"]}'
+                    android:textOff="OFF"
+                    android:textOn="OFF" />
+                <ToggleButton
+                    android:layout_rowWeight="1"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:id="@+id/tbut_frguseronmap_1h"
+                    android:background="@drawable/toggle_button_selector"
+                    android:checked='@{viewmodel.toggleButtons["1H"]}'
+                    android:textOff="1H"
+                    android:textOn="1H" />
+                <ToggleButton
+                    android:layout_rowWeight="1"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:id="@+id/tbut_frguseronmap_8h"
+                    android:background="@drawable/toggle_button_selector"
+                    android:checked='@{viewmodel.toggleButtons["8H"]}'
+                    android:textOff="8H"
+                    android:textOn="8H" />
+                <ToggleButton
+                    android:layout_rowWeight="1"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:id="@+id/tbut_frguseronmap_1d"
+                    android:background="@drawable/toggle_button_selector"
+                    android:checked='@{viewmodel.toggleButtons["1D"]}'
+                    android:textOff="1D"
+                    android:textOn="1D" />
+                <ToggleButton
+                    android:layout_rowWeight="1"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:id="@+id/tbut_frguseronmap_1w"
+                    android:background="@drawable/toggle_button_selector"
+                    android:checked='@{viewmodel.toggleButtons["1W"]}'
+                    android:textOff="1W"
+                    android:textOn="1W" />
+            </GridLayout>
             <LinearLayout
                 android:id="@+id/linlayout_frguseronmap_users"
                 android:layout_width="0dp"
@@ -132,7 +118,6 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <android.support.v7.widget.RecyclerView
-                    android:layout_marginStart="8dp"
                     android:id="@+id/recyclerview_frguseronmap_userslist"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

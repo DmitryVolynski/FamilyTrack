@@ -1,4 +1,7 @@
 <resources>
+    <dimen name="user_photo_normal_width">48dp</dimen>
+    <dimen name="user_photo_normal_height">48dp</dimen>
+
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="list_item_horizontal_margin">16dp</dimen>
     <dimen name="list_item_padding">8dp</dimen>

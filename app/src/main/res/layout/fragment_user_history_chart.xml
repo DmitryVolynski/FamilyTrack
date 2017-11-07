@@ -58,68 +58,67 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp">
 
-                <LinearLayout
+                <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:stretchColumns="*"
+                    android:layout_marginBottom="8dp"
                     android:orientation="horizontal">
+                    <TableRow>
+                        <ToggleButton
+                            android:enabled="false"
+                            android:id="@+id/tbut_off"
+                            android:layout_width="64dp"
+                            android:layout_height="36dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["OFF"]}'
+                            android:textOff="OFF"
+                            android:textOn="OFF" />
 
-                    <ToggleButton
-                        android:id="@+id/tbut_frguserhistorychart_off"
-                        android:layout_width="64dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:paddingEnd="16dp"
-                        android:paddingStart="16dp"
-                        android:checked='@{viewmodel.toggleButtons["OFF"]}'
-                        android:textOff="OFF"
-                        android:textOn="OFF" />
+                        <ToggleButton
+                            android:id="@+id/tbut_1h"
+                            android:layout_width="64dp"
+                            android:layout_height="36dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["1H"]}'
+                            android:textOff="1H"
 
-                    <ToggleButton
-                        android:id="@+id/tbut_frguserhistorychart_1h"
-                        android:layout_width="64dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:paddingEnd="16dp"
-                        android:paddingStart="16dp"
-                        android:checked='@{viewmodel.toggleButtons["1H"]}'
-                        android:textOff="1H"
-                        android:textOn="1H" />
+                            android:textOn="1H" />
 
-                    <ToggleButton
-                        android:id="@+id/tbut_frguserhistorychart_8h"
-                        android:layout_width="64dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:paddingEnd="16dp"
-                        android:paddingStart="16dp"
-                        android:checked='@{viewmodel.toggleButtons["8H"]}'
-                        android:textOff="8H"
-                        android:textOn="8H" />
+                        <ToggleButton
+                            android:id="@+id/tbut_8h"
+                            android:layout_width="64dp"
+                            android:layout_height="36dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["8H"]}'
+                            android:textOff="8H"
+                            android:textOn="8H" />
 
-                    <ToggleButton
-                        android:id="@+id/tbut_frguserhistorychart_1d"
-                        android:layout_width="64dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:paddingEnd="16dp"
-                        android:paddingStart="16dp"
-                        android:checked='@{viewmodel.toggleButtons["1D"]}'
-                        android:textOff="1D"
-                        android:textOn="1D" />
+                        <ToggleButton
+                            android:id="@+id/tbut_1d"
+                            android:layout_width="64dp"
+                            android:layout_height="36dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["1D"]}'
+                            android:textOff="1D"
+                            android:textOn="1D" />
 
-                    <ToggleButton
-                        android:id="@+id/tbut_frguserhistorychart_1w"
-                        android:layout_width="64dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/toggle_button_selector"
-                        android:paddingEnd="16dp"
-                        android:paddingStart="16dp"
-                        android:checked='@{viewmodel.toggleButtons["1W"]}'
-                        android:textOff="1W"
-                        android:textOn="1W" />
+                        <ToggleButton
+                            android:id="@+id/tbut_1w"
+                            android:layout_width="64dp"
+                            android:layout_height="36dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["1W"]}'
+                            android:textOff="1W"
+                            android:textOn="1W" />
+                    </TableRow>
 
 
-                </LinearLayout>
+                </TableLayout>
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recyclerview_frguserhistorychart"
