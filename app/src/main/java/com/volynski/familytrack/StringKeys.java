@@ -28,6 +28,12 @@ public class StringKeys {
     public static final String SETTINGS_UPDATE_RESULT_KEY = "SETTINGS_UPDATE_RESULT";
     public static final String SNACKBAR_TEXT_KEY = "SNACKBAR_TEXT";
     public static final String SHARED_PREFS_CONNECTION_STATUS_KEY = "CONNECTION_STATUS";
+
+    public static final String INVITE_USERS_LAYOUT_POSITION_KEY = "INVITE_USERS_LAYOUT_POSITION";
+    public static final String INVITE_USERS_VIEWMODEL_BUNDLE_KEY = "INVITE_USERS_VIEWMODEL_BUNDLE";
+    public static final String INVITE_USERS_VM_SEARCH_STRING_KEY = "INVITE_USERS_VM_SEARCH_STRING";
+    public static final String INVITE_USERS_VM_SELECTED_USERS_KEY = "INVITE_USERS_VM_SELECTED_USERS";
+    public static final String INVITE_USERS_DIALOG_SHOW_KEY = "INVITE_USERS_DIALOG_SHOW";
 }
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением

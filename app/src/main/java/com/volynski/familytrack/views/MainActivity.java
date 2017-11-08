@@ -1,10 +1,8 @@
 package com.volynski.familytrack.views;
 
-import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityOptionsCompat;
@@ -30,7 +28,6 @@ import com.volynski.familytrack.databinding.NavHeaderMainBinding;
 import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
-import com.volynski.familytrack.viewmodels.AbstractViewModel;
 import com.volynski.familytrack.viewmodels.MainActivityViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
@@ -39,10 +36,7 @@ import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
 import com.volynski.familytrack.views.fragments.UserMembershipFragment;
 import com.volynski.familytrack.views.fragments.UserOnMapFragment;
-import com.volynski.familytrack.views.fragments.ViewModelHolder;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
-
-import java.util.List;
 
 import timber.log.Timber;
 
@@ -365,7 +359,7 @@ public class MainActivity
                         (UserListFragment) FragmentUtil
                                 .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
                 if (f0 != null) {
-                    f0.inviteUser();
+                    f0.showInviteUsersDialog(null);
                 }
                 break;
 

@@ -2,6 +2,7 @@ package com.volynski.familytrack.views.fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
@@ -38,6 +39,7 @@ import com.volynski.familytrack.views.navigators.UserListNavigator;
 import timber.log.Timber;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
+import static com.volynski.familytrack.StringKeys.INVITE_USERS_DIALOG_SHOW_KEY;
 
 /**
  * Created by DmitryVolynski on 22.08.2017.
@@ -77,6 +79,7 @@ public class UserListFragment
 
     @Override
     public void onResume() {
+
         super.onResume();
         if (getArguments() == null) {
             Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
@@ -89,6 +92,15 @@ public class UserListFragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null &&
+                savedInstanceState.containsKey(StringKeys.INVITE_USERS_DIALOG_SHOW_KEY)) {
+            showInviteUsersDialog(savedInstanceState);
+        }
     }
 
     @Nullable
@@ -119,11 +131,21 @@ public class UserListFragment
         return mBinding.getRoot();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mInviteUsersDialog != null && mInviteUsersDialog.getDialog().isShowing()) {
+            // if invite dialog is visible - save the state of dialog & data
+            mInviteUsersDialog.onSaveInstanceState(outState);
+        }
+        int i = 0;
+    }
+
     public void setViewModel(UserListViewModel mViewModel) {
         this.mViewModel = mViewModel;
     }
 
-    public void inviteUser() {
+    public void showInviteUsersDialog(Bundle savedInstanceState) {
         if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
                 Manifest.permission.READ_CONTACTS)
                 == PackageManager.PERMISSION_DENIED) {
@@ -131,8 +153,6 @@ public class UserListFragment
                     new String[]{Manifest.permission.READ_CONTACTS},
                     PERMISSIONS_REQUEST_READ_CONTACTS);
         }
-
-        mInviteUsersDialog = InviteUsersDialogFragment.newInstance(mCurrentUserUuid);
 
         InviteUsersViewModel viewModel =
                 (InviteUsersViewModel)PersistedFragmentsUtil.findOrCreateViewModel(
@@ -142,9 +162,29 @@ public class UserListFragment
                         mViewModel.getNavigator(),
                         false);
 
-        mInviteUsersDialog.setViewModel(viewModel);
-        mInviteUsersDialog.show(getActivity().getSupportFragmentManager(),
-                viewModel.getClass().getSimpleName());
+        //viewModel.restoreFromBundle(savedInstanceState);
+
+        mInviteUsersDialog = (InviteUsersDialogFragment) getActivity()
+                .getSupportFragmentManager()
+                .findFragmentByTag(InviteUsersDialogFragment.class.getSimpleName());
+        if (mInviteUsersDialog == null) {
+            mInviteUsersDialog = InviteUsersDialogFragment.newInstance(mCurrentUserUuid);
+            mInviteUsersDialog.show(getActivity().getSupportFragmentManager(),
+                    InviteUsersDialogFragment.class.getSimpleName());
+            mInviteUsersDialog.setViewModel(viewModel);
+        } else {
+            mInviteUsersDialog.setViewModel(viewModel);
+        }
+        //mInviteUsersDialog.show();
+
+/*
+        InviteUsersViewModel viewModel = new InviteUsersViewModel(
+                getContext(),
+                mCurrentUserUuid,
+                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(getContext()), getContext()),
+                mViewModel.getNavigator());
+*/
+
     }
 
     public void dismissInviteUsersDialog() {

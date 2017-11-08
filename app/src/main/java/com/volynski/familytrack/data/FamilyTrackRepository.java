@@ -371,27 +371,43 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
             if (isNew) {
                 String givenName = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
-                user = new User("", "", "", cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)),
+                user = new User(key, "", "", cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)),
                         "", "", "", null, null);
             } else {
                 user = contacts.get(key);
             }
 
+            Timber.v(user.getDisplayName() + "/" + cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE)));
+
+
             String mimeType = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
-            String data = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA1));
-            if (mimeType.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
-                user.setEmail(data);
-            } else {
-                user.setPhone(data);
+
+            if (key.equals("320")) {
+                int u = 0;
+            }
+            try {
+                String data = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA1));
+                if (mimeType.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
+                    user.setEmail(data);
+                } else {
+                    user.setPhone(data);
+                }
+
+                if (isNew) {
+                    contacts.put(key, user);
+                } else {
+                    contacts.remove(key);
+                    contacts.put(key, user);
+                }
+            } catch (Exception e) {
+                Timber.v("Exception!");
+                Timber.v(e.getMessage());
             }
 
-            if (isNew) {
-                contacts.put(key, user);
-            } else {
-                contacts.remove(key);
-                contacts.put(key, user);
-            }
+
         }
+
+        cursor.close();
 
         getGroupByUuid(groupUuid, false, new GetGroupByUuidCallback() {
             @Override
