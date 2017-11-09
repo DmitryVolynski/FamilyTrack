@@ -55,6 +55,7 @@ public class MainActivity
     public static final int CONTENT_MEMBERSHIP = 3;
     public static final int CONTENT_GEOFENCE_EVENTS = 4;
     public static final int CONTENT_INVITE_USERS = 5;
+    public static final int CONTENT_USER_DETAILS = 6;
 
     private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
     private static final int REQUEST_CODE_EDIT_SETTINGS = 1001;
@@ -128,67 +129,6 @@ public class MainActivity
                     .commit();
         }
     }
-
-
-/*
-    @NonNull
-    private Object findOrCreateViewModel(int contentId, boolean forceRecreate) {
-        // In a configuration change we might have a ViewModel present. It's retained using the
-        // Fragment Manager.
-        Object viewModel;
-        Context context = getApplicationContext();
-        switch (contentId) {
-            case CONTENT_USER_LIST:
-                ViewModelHolder<UserListViewModel> userListVM =
-                        (ViewModelHolder<UserListViewModel>) getSupportFragmentManager()
-                                .findFragmentByTag(TAG);
-
-                if (!forceRecreate && userListVM != null && userListVM.getViewmodel() != null) {
-                    // If the model was retained, return it.
-                    viewModel = userListVM.getViewmodel();
-                    ((UserListViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
-                } else {
-                    // There is no ViewModel yet, create it.
-                    viewModel = new UserListViewModel(context,
-                            mCurrentUserUuid,
-                            new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context),
-                            this);
-                    ((UserListViewModel) viewModel).setCreatedFromViewHolder(false);
-                    // and bind it to this Activity's lifecycle using the Fragment Manager.
-                }
-                break;
-            case CONTENT_MAP:
-                ViewModelHolder<UserOnMapViewModel> userOnMapVM =
-                        (ViewModelHolder<UserOnMapViewModel>) getSupportFragmentManager()
-                                .findFragmentByTag(TAG);
-
-                if (!forceRecreate && userOnMapVM != null && userOnMapVM.getViewmodel() != null) {
-                    // If the model was retained, return it.
-                    viewModel = userOnMapVM.getViewmodel();
-                    ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
-                } else {
-                    // There is no ViewModel yet, create it.
-                    viewModel = new UserOnMapViewModel(context,
-                            mCurrentUserUuid,
-                            new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context),
-                            this);
-                    ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(false);
-                    // and bind it to this Activity's lifecycle using the Fragment Manager.
-                }
-                break;
-            default:
-                viewModel = null;
-        }
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(ViewModelHolder.createContainer(viewModel), TAG)
-                .commit();
-        return viewModel;
-    }
-
-*/
 
     private void readIntentData() {
         Intent intent = getIntent();

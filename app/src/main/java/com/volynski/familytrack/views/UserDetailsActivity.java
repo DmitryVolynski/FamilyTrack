@@ -175,9 +175,18 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
 
     private void setupBindings() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_user_details);
+        mViewModel = (UserDetailsViewModel)PersistedFragmentsUtil.findOrCreateViewModel(this,
+                MainActivity.CONTENT_USER_DETAILS,
+                mCurrentUserUuid,
+                null,
+                false);
+        mViewModel.setUserUuid(mUserUuid);
+        mViewModel.setNavigator(this);
+/*
         mViewModel = new UserDetailsViewModel(this, mCurrentUserUuid, mUserUuid,
                 new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this),
                 this);
+*/
         mBinding.setViewmodel(mViewModel);
     }
 

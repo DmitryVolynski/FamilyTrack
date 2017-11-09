@@ -14,6 +14,7 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.views.navigators.UserDetailsNavigator;
+import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 07.09.2017.
  */
 
-public class UserDetailsViewModel extends BaseObservable {
+public class UserDetailsViewModel extends AbstractViewModel {
     public ObservableField<User> user = new ObservableField<User>();
 
     public ObservableBoolean isDataLoading = new ObservableBoolean(false);
@@ -40,25 +41,22 @@ public class UserDetailsViewModel extends BaseObservable {
     public ObservableField<String> phoneError = new ObservableField<>();
 
     private String mActiveGroupUuid;
-    private User mCurrentUser;
-    private final Context mContext;
+
     private String mUserUuid = "";
-    private String mCurrentUserUuid = "";
-    private boolean mIsDataLoading = false;
-    //private UserListNavigator mNavigator;
-    private FamilyTrackDataSource mRepository;
     private UserDetailsNavigator mNavigator;
 
     public UserDetailsViewModel(Context context,
                                 String currentUserUuid,
-                                String userUuid,
-                                FamilyTrackDataSource dataSource,
-                                UserDetailsNavigator navigator) {
+                                FamilyTrackDataSource dataSource) {
+        super(context, currentUserUuid, dataSource);
+        /*
         mUserUuid = userUuid;
         mCurrentUserUuid = currentUserUuid;
         mContext = context.getApplicationContext();
         mRepository = dataSource;
         mNavigator = navigator;
+*/
+
         setupSpinnerEntries();
 /*
         userRole.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
@@ -84,7 +82,11 @@ public class UserDetailsViewModel extends BaseObservable {
             return;
         }
 
-        mIsDataLoading = true;
+        if (isCreatedFromViewHolder()) {
+            return;
+        }
+
+        isDataLoading.set(true);
 
 
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
@@ -92,12 +94,14 @@ public class UserDetailsViewModel extends BaseObservable {
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() == null) {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    isDataLoading.set(false);
                     return;
                 }
                 mCurrentUser = result.getData();
                 mRepository.getUserByUuid(mUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
                     @Override
                     public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                        isDataLoading.set(false);
                         User u = result.getData();
                         if (u == null) {
                             Timber.v("User with uuid=" + mUserUuid + " not found ");
@@ -183,4 +187,21 @@ public class UserDetailsViewModel extends BaseObservable {
                 }
         );
     }
+
+    public UserDetailsNavigator getNavigator() {
+        return mNavigator;
+    }
+
+    public void setNavigator(UserDetailsNavigator navigator) {
+        this.mNavigator = navigator;
+    }
+
+    public String getUserUuid() {
+        return mUserUuid;
+    }
+
+    public void setUserUuid(String userUuid) {
+        this.mUserUuid = userUuid;
+    }
+
 }

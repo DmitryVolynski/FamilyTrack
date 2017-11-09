@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.InviteUsersViewModel;
+import com.volynski.familytrack.viewmodels.UserDetailsViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.fragments.ViewModelHolder;
@@ -14,6 +15,7 @@ import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import static com.volynski.familytrack.views.MainActivity.CONTENT_INVITE_USERS;
 import static com.volynski.familytrack.views.MainActivity.CONTENT_MAP;
+import static com.volynski.familytrack.views.MainActivity.CONTENT_USER_DETAILS;
 import static com.volynski.familytrack.views.MainActivity.CONTENT_USER_LIST;
 
 /**
@@ -93,6 +95,26 @@ public class PersistedFragmentsUtil {
                     // and bind it to this Activity's lifecycle using the Fragment Manager.
                 }
                 break;
+            case CONTENT_USER_DETAILS:
+                ViewModelHolder<UserDetailsViewModel> userDetailsVM =
+                        (ViewModelHolder<UserDetailsViewModel>) activity.getSupportFragmentManager()
+                                .findFragmentByTag(UserDetailsViewModel.class.getSimpleName());
+
+                if (!forceRecreate && userDetailsVM != null && userDetailsVM.getViewmodel() != null) {
+                    // If the model was retained, return it.
+                    viewModel = userDetailsVM.getViewmodel();
+                    ((UserDetailsViewModel) viewModel).setCreatedFromViewHolder(true);
+                    return viewModel;
+                } else {
+                    // There is no ViewModel yet, create it.
+                    viewModel = new UserDetailsViewModel(context,
+                            currentUserUuid,
+                            new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
+                    ((UserDetailsViewModel) viewModel).setCreatedFromViewHolder(false);
+                    // and bind it to this Activity's lifecycle using the Fragment Manager.
+                }
+                break;
+
             default:
                 viewModel = null;
         }

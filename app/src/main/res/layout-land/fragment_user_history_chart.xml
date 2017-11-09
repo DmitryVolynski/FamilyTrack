@@ -51,7 +51,7 @@
 
             <GridLayout
                 android:id="@+id/tbllayout_frguseronmap"
-                android:layout_width="0dp"
+                android:layout_width="104dp"
                 android:layout_height="0dp"
                 android:layout_marginBottom="8dp"
                 android:layout_marginTop="8dp"
@@ -64,13 +64,13 @@
                 app:layout_constraintTop_toTopOf="parent">
 
                 <ToggleButton
-                    android:enabled="false"
                     android:id="@+id/tbut_off"
                     android:layout_column="0"
                     android:layout_gravity="center"
                     android:layout_rowWeight="1"
                     android:background="@drawable/toggle_button_selector"
                     android:checked='@{viewmodel.toggleButtons["OFF"]}'
+                    android:enabled="false"
                     android:textOff="OFF"
                     android:textOn="OFF" />
 
