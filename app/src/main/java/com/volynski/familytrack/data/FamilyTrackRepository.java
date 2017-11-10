@@ -476,25 +476,21 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         if (isUserAlreadyInvited(user, group)) {
             return;
         }
-
+        закончил здесь, почему-то вместо uuid подставляется id пользователя из контактов
         // проверяем логинился ли такой пользователь в системе
         final Map<String, Object> childUpdates = new HashMap<>();
         getUserByPhone(user.getPhone(), new GetUserByPhoneCallback() {
             @Override
             public void onGetUserByPhoneCompleted(FirebaseResult<User> result) {
                 User dbUser = result.getData();
+                user.addMembership(new Membership(group.getGroupUuid(), group.getName(), Membership.ROLE_UNDEFINED, Membership.USER_INVITED));
                 if (dbUser == null) {
                     // пользователь не найден, вначале создаем пользователя в ветке registered_users
-                    user.addMembership(new Membership(group.getGroupUuid(), group.getName(), Membership.ROLE_UNDEFINED, Membership.USER_INVITED));
                     user.setUserUuid(getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY).push().getKey());
-                    childUpdates.put(Group.REGISTERED_USERS_GROUP_KEY + "/" + user.getUserUuid(), user);
-
-                    group.addMember(user);
-                    childUpdates.put("/groups/" + group.getGroupUuid(), group);
-                } else {
-                    // TODO: в системе найден зарегистрированный пользователь, но он не приглашен в группу
-
+                    childUpdates.put(FamilyTrackDbRefsHelper.userRef(user.getUserUuid()), user);
                 }
+                group.addMember(user);
+                childUpdates.put(FamilyTrackDbRefsHelper.groupRef(group.getGroupUuid()), group);
                 getFirebaseConnection().getReference().updateChildren(childUpdates);
             }
         });

@@ -88,7 +88,7 @@ public class BindingsHelper {
                     .transform(new CropCircleTransformation())
                     .into(view);
         } else {
-            //view.setImageResource(R.mipmap.ic_no_user_photo);
+            view.setImageResource(R.mipmap.ic_no_user_photo);
         }
     }
 

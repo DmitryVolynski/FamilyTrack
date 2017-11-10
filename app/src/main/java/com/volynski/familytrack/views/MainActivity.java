@@ -28,8 +28,10 @@ import com.volynski.familytrack.databinding.NavHeaderMainBinding;
 import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
+import com.volynski.familytrack.viewmodels.GeofenceEventsViewModel;
 import com.volynski.familytrack.viewmodels.MainActivityViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
+import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.fragments.GeofenceEventsFragment;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
@@ -56,6 +58,7 @@ public class MainActivity
     public static final int CONTENT_GEOFENCE_EVENTS = 4;
     public static final int CONTENT_INVITE_USERS = 5;
     public static final int CONTENT_USER_DETAILS = 6;
+    public static final int CONTENT_SETTINGS = 7;
 
     private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
     private static final int REQUEST_CODE_EDIT_SETTINGS = 1001;
@@ -101,21 +104,34 @@ public class MainActivity
                     newFragment = UserOnMapFragment.newInstance(mCurrentUserUuid);
                 }
                 ((UserOnMapFragment) newFragment).setViewModel((UserOnMapViewModel)viewModel);
+                getSupportActionBar().setTitle(R.string.toolbar_title_map);
                 break;
             case CONTENT_USER_LIST:
                 if (newFragment == null || forceRecreate) {
                     newFragment = UserListFragment.newInstance(mCurrentUserUuid);
                 }
                 ((UserListFragment)newFragment).setViewModel((UserListViewModel)viewModel);
+                getSupportActionBar().setTitle(R.string.toolbar_title_user_list);
                 break;
             case CONTENT_USER_HISTORY_CHART:
-                newFragment = UserHistoryChartFragment.newInstance(this, mCurrentUserUuid, this);
+                if (newFragment == null || forceRecreate) {
+                    newFragment = UserHistoryChartFragment.newInstance(this, mCurrentUserUuid, this);
+                }
+                getSupportActionBar().setTitle(R.string.toolbar_title_history_chart);
                 break;
             case CONTENT_MEMBERSHIP:
-                newFragment = UserMembershipFragment.newInstance(this, mCurrentUserUuid, this);
+                if (newFragment == null || forceRecreate) {
+                    newFragment = UserMembershipFragment.newInstance(this, mCurrentUserUuid, this);
+                }
+                ((UserMembershipFragment) newFragment).setViewModel((UserMembershipViewModel) viewModel);
+                getSupportActionBar().setTitle(R.string.toolbar_title_membership);
                 break;
             case CONTENT_GEOFENCE_EVENTS:
-                newFragment = GeofenceEventsFragment.newInstance(this, mCurrentUserUuid, this);
+                if (newFragment == null || forceRecreate) {
+                    newFragment = GeofenceEventsFragment.newInstance(mCurrentUserUuid);
+                }
+                ((GeofenceEventsFragment)newFragment).setViewModel((GeofenceEventsViewModel)viewModel);
+                getSupportActionBar().setTitle(R.string.toolbar_title_geofence_events);
                 break;
             default:
                 Timber.v("Unsupported content id=" + contentId);
@@ -204,7 +220,12 @@ public class MainActivity
 
     @Override
     public void inviteUsers() {
-
+        UserListFragment f =
+                (UserListFragment) FragmentUtil
+                        .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+        if (f != null) {
+            f.refreshList();
+        }
     }
 
     @Override
@@ -262,6 +283,7 @@ public class MainActivity
 
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

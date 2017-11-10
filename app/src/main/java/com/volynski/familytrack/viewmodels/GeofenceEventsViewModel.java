@@ -26,14 +26,8 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 30.10.2017.
  */
 
-public class GeofenceEventsViewModel extends BaseObservable {
+public class GeofenceEventsViewModel extends AbstractViewModel {
     public final static String UI_CONTEXT = GeofenceEventsViewModel.class.getSimpleName();
-    private final static String TAG = GeofenceEventsViewModel.class.getSimpleName();
-    private final Context mContext;
-    private String mCurrentUserUuid = "";
-    private User mCurrentUser;
-    private boolean mIsDataLoading;
-    private FamilyTrackDataSource mRepository;
     private UserListNavigator mNavigator;
 
     // text for snackbar
@@ -50,31 +44,26 @@ public class GeofenceEventsViewModel extends BaseObservable {
     public GeofenceEventsViewModel(Context context,
                              String currentUserUuid,
                              FamilyTrackDataSource dataSource) {
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
+        super(context, currentUserUuid, dataSource);
     }
 
-
-    /**
-     * Reads list of mUsers from firebase and refresh it in RecyclerView
-     */
-    private void refreshList() {
-        Log.v(TAG, "refreshList started");
-    }
 
     /**
      * Starts loading data according to group membership of the user
      * ViewModel will populate the view if current user is member of any group
      */
-    public void start() {
+    public void start(String currentUserUuid) {
 
         if (mCurrentUserUuid.equals("")) {
             Timber.e("Can't start viewmodel. UserUuid is empty");
             return;
         }
 
-        mIsDataLoading = true;
+        if (isCreatedFromViewHolder()) {
+            return;
+        }
+
+        isDataLoading.set(true);
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -83,6 +72,7 @@ public class GeofenceEventsViewModel extends BaseObservable {
                     loadEventsList();
                 } else {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    isDataLoading.set(false);
                 }
             }
         });
@@ -97,9 +87,12 @@ public class GeofenceEventsViewModel extends BaseObservable {
                     new FamilyTrackDataSource.GetGeofenceEventsByUserUuidCallback() {
                 @Override
                 public void onGetGeofenceEventsByUserUuidCompleted(FirebaseResult<List<GeofenceEvent>> result) {
+                    isDataLoading.set(false);
                     populateViewmodels(result);
                 }
             });
+        } else {
+            isDataLoading.set(false);
         }
     }
 

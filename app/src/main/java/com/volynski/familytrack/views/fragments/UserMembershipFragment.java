@@ -118,7 +118,8 @@ public class UserMembershipFragment extends Fragment {
         setupCustomListeners();
         setupSnackbar();
 
-        mLayoutManager = new GridLayoutManager(this.getContext(), 2);
+        int nCols = getResources().getInteger(R.integer.membership_list_ncols);
+        mLayoutManager = new GridLayoutManager(this.getContext(), nCols);
         //mLayoutManager.setMeasuredDimension();
         mLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override

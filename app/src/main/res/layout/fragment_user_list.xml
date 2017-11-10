@@ -21,6 +21,7 @@
             android:layout_height="wrap_content" />
         <TextView
             style="@style/Base.TextAppearance.AppCompat.Headline"
+            android:onClick="@{() -> viewmodel.createGeofenceEvent()}"
             android:fontFamily="sans-serif-condensed"
             tools:text="My group"
             android:gravity="center_vertical"

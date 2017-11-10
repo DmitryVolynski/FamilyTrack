@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
@@ -60,8 +61,10 @@ public class GeofenceEventsFragment extends Fragment
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
     private GeofenceEventsViewModel mViewModel;
+/*
     private String mCurrentUserUuid;
     private UserListNavigator mUserListNavigator;
+*/
     private LinearLayoutManager mLayoutManager;
     private Circle mCurrentGeofence;
     private Observable.OnPropertyChangedCallback mSnackbarCallback;
@@ -69,26 +72,28 @@ public class GeofenceEventsFragment extends Fragment
     FragmentGeofenceEventsBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
 
-    public static GeofenceEventsFragment newInstance(Context context,
-                                               String currentUserUuid,
-                                               UserListNavigator navigator) {
+    public static GeofenceEventsFragment newInstance(String currentUserUuid) {
+
+        Bundle args = new Bundle();
+        args.putString(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
 
         GeofenceEventsFragment result = new GeofenceEventsFragment();
+        result.setArguments(args);
 
-        // TODO проверить это место. может быть создание модели именно здесь неверно.
-        GeofenceEventsViewModel viewModel = new GeofenceEventsViewModel(context, currentUserUuid,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-        viewModel.setNavigator(navigator);
-        result.setViewModel(viewModel);
-        result.setCurrentUserUuid(currentUserUuid);
-        result.setNavigator(navigator);
         return result;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mViewModel.start();
+        if (getArguments() == null) {
+            Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
+            return;
+        }
+        if (mViewModel.isCreatedFromViewHolder()) {
+            return;
+        }
+        mViewModel.start(getArguments().getString(StringKeys.CURRENT_USER_UUID_KEY));
     }
 
     @Override
@@ -182,10 +187,12 @@ public class GeofenceEventsFragment extends Fragment
 
     //
     private void showZoneFromSelectedEvent() {
-        if (mViewModel.zoneToShow == null && mCurrentGeofence != null) {
-            // nothing to show, just hide circle if it still visible
-            mCurrentGeofence.remove();
-            mCurrentGeofence = null;
+        if (mViewModel.zoneToShow == null) {
+            if (mCurrentGeofence != null) {
+                // nothing to show, just hide circle if it still visible
+                mCurrentGeofence.remove();
+                mCurrentGeofence = null;
+            }
             return;
         }
 
@@ -212,6 +219,10 @@ public class GeofenceEventsFragment extends Fragment
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        if (mViewModel.isCreatedFromViewHolder()) {
+            showZoneFromSelectedEvent();
+        }
+
     }
 
     private void setupMapFragment() {
@@ -227,6 +238,7 @@ public class GeofenceEventsFragment extends Fragment
     }
 
 
+/*
     public void refreshList() {
         mViewModel.start();
     }
@@ -242,6 +254,7 @@ public class GeofenceEventsFragment extends Fragment
     public void setNavigator(UserListNavigator userListNavigator) {
         this.mUserListNavigator = userListNavigator;
     }
+*/
 
     public void eventClicked(GeofenceEvent event) {
         mViewModel.selectEvent(event);

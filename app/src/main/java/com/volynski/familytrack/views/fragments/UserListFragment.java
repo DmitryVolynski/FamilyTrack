@@ -15,6 +15,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,11 +32,16 @@ import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
+import com.volynski.familytrack.utils.SnackbarUtil;
+import com.volynski.familytrack.viewmodels.GeofenceEventListItemViewModel;
 import com.volynski.familytrack.viewmodels.InviteUsersViewModel;
+import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.views.MainActivity;
 import com.volynski.familytrack.views.PersistedFragmentsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+
+import java.util.List;
 
 import timber.log.Timber;
 
@@ -57,6 +64,7 @@ public class UserListFragment
     FragmentUserListBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
     private InviteUsersDialogFragment mInviteUsersDialog;
+    private Observable.OnPropertyChangedCallback mSnackbarCallback;
 
     public static UserListFragment newInstance(String currentUserUuid) {
         Bundle args = new Bundle();
@@ -108,7 +116,14 @@ public class UserListFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        View view = setupFragmentContent(inflater, container, savedInstanceState);
+        setupSnackbar();
+        return view;
+    }
 
+    private View setupFragmentContent(LayoutInflater inflater,
+                                      ViewGroup container,
+                                      Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_list,
                 container,
@@ -126,15 +141,54 @@ public class UserListFragment
                 R.layout.user_list_item, BR.viewmodel);
         mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
         mBinding.recyclerviewFragmentuserslistUserslist.setAdapter(mAdapter);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView,
+                                  RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                String userUuid = ((List<UserListItemViewModel>)mAdapter.getViewModels())
+                        .get(viewHolder.getAdapterPosition()).getUser().getUserUuid();
+                mViewModel.excludeUser(userUuid);
+            }
+        }).attachToRecyclerView(mBinding.recyclerviewFragmentuserslistUserslist);
+
         mBinding.setViewmodel(mViewModel);
 
         return mBinding.getRoot();
     }
 
+
+    @Override
+    public void onDestroy() {
+        if (mSnackbarCallback != null) {
+            mViewModel.snackbarText.removeOnPropertyChangedCallback(mSnackbarCallback);
+        }
+        super.onDestroy();
+    }
+
+    private void setupSnackbar() {
+        mSnackbarCallback = new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                SnackbarUtil.showSnackbar(((MainActivity)getActivity()).getViewForSnackbar(),
+                        mViewModel.snackbarText.get());
+            }
+        };
+        mViewModel.snackbarText.addOnPropertyChangedCallback(mSnackbarCallback);
+    }
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mInviteUsersDialog != null && mInviteUsersDialog.getDialog().isShowing()) {
+        if (mInviteUsersDialog != null &&
+                mInviteUsersDialog.getDialog() != null &&
+                mInviteUsersDialog.getDialog().isShowing()) {
             // if invite dialog is visible - save the state of dialog & data
             mInviteUsersDialog.onSaveInstanceState(outState);
         }

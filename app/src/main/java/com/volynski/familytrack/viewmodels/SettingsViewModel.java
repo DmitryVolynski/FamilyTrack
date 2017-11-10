@@ -22,26 +22,15 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 13.10.2017.
  */
 
-public class SettingsViewModel extends BaseObservable {
+public class SettingsViewModel extends AbstractViewModel {
 
-    private final String mCurrentUserUuid;
-    private final Context mContext;
-    private final FamilyTrackDataSource mRepository;
-    private boolean mIsDataLoading;
     private SettingsNavigator mNavigator;
-    private User mCurrentUser;
-
     public ObservableField<Settings> settings = new ObservableField<>();
 
     public SettingsViewModel(Context context,
                              String currentUserUuid,
-                             FamilyTrackDataSource dataSource,
-                             SettingsNavigator navigator) {
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
-        mNavigator = navigator;
-        //setupSpinnerEntries();
+                             FamilyTrackDataSource dataSource) {
+        super(context, currentUserUuid, dataSource);
     }
 
     /**
@@ -53,25 +42,33 @@ public class SettingsViewModel extends BaseObservable {
             return;
         }
 
-        mIsDataLoading = true;
+        if (isCreatedFromViewHolder()) {
+            return;
+        }
+
+        isDataLoading.set(true);
 
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() == null) {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    isDataLoading.set(false);
                     return;
                 }
                 mCurrentUser = result.getData();
                 if (mCurrentUser.getActiveMembership() != null) {
                     String groupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
-                    mRepository.getSettingsByGroupUuid(groupUuid, new FamilyTrackDataSource.GetSettingsByGroupUuidCallback() {
+                    mRepository.getSettingsByGroupUuid(groupUuid,
+                            new FamilyTrackDataSource.GetSettingsByGroupUuidCallback() {
                         @Override
                         public void onGetSettingsByGroupUuidCompleted(FirebaseResult<Settings> result) {
                             settings.set(result.getData());
+                            isDataLoading.set(false);
                         }
                     });
                 }
+                isDataLoading.set(false);
             }
         });
     }
@@ -91,4 +88,14 @@ public class SettingsViewModel extends BaseObservable {
                     });
         }
     }
+
+    public SettingsNavigator getNavigator() {
+        return mNavigator;
+    }
+
+    public void setNavigator(SettingsNavigator navigator) {
+        this.mNavigator = navigator;
+    }
+
+
 }

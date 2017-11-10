@@ -27,29 +27,21 @@ import timber.log.Timber;
  */
 
 public class UserMembershipViewModel
-        extends BaseObservable
+        extends AbstractViewModel
         implements View.OnClickListener {
 
     public final static String UI_CONTEXT = UserMembershipViewModel.class.getSimpleName();
     private final static String TAG = UserMembershipViewModel.class.getSimpleName();
-    private final Context mContext;
-    private String mCurrentUserUuid = "";
-    private User mCurrentUser;
-    private boolean mIsDataLoading;
-    private FamilyTrackDataSource mRepository;
     private UserListNavigator mNavigator;
 
     public final ObservableBoolean showLeaveGroupWarningDialog = new ObservableBoolean(false);
     public final ObservableList<MembershipListItemViewModel> viewModels = new ObservableArrayList<>();
-    public ObservableField<String> snackbarText = new ObservableField<>();
-    //public ObservableBoolean refreshList = new ObservableBoolean(false);
+    //public ObservableField<String> snackbarText = new ObservableField<>();
 
     public UserMembershipViewModel(Context context,
                              String currentUserUuid,
                              FamilyTrackDataSource dataSource) {
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
+        super(context, currentUserUuid, dataSource);
     }
 
     @Override
@@ -78,7 +70,11 @@ public class UserMembershipViewModel
             return;
         }
 
-        mIsDataLoading = true;
+        if (isCreatedFromViewHolder()) {
+            return;
+        }
+
+        isDataLoading.set(true);
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -87,6 +83,7 @@ public class UserMembershipViewModel
                     createViewModels();
                 } else {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    isDataLoading.set(false);
                 }
             }
         });
@@ -102,7 +99,7 @@ public class UserMembershipViewModel
                 viewModels.clear();
                 String activeGroupUuid = (mCurrentUser.getActiveMembership() != null ?
                     mCurrentUser.getActiveMembership().getGroupUuid() : "");
-
+                isDataLoading.set(false);
                 if (result.getData() != null) {
                     for (Group group : result.getData()) {
                         List<MembershipListItem> newList = MembershipListItem.createListFromGroup(group);

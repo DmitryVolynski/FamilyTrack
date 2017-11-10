@@ -97,6 +97,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
         // Get a support ActionBar corresponding to this toolbar
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
+
+        toolbar.setTitle("Settings");
     }
 
     @Override
@@ -131,9 +133,12 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
 
     private void setupBindings() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
-        mViewModel = new SettingsViewModel(this, mCurrentUserUuid,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this),
-                this);
+        mViewModel = (SettingsViewModel) PersistedFragmentsUtil.findOrCreateViewModel(this,
+                MainActivity.CONTENT_SETTINGS,
+                mCurrentUserUuid,
+                null,
+                false);
+        mViewModel.setNavigator(this);
         mBinding.setViewmodel(mViewModel);
     }
 

@@ -143,4 +143,30 @@ public class UserListViewModel
         return mNavigator;
     }
 
+    public void excludeUser(String userUuid) {
+        if (userUuid.equals(mCurrentUserUuid)) {
+            snackbarText.set("You can't exclude yourself");
+            return;
+        }
+
+        if (mCurrentUser.getActiveMembership() == null) {
+            Timber.v("Active group for " + userUuid + " == null. Expected value");
+            snackbarText.set("Unable to exclude user");
+            return;
+        }
+
+        String activeGroupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
+        mRepository.removeUserFromGroup(activeGroupUuid, userUuid, new FamilyTrackDataSource.RemoveUserFromGroupCallback() {
+            @Override
+            public void onRemoveUserFromGroupCompleted(FirebaseResult<String> result) {
+                if (result.getData().equals(FirebaseResult.RESULT_OK)) {
+                    snackbarText.set("User excluded from group");
+                    loadUsersList();
+                } else {
+                    snackbarText.set("Unable to exclude user");
+                }
+            }
+        });
+
+    }
 }

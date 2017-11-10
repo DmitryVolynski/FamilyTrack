@@ -9,38 +9,53 @@
             type="com.volynski.familytrack.viewmodels.MembershipListItemViewModel"/>
     </data>
 
-    <LinearLayout
-        android:orientation="vertical"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <FrameLayout
+        android:layout_height="56dp"
+        android:orientation="horizontal">
+<!--
+
+        android:background="@{viewmodel.isActive ? @drawable/shape_active_group : @drawable/shape_normal_group}"
+
+-->
+        <TextView
+            style="@style/Base.TextAppearance.AppCompat.Headline"
+            android:fontFamily="sans-serif-condensed"
+            tools:text="My group"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@{viewmodel.isActive ? @drawable/shape_active_group : @drawable/shape_normal_group }"
+            android:textColor="@{viewmodel.isActive ? @android:color/white : @android:color/black}"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="@{viewmodel.isActive ? @drawable/shape_active_group : @drawable/shape_normal_group}"
-            android:orientation="horizontal">
+            android:text="@{viewmodel.item.groupName}"
+            android:layout_height="56dp" />
 
-            <TextView
-                android:id="@+id/textView7"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:text="@{viewmodel.item.groupName}"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
-                tools:text="My family" />
+<!--
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="16dp"
+            android:text="@{viewmodel.item.groupName}"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            tools:text="My family" />
+-->
 
-            <Button
-                android:onClick="@{()->viewmodel.changeMembership()}"
-                android:id="@+id/button_grouplistitem"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end|center_vertical"
-                android:layout_marginEnd="16dp"
-                android:text='@{viewmodel.isActive ? "leave" : "join"}'/>
+        <Button
+            android:onClick="@{()->viewmodel.changeMembership()}"
+            android:id="@+id/button_grouplistitem"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            android:textColor="@{viewmodel.isActive ? @android:color/white : @color/colorAccent}"
+            tools:text="leave"
+            android:text='@{viewmodel.isActive ? "leave" : "join"}'/>
 
-            <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
-        </FrameLayout>
-    </LinearLayout>
+        <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
+    </FrameLayout>
 </layout>
