@@ -41,7 +41,7 @@ import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.services.FirebaseListenersService;
-import com.volynski.familytrack.services.TrackingService;
+import com.volynski.familytrack.services.TrackingJobService;
 import com.volynski.familytrack.utils.MyDebugTree;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.fragments.FirstTimeUserDialogFragment;
@@ -307,11 +307,13 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void proceedToMainActivity(String userUuid) {
+        SharedPrefsUtil.removeSettings(this);
+
         Intent serviceIntent = new Intent(this, FirebaseListenersService.class);
         serviceIntent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         startService(serviceIntent);
 
-        startJobServices(userUuid);
+        //startJobServices(userUuid);
 
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
@@ -336,6 +338,6 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void startJobServices(String userUuid) {
-        TrackingService.startService(this, userUuid, 0, 5);
+        TrackingJobService.startJobService(this, userUuid, 0, 5);
     }
 }

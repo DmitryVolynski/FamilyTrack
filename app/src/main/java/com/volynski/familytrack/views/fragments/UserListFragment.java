@@ -192,7 +192,6 @@ public class UserListFragment
             // if invite dialog is visible - save the state of dialog & data
             mInviteUsersDialog.onSaveInstanceState(outState);
         }
-        int i = 0;
     }
 
     public void setViewModel(UserListViewModel mViewModel) {

@@ -5,12 +5,10 @@ import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -20,7 +18,6 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Places;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,7 +28,6 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackDbRefsHelper;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
-import com.volynski.familytrack.data.FirebaseUtil;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Settings;
@@ -40,7 +36,6 @@ import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.utils.NotificationUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.widget.FamilyTrackWidgetProvider;
-import com.volynski.familytrack.widget.FamilyTrackWidgetService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -235,11 +230,14 @@ public class FirebaseListenersService
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.GeofencingApi.addGeofences(
-                    mGoogleApiClient,
-                    getGeofencingRequest(zones),
-                    getGeofencePendingIntent()
-            ).setResultCallback(this);
+            GeofencingRequest request = getGeofencingRequest(zones);
+            if (request != null) {
+                LocationServices.GeofencingApi.addGeofences(
+                        mGoogleApiClient,
+                        request,
+                        getGeofencePendingIntent()
+                ).setResultCallback(this);
+            }
         } else {
             Timber.v("ACCESS_FINE_LOCATION not granted. Unable to use geofences");
         }
@@ -408,6 +406,7 @@ public class FirebaseListenersService
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     Settings oldSettings = SharedPrefsUtil.getSettings(FirebaseListenersService.this);
                     Settings settings = dataSnapshot.getValue(Settings.class);
+                    updateTrackingServiceState(oldSettings, settings);
                     if (oldSettings != null &&
                             !oldSettings.getIsTrackingOn() &&
                             settings.getIsTrackingOn()) {
@@ -433,6 +432,67 @@ public class FirebaseListenersService
             mSettingsRef.addValueEventListener(mSettingsListener);
         }
 
+    }
+
+    /**
+     * Updates tracking service state
+     * - stops service if trackingMode is off and was on
+     * - starts simulation tracking service (TrackingJobService) if trackingMode is on, was off and simulationMode is on
+     * - starts real tracking service (TrackingService) if trackingMode is on, was off and simulationMode is off
+     * @param oldSettings
+     * @param settings
+     */
+    private void updateTrackingServiceState(Settings oldSettings, Settings settings) {
+        if (oldSettings == null || settings == null) {
+            Timber.v("Unexpected error: New settings or old settings are null. Can't update tracking service");
+            return;
+        }
+
+        if (oldSettings.getIsTrackingOn() && !settings.getIsTrackingOn()) {
+            // stop tracking services
+            TrackingJobService.stopJobService(this);
+            stopServiceViaIntent(new Intent(this, TrackingService.class));
+            return;
+        }
+
+        if (!oldSettings.getIsTrackingOn() && settings.getIsTrackingOn()) {
+            if (settings.getIsSimulationOn()) {
+                TrackingJobService.startJobService(this, mCurrentUserUuid,
+                        0, 5);
+            } else {
+                startServiceViaIntent(new Intent(this, TrackingService.class),
+                        TrackingService.COMMAND_START, mCurrentUserUuid);
+            }
+            return;
+        }
+
+        if (oldSettings.getIsTrackingOn() && settings.getIsTrackingOn()) {
+            if (oldSettings.getIsSimulationOn() && !settings.getIsSimulationOn()) {
+                // switch from simulation tracking mode to real tracking mode
+                TrackingJobService.stopJobService(this);
+                startService(new Intent(this, TrackingService.class));
+            } else {
+                if (!oldSettings.getIsSimulationOn() && settings.getIsSimulationOn()) {
+                    // switch from real tracking mode to simulation tracking mode
+                    stopService(new Intent(this, TrackingService.class));
+                    TrackingJobService.startJobService(this, mCurrentUserUuid,
+                            0, 5);
+                }
+            }
+        }
+    }
+
+    private void startServiceViaIntent(Intent intent,
+                                       String commandStart,
+                                       String currentUserUuid) {
+        intent.setAction(TrackingService.COMMAND_START);
+        intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
+        this.startService(intent);
+    }
+
+    private void stopServiceViaIntent(Intent intent) {
+        intent.setAction(TrackingService.COMMAND_STOP);
+        this.startService(intent);
     }
 
     /**

@@ -193,4 +193,9 @@ public class Location {
     private static double rad2deg(double rad) {
         return (rad * 180.0 / Math.PI);
     }
+
+    public static Location getInstanceFromLastLocation(android.location.Location lastLoc) {
+        return new Location(Calendar.getInstance(), lastLoc.getLatitude(), lastLoc.getLongitude(),
+                "", "", 0);
+    }
 }

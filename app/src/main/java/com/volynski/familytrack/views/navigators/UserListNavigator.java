@@ -16,7 +16,7 @@ import com.volynski.familytrack.data.models.firebase.User;
 public interface UserListNavigator {
     void editUserDetails(String userUuid, View rootView);
     void removeUser(String userUuid);
-    void inviteUsers();
+    void inviteCompleted();
     void dismissInviteUsersDialog();
     void userClicked(User user, String uiContext);
     void eventClicked(GeofenceEvent event, String mUiContext);

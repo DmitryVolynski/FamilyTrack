@@ -93,9 +93,9 @@ public class InviteUsersViewModel
                     @Override
                     public void onInviteUsersCompleted(FirebaseResult<String> result) {
                         Timber.v("Invite done");
+                        mNavigator.inviteCompleted();
                     }
                 });
-        mNavigator.dismissInviteUsersDialog();
     }
 
     private List<User> getUsersFromViewModels(ObservableList<UserListItemViewModel> viewModels) {

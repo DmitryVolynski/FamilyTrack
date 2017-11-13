@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
     <data>
+        <import type="android.view.View"/>
         <variable
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserMembershipViewModel"/>
@@ -14,10 +15,16 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <android.support.v7.widget.RecyclerView
+            android:visibility="@{viewmodel.isDataLoading ? View.INVISIBLE : View.VISIBLE}"
             android:id="@+id/recyclerview_fragmentusermembership"
             app:groupListItemViewModels="@{viewmodel.viewModels}"
             android:layout_height="match_parent"
             android:layout_width="match_parent">
         </android.support.v7.widget.RecyclerView>
+        <ProgressBar
+            android:visibility="@{viewmodel.isDataLoading ? View.VISIBLE : View.GONE}"
+            android:layout_gravity="center"
+            android:layout_width="48dp"
+            android:layout_height="48dp" />
     </FrameLayout>
 </layout>

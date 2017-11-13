@@ -34,6 +34,11 @@ public class StringKeys {
     public static final String INVITE_USERS_VM_SEARCH_STRING_KEY = "INVITE_USERS_VM_SEARCH_STRING";
     public static final String INVITE_USERS_VM_SELECTED_USERS_KEY = "INVITE_USERS_VM_SELECTED_USERS";
     public static final String INVITE_USERS_DIALOG_SHOW_KEY = "INVITE_USERS_DIALOG_SHOW";
+
+    public static final String SETTINGS_CHANGED_FLAG_KEY = "SETTINGS_CHANGED_FLAG";
+    public static final String TRACKING_SERVICE_COMMAND_KEY = "TRACKING_SERVICE_COMMAND";
+
+    public static String NEW_GROUP_NAME_KEY = "NEW_GROUP_NAME";
 }
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением
@@ -51,13 +56,13 @@ public class StringKeys {
 // 02.11.2017 работа с уведомлениями по geofences
 // 02.11.2017 настройка geofences
 // 04.11.2017 разработка виджета
+// 11.11.2017 исключение пользователя группы свайпом
+// 11.11.2017 работа приложения при изменении ориентации
 
 // === функционал
 // TODO: Изменить механизм позиционирования клиента (увеличить точность)
 // TODO: Переделать позиционирование клиента под событийную модель
 // TODO: проверка ролей
-// TODO: исключение пользователя группы свайпом
-// TODO: работа приложения при изменении ориентации
 
 // === UI
 // TODO: опция для отображения маркеров в пути + динамическое отображение пути (либо seekBar)

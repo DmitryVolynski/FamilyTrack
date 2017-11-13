@@ -143,8 +143,9 @@ public class UserListViewModel
         return mNavigator;
     }
 
-    public void excludeUser(String userUuid) {
+    public void excludeUser(final String userUuid) {
         if (userUuid.equals(mCurrentUserUuid)) {
+            snackbarText.set("");
             snackbarText.set("You can't exclude yourself");
             return;
         }
@@ -160,10 +161,11 @@ public class UserListViewModel
             @Override
             public void onRemoveUserFromGroupCompleted(FirebaseResult<String> result) {
                 if (result.getData().equals(FirebaseResult.RESULT_OK)) {
+                    snackbarText.set("");
                     snackbarText.set("User excluded from group");
                     loadUsersList();
                 } else {
-                    snackbarText.set("Unable to exclude user");
+                    snackbarText.set("Unable to exclude user " + userUuid);
                 }
             }
         });

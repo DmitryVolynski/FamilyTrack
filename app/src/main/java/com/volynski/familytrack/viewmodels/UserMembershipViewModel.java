@@ -34,8 +34,10 @@ public class UserMembershipViewModel
     private final static String TAG = UserMembershipViewModel.class.getSimpleName();
     private UserListNavigator mNavigator;
 
-    public final ObservableBoolean showLeaveGroupWarningDialog = new ObservableBoolean(false);
-    public final ObservableList<MembershipListItemViewModel> viewModels = new ObservableArrayList<>();
+    public final ObservableBoolean showLeaveGroupWarningDialog =
+            new ObservableBoolean(false);
+    public final ObservableList<MembershipListItemViewModel> viewModels =
+            new ObservableArrayList<>();
     //public ObservableField<String> snackbarText = new ObservableField<>();
 
     public UserMembershipViewModel(Context context,

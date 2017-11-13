@@ -464,34 +464,57 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                             new FirebaseResult<String>(FamilyTrackException.getInstance(mContext, FamilyTrackException.DB_GROUP_NOT_FOUND)));
                     return;
                 }
-
+                CountDownLatch countDownLatch = new CountDownLatch(usersToinvite.size());
                 for (User user : usersToinvite) {
-                    inviteUser(user, result.getData());
+                    inviteUser(user, result.getData(), countDownLatch, callback);
                 }
             }
         });
     }
 
-    private void inviteUser(final User user, final Group group) {
+    private void inviteUser(final User user,
+                            final Group group,
+                            final CountDownLatch countDownLatch,
+                            final InviteUsersCallback callback) {
         if (isUserAlreadyInvited(user, group)) {
             return;
         }
-        закончил здесь, почему-то вместо uuid подставляется id пользователя из контактов
+        //закончил здесь, почему-то вместо uuid подставляется id пользователя из контактов
         // проверяем логинился ли такой пользователь в системе
         final Map<String, Object> childUpdates = new HashMap<>();
         getUserByPhone(user.getPhone(), new GetUserByPhoneCallback() {
             @Override
             public void onGetUserByPhoneCompleted(FirebaseResult<User> result) {
                 User dbUser = result.getData();
-                user.addMembership(new Membership(group.getGroupUuid(), group.getName(), Membership.ROLE_UNDEFINED, Membership.USER_INVITED));
+                Membership newMembership = new Membership(group.getGroupUuid(), group.getName(), Membership.ROLE_UNDEFINED, Membership.USER_INVITED);
                 if (dbUser == null) {
                     // пользователь не найден, вначале создаем пользователя в ветке registered_users
+                    user.addMembership(newMembership);
                     user.setUserUuid(getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY).push().getKey());
                     childUpdates.put(FamilyTrackDbRefsHelper.userRef(user.getUserUuid()), user);
+
+                    group.addMember(user);
+                    childUpdates.put(FamilyTrackDbRefsHelper.groupRef(group.getGroupUuid()), group);
+                } else {
+                    // пользователь уже регистрировался в системе,
+                    // просто добавляем его в группу в качестве приглашенного
+                    dbUser.addMembership(newMembership);
+                    childUpdates.put(FamilyTrackDbRefsHelper.userRef(dbUser.getUserUuid()), dbUser);
+                    group.addMember(dbUser);
+                    childUpdates.put(FamilyTrackDbRefsHelper.groupRef(group.getGroupUuid()), group);
                 }
-                group.addMember(user);
-                childUpdates.put(FamilyTrackDbRefsHelper.groupRef(group.getGroupUuid()), group);
-                getFirebaseConnection().getReference().updateChildren(childUpdates);
+                getFirebaseConnection()
+                        .getReference()
+                        .updateChildren(childUpdates)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                countDownLatch.countDown();
+                                if (countDownLatch.getCount() == 0 && callback != null) {
+                                    callback.onInviteUsersCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                                }
+                            }
+                        });
             }
         });
     }

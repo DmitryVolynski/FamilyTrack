@@ -4,47 +4,34 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
-import android.databinding.ObservableList;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.ToggleButton;
 
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.utils.ColorTemplate;
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.GroupsAndUsersItemType;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.MembershipListItem;
-import com.volynski.familytrack.data.models.firebase.User;
-import com.volynski.familytrack.databinding.FragmentUserHistoryChartBinding;
 import com.volynski.familytrack.databinding.FragmentUserMembershipBinding;
 import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
-import com.volynski.familytrack.viewmodels.MembershipListItemViewModel;
-import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
 import com.volynski.familytrack.views.MainActivity;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
@@ -60,6 +47,10 @@ public class UserMembershipFragment extends Fragment {
     FragmentUserMembershipBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
     private Observable.OnPropertyChangedCallback mSnackbarCallback;
+    private View mPopupView;
+    private String mGroupName;
+    private boolean mIsPopupViewVisible = false;
+    private CreateGroupDialogFragment mCreateGroupDialog;
 
     public static UserMembershipFragment newInstance(Context context,
                                                        String currentUserUuid,
@@ -74,15 +65,38 @@ public class UserMembershipFragment extends Fragment {
         return result;
     }
 
+/*    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mInviteUsersDialog != null &&
+                mInviteUsersDialog.getDialog() != null &&
+                mInviteUsersDialog.getDialog().isShowing()) {
+            // if invite dialog is visible - save the state of dialog & data
+            mInviteUsersDialog.onSaveInstanceState(outState);
+        }
+    }*/
 
     public void setViewModel(UserMembershipViewModel viewModel) {
         this.mViewModel = viewModel;
     }
 
     @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if (savedInstanceState != null &&
+                savedInstanceState.containsKey(StringKeys.NEW_GROUP_NAME_KEY)) {
+            mGroupName = savedInstanceState.getString(StringKeys.NEW_GROUP_NAME_KEY);
+            mIsPopupViewVisible = true;
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         mViewModel.start();
+        if (mIsPopupViewVisible) {
+            createNewGroupDialog(mGroupName);
+        }
     }
 
     @Override
@@ -154,7 +168,8 @@ public class UserMembershipFragment extends Fragment {
     }
 
     private void setupCustomListeners() {
-        mViewModel.showLeaveGroupWarningDialog.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+        mViewModel.showLeaveGroupWarningDialog
+                .addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 showLeaveGroupWarningDialog();
@@ -162,9 +177,20 @@ public class UserMembershipFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mIsPopupViewVisible) {
+            EditText et = (EditText)mPopupView
+                    .findViewById(R.id.edittext_dialogcreategroup_groupname);
+            outState.putString(StringKeys.NEW_GROUP_NAME_KEY, et.getText().toString());
+        }
+    }
+
     private void showLeaveGroupWarningDialog() {
         final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
-        confirmDialog.setParms("Leaving group", "Please note that you are the one and only admin in group.\n\n" +
+        confirmDialog.setParms("Leaving group",
+                "Please note that you are the one and only admin in group.\n\n" +
                 "Delegate admin role to somebody else before leaving this group",
                 "Ok", new DialogInterface.OnClickListener() {
                     @Override
@@ -175,41 +201,76 @@ public class UserMembershipFragment extends Fragment {
         confirmDialog.show(getActivity().getFragmentManager(), "dialog");
     }
 
-    public void createNewGroup() {
+    public void createNewGroupDialog(String groupName) {
         // get a reference to the already created main layout
 
+/*
+        mCreateGroupDialog = (CreateGroupDialogFragment) getActivity()
+                .getSupportFragmentManager()
+                .findFragmentByTag(CreateGroupDialogFragment.class.getSimpleName());
+        if (mCreateGroupDialog == null) {
+*/
+            mCreateGroupDialog = new CreateGroupDialogFragment();
+            mCreateGroupDialog.show(getActivity().getSupportFragmentManager(),
+                    CreateGroupDialogFragment.class.getSimpleName());
+
+/*
         FrameLayout mainLayout = mBinding.framelayoutFragmentusermembership;
 
         // inflate the layout of the popup window
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
-        final View popupView = inflater.inflate(R.layout.dialog_create_group, null);
+        mPopupView = inflater.inflate(R.layout.dialog_create_group, null);
 
         // create the popup window
         int width =  (int) Math.round(0.8 * mainLayout.getWidth());  //LinearLayout.LayoutParams.WRAP_CONTENT;
         int height = (int) Math.round(0.8 * mainLayout.getHeight());  //LinearLayout.LayoutParams.WRAP_CONTENT;
 
         boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
+        final PopupWindow popupWindow = new PopupWindow(mPopupView, width, height, focusable);
 
-        // show the popup window
-        popupWindow.showAtLocation(mainLayout, Gravity.CENTER, 0, 0);
-        popupView.findViewById(R.id.button_dialogcreategroup_cancel)
+        mIsPopupViewVisible = true;
+
+        if (groupName != null) {
+            EditText et = (EditText)mPopupView
+                    .findViewById(R.id.edittext_dialogcreategroup_groupname);
+            et.setText(groupName);
+        }
+
+        mPopupView.findViewById(R.id.button_dialogcreategroup_cancel)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         popupWindow.dismiss();
+                        mIsPopupViewVisible = false;
                     }
                 });
 
-        popupView.findViewById(R.id.button_dialogcreategroup_create)
+        mPopupView.findViewById(R.id.button_dialogcreategroup_create)
                 .setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        EditText editText = (EditText) popupView.findViewById(R.id.edittext_dialogcreategroup_groupname);
+                        EditText editText = (EditText) mPopupView
+                                .findViewById(R.id.edittext_dialogcreategroup_groupname);
                         mViewModel.createNewGroup(editText.getText().toString());
                         popupWindow.dismiss();
+                        mIsPopupViewVisible = false;
                     }
                 });
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                mIsPopupViewVisible = false;
+            }
+
+        });
+        new Handler().postDelayed(new Runnable(){
+            public void run() {
+                // show the popup window
+                popupWindow.showAtLocation(mPopupView, Gravity.CENTER, 0, 0);
+            }
+
+        }, 100L);
+*/
     }
 }
 

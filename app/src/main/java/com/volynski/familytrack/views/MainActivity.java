@@ -219,11 +219,12 @@ public class MainActivity
     }
 
     @Override
-    public void inviteUsers() {
+    public void inviteCompleted() {
         UserListFragment f =
                 (UserListFragment) FragmentUtil
                         .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
         if (f != null) {
+            f.dismissInviteUsersDialog();
             f.refreshList();
         }
     }
@@ -339,7 +340,7 @@ public class MainActivity
                         (UserMembershipFragment) FragmentUtil
                         .findFragmentByClassName(this, UserMembershipFragment.class.getSimpleName());
                 if (f2 != null) {
-                    f2.createNewGroup();
+                    f2.createNewGroupDialog(null);
                 }
                 break;
             case CONTENT_GEOFENCE_EVENTS:
