@@ -93,6 +93,7 @@ public class UserMembershipFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_membership);
         mViewModel.start();
         if (mIsPopupViewVisible) {
             createNewGroupDialog(mGroupName);

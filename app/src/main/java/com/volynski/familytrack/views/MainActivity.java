@@ -22,6 +22,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
+import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.ActivityMainBinding;
 import com.volynski.familytrack.databinding.NavHeaderMainBinding;
@@ -30,15 +31,20 @@ import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.GeofenceEventsViewModel;
 import com.volynski.familytrack.viewmodels.MainActivityViewModel;
+import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
 import com.volynski.familytrack.views.fragments.GeofenceEventsFragment;
+import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
 import com.volynski.familytrack.views.fragments.UserListFragment;
 import com.volynski.familytrack.views.fragments.UserMembershipFragment;
 import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import timber.log.Timber;
 
@@ -66,11 +72,14 @@ public class MainActivity
 
     private String mCurrentUserUuid;
     private int mContentId;
+
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
     private GoogleApiClient mGoogleApiClient;
     private FloatingActionButton mFab;
     private int mCurrentMenuId = R.id.drawer_nav_map;
+
+    private Map<String, Integer> fragmentIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,8 +90,27 @@ public class MainActivity
             mContentId = savedInstanceState.getInt(StringKeys.MAIN_ACTIVITY_MODE_KEY);
             mCurrentUserUuid = savedInstanceState.getString(StringKeys.CURRENT_USER_UUID_KEY);
         }
+        setupFragmentIds();
         setupCommonContent();
-        setupFragment(mContentId, false);
+        setupFragment(mContentId);
+
+    }
+
+    private void setupFragmentIds() {
+        fragmentIds = new HashMap<>();
+        fragmentIds.put(UserOnMapFragment.class.getSimpleName(), CONTENT_MAP);
+        fragmentIds.put(UserListFragment.class.getSimpleName(), CONTENT_USER_LIST);
+        fragmentIds.put(UserHistoryChartFragment.class.getSimpleName(), CONTENT_USER_HISTORY_CHART);
+        fragmentIds.put(UserMembershipFragment.class.getSimpleName(), CONTENT_MEMBERSHIP);
+        fragmentIds.put(GeofenceEventsFragment.class.getSimpleName(), CONTENT_GEOFENCE_EVENTS);
+        fragmentIds.put(InviteUsersDialogFragment.class.getSimpleName(), CONTENT_INVITE_USERS);
+        fragmentIds.put(UserDetailsActivity.class.getSimpleName(), CONTENT_USER_DETAILS);
+        fragmentIds.put(Settings.class.getSimpleName(), CONTENT_SETTINGS);
+    }
+
+    @Override
+    public boolean onNavigateUp() {
+        return super.onNavigateUp();
     }
 
     @Override
@@ -92,46 +120,42 @@ public class MainActivity
         outState.putString(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
     }
 
-    private void setupFragment(int contentId, boolean forceRecreate) {
+    private void setupFragment(int contentId) {
         Fragment newFragment =
-                getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
+                getSupportFragmentManager().findFragmentByTag("F" + contentId);
 
-        Object viewModel = PersistedFragmentsUtil.findOrCreateViewModel(this,
-                        contentId, mCurrentUserUuid, this,  forceRecreate);
+        Object viewModel = FragmentsUtil.findOrCreateViewModel(this,
+                        contentId, mCurrentUserUuid, this);
         switch (contentId) {
             case CONTENT_MAP:
-                if (newFragment == null || forceRecreate) {
+                if (newFragment == null) {
                     newFragment = UserOnMapFragment.newInstance(mCurrentUserUuid);
                 }
                 ((UserOnMapFragment) newFragment).setViewModel((UserOnMapViewModel)viewModel);
-                getSupportActionBar().setTitle(R.string.toolbar_title_map);
                 break;
             case CONTENT_USER_LIST:
-                if (newFragment == null || forceRecreate) {
+                if (newFragment == null) {
                     newFragment = UserListFragment.newInstance(mCurrentUserUuid);
                 }
                 ((UserListFragment)newFragment).setViewModel((UserListViewModel)viewModel);
-                getSupportActionBar().setTitle(R.string.toolbar_title_user_list);
                 break;
             case CONTENT_USER_HISTORY_CHART:
-                if (newFragment == null || forceRecreate) {
+                if (newFragment == null) {
                     newFragment = UserHistoryChartFragment.newInstance(this, mCurrentUserUuid, this);
                 }
-                getSupportActionBar().setTitle(R.string.toolbar_title_history_chart);
+                ((UserHistoryChartFragment)newFragment).setViewModel((UserHistoryChartViewModel)viewModel);
                 break;
             case CONTENT_MEMBERSHIP:
-                if (newFragment == null || forceRecreate) {
+                if (newFragment == null) {
                     newFragment = UserMembershipFragment.newInstance(this, mCurrentUserUuid, this);
                 }
                 ((UserMembershipFragment) newFragment).setViewModel((UserMembershipViewModel) viewModel);
-                getSupportActionBar().setTitle(R.string.toolbar_title_membership);
                 break;
             case CONTENT_GEOFENCE_EVENTS:
-                if (newFragment == null || forceRecreate) {
+                if (newFragment == null) {
                     newFragment = GeofenceEventsFragment.newInstance(mCurrentUserUuid);
                 }
                 ((GeofenceEventsFragment)newFragment).setViewModel((GeofenceEventsViewModel)viewModel);
-                getSupportActionBar().setTitle(R.string.toolbar_title_geofence_events);
                 break;
             default:
                 Timber.v("Unsupported content id=" + contentId);
@@ -140,7 +164,7 @@ public class MainActivity
         if (newFragment != null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main_fcontainer, newFragment)
+                    .replace(R.id.main_fcontainer, newFragment, "F" + contentId)
                     .addToBackStack(null)
                     .commit();
         }
@@ -178,6 +202,9 @@ public class MainActivity
                 if (f != null) {
                     f.refreshList();
                 }
+            case REQUEST_CODE_EDIT_SETTINGS:
+                mCurrentMenuId = CONTENT_MAP;
+                break;
             default:
                 super.onActivityResult(requestCode, resultCode, data);
         }
@@ -369,6 +396,12 @@ public class MainActivity
         } else {
             super.onBackPressed();
         }
+        Fragment f = getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
+        if (f != null && fragmentIds.containsKey(f.getClass().getSimpleName())) {
+            mContentId = fragmentIds.get(f.getClass().getSimpleName());
+        } else {
+            Timber.v("Can't restore contentId when back button pressed");
+        }
     }
 
     @Override
@@ -393,6 +426,7 @@ public class MainActivity
         return super.onOptionsItemSelected(item);
     }
 
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -401,19 +435,19 @@ public class MainActivity
             switch (id) {
                 case (R.id.drawer_nav_map):
                     mContentId = CONTENT_MAP;
-                    setupFragment(mContentId, true);
+                    setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_users):
                     mContentId = CONTENT_USER_LIST;
-                    setupFragment(mContentId, true);
+                    setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_chart):
                     mContentId = CONTENT_USER_HISTORY_CHART;
-                    setupFragment(mContentId, true);
+                    setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_membership):
                     mContentId = CONTENT_MEMBERSHIP;
-                    setupFragment(mContentId, true);
+                    setupFragment(mContentId);
                     break;
                 case (R.id.drawer_nav_settings):
                     editSettings(mCurrentUserUuid);
@@ -422,7 +456,7 @@ public class MainActivity
                     break;
                 case (R.id.drawer_nav_geofences):
                     mContentId = CONTENT_GEOFENCE_EVENTS;
-                    setupFragment(mContentId, true);
+                    setupFragment(mContentId);
                     break;
                 default:
                     Timber.v("Unsupported menu id=" + id);

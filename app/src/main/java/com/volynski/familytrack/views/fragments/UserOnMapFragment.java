@@ -76,6 +76,7 @@ public class UserOnMapFragment
     public static final float GEOFENCE_STROKE_WIDTH = 2;
     public static final int DEFAULT_ZOOM = 15;
 
+    private boolean mNewlyCreated = true;
     private UserOnMapViewModel mViewModel;
     private GeoDataClient mGeoDataClient;
     private PlaceDetectionClient mPlaceDetectionClient;
@@ -127,7 +128,8 @@ public class UserOnMapFragment
     @Override
     public void onResume() {
         super.onResume();
-        if (mViewModel.isCreatedFromViewHolder()) {
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_map);
+        if (mViewModel.isCreatedFromViewHolder() || !mNewlyCreated) {
             if (mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_EDIT ||
                     mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_NEW) {
                 changeUiLayout(true);
@@ -135,6 +137,7 @@ public class UserOnMapFragment
         } else {
             mViewModel.start();
         }
+        mNewlyCreated = false;
     }
 
     @Override
@@ -148,6 +151,7 @@ public class UserOnMapFragment
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mNewlyCreated = true;
     }
 
     private void setupMapFragment() {
@@ -161,6 +165,14 @@ public class UserOnMapFragment
         fragmentTransaction.commit();
         mMapFragment.getMapAsync(this);
     }
+
+/*
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(StringKeys.FRAGMENT_ALREADY_CREATED_KEY, true);
+    }
+*/
 
     @Nullable
     @Override
@@ -205,6 +217,7 @@ public class UserOnMapFragment
         mBinding.setViewmodel(mViewModel);
 
         mBinding.conslayoutFrguseronmapEditgeofence.setVisibility(View.INVISIBLE);
+
         return mBinding.getRoot();
     }
 
@@ -302,6 +315,12 @@ public class UserOnMapFragment
                 }
             }
         });
+
+        if (mViewModel != null &&
+                mViewModel.getSelectedUser() != null &&
+                mViewModel.getSelectedUser().getLastKnownLocation() != null) {
+            moveCameraTo(mViewModel.getSelectedUser().getLastKnownLocation().getLatLng());
+        }
     }
 
     /**
@@ -398,7 +417,7 @@ public class UserOnMapFragment
                 moveCameraTo(newCameraPos);
             }
         }
-        redrawPath();
+        //redrawPath();
     }
 
     /**
@@ -476,6 +495,7 @@ public class UserOnMapFragment
 
         mViewModel.selectUser(user);
     }
+
 
     private void changeUiLayout(boolean isForEditMode) {
         boolean isLandscape = getContext().getResources().getBoolean(R.bool.is_landscape);

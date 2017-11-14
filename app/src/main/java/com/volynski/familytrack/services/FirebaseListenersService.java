@@ -443,8 +443,22 @@ public class FirebaseListenersService
      * @param settings
      */
     private void updateTrackingServiceState(Settings oldSettings, Settings settings) {
-        if (oldSettings == null || settings == null) {
-            Timber.v("Unexpected error: New settings or old settings are null. Can't update tracking service");
+        if (settings == null) {
+            TrackingJobService.stopJobService(this);
+            stopServiceViaIntent(new Intent(this, TrackingService.class));
+            return;
+        }
+
+        if (oldSettings == null) {
+            if (settings.getIsTrackingOn()) {
+                if (settings.getIsSimulationOn()) {
+                    TrackingJobService.startJobService(this, mCurrentUserUuid,
+                            0, 5);
+                } else {
+                    startServiceViaIntent(new Intent(this, TrackingService.class),
+                            TrackingService.COMMAND_START, mCurrentUserUuid);
+                }
+            }
             return;
         }
 
@@ -474,7 +488,7 @@ public class FirebaseListenersService
             } else {
                 if (!oldSettings.getIsSimulationOn() && settings.getIsSimulationOn()) {
                     // switch from real tracking mode to simulation tracking mode
-                    stopService(new Intent(this, TrackingService.class));
+                    stopServiceViaIntent(new Intent(this, TrackingService.class));
                     TrackingJobService.startJobService(this, mCurrentUserUuid,
                             0, 5);
                 }

@@ -307,7 +307,7 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void proceedToMainActivity(String userUuid) {
-        SharedPrefsUtil.removeSettings(this);
+        //SharedPrefsUtil.removeSettings(this);
 
         Intent serviceIntent = new Intent(this, FirebaseListenersService.class);
         serviceIntent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
@@ -319,6 +319,8 @@ public class LoginActivity extends AppCompatActivity implements
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         intent.putExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, MainActivity.CONTENT_MAP);
         startActivity(intent);
+
+        finish();
     }
 
     @Override

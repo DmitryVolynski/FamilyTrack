@@ -36,7 +36,7 @@
     <string name="ROLE_2">Member</string>
     <string name="ROLE_3">Undefined</string>
     <string name="toolbar_title_user_list">User list</string>
-    <string name="toolbar_title_history_chart">history_chart</string>
+    <string name="toolbar_title_history_chart">History chart</string>
     <string name="toolbar_title_map">Map</string>
     <string name="toolbar_title_geofence_events">Geofence events</string>
     <string name="toolbar_title_membership">Memberships</string>

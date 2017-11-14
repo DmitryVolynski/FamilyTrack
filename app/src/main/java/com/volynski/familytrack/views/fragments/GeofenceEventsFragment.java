@@ -86,6 +86,7 @@ public class GeofenceEventsFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_geofence_events);
         if (getArguments() == null) {
             Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
             return;

@@ -16,11 +16,9 @@ import android.view.View;
 
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
-import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.databinding.ActivityUserDetailsBinding;
 import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.utils.IntentUtil;
-import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserDetailsViewModel;
 import com.volynski.familytrack.views.navigators.UserDetailsNavigator;
 
@@ -175,11 +173,10 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
 
     private void setupBindings() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_user_details);
-        mViewModel = (UserDetailsViewModel)PersistedFragmentsUtil.findOrCreateViewModel(this,
+        mViewModel = (UserDetailsViewModel) FragmentsUtil.findOrCreateViewModel(this,
                 MainActivity.CONTENT_USER_DETAILS,
                 mCurrentUserUuid,
-                null,
-                false);
+                null);
         mViewModel.setUserUuid(mUserUuid);
         mViewModel.setNavigator(this);
 /*

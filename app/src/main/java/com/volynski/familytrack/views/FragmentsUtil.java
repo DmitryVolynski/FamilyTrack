@@ -11,6 +11,7 @@ import com.volynski.familytrack.viewmodels.GeofenceEventsViewModel;
 import com.volynski.familytrack.viewmodels.InviteUsersViewModel;
 import com.volynski.familytrack.viewmodels.SettingsViewModel;
 import com.volynski.familytrack.viewmodels.UserDetailsViewModel;
+import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
@@ -23,20 +24,20 @@ import static com.volynski.familytrack.views.MainActivity.CONTENT_MAP;
 import static com.volynski.familytrack.views.MainActivity.CONTENT_MEMBERSHIP;
 import static com.volynski.familytrack.views.MainActivity.CONTENT_SETTINGS;
 import static com.volynski.familytrack.views.MainActivity.CONTENT_USER_DETAILS;
+import static com.volynski.familytrack.views.MainActivity.CONTENT_USER_HISTORY_CHART;
 import static com.volynski.familytrack.views.MainActivity.CONTENT_USER_LIST;
 
 /**
  * Created by DmitryVolynski on 07.11.2017.
  */
 
-public class PersistedFragmentsUtil {
+public class FragmentsUtil {
 
     @NonNull
     public static Object findOrCreateViewModel(AppCompatActivity activity,
                                                int contentId,
                                                String currentUserUuid,
-                                               UserListNavigator navigator,
-                                               boolean forceRecreate) {
+                                               UserListNavigator navigator) {
         // In a configuration change we might have a ViewModel present. It's retained using the
         // Fragment Manager.
         Object viewModel;
@@ -47,7 +48,7 @@ public class PersistedFragmentsUtil {
                         (ViewModelHolder<UserListViewModel>) activity.getSupportFragmentManager()
                                 .findFragmentByTag(UserListViewModel.class.getSimpleName());
 
-                if (!forceRecreate && userListVM != null && userListVM.getViewmodel() != null) {
+                if (userListVM != null && userListVM.getViewmodel() != null) {
                     viewModel = userListVM.getViewmodel();
                     ((UserListViewModel) viewModel).setCreatedFromViewHolder(true);
                     return viewModel;
@@ -64,7 +65,7 @@ public class PersistedFragmentsUtil {
                         (ViewModelHolder<UserOnMapViewModel>) activity.getSupportFragmentManager()
                                 .findFragmentByTag(UserOnMapViewModel.class.getSimpleName());
 
-                if (!forceRecreate && userOnMapVM != null && userOnMapVM.getViewmodel() != null) {
+                if (userOnMapVM != null && userOnMapVM.getViewmodel() != null) {
                     viewModel = userOnMapVM.getViewmodel();
                     ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(true);
                     return viewModel;
@@ -81,7 +82,7 @@ public class PersistedFragmentsUtil {
                         (ViewModelHolder<InviteUsersViewModel>) activity.getSupportFragmentManager()
                                 .findFragmentByTag(InviteUsersViewModel.class.getSimpleName());
 
-                if (!forceRecreate && inviteUsersVM != null && inviteUsersVM.getViewmodel() != null) {
+                if (inviteUsersVM != null && inviteUsersVM.getViewmodel() != null) {
                     viewModel = inviteUsersVM.getViewmodel();
                     ((InviteUsersViewModel) viewModel).setCreatedFromViewHolder(true);
                     return viewModel;
@@ -98,7 +99,7 @@ public class PersistedFragmentsUtil {
                         (ViewModelHolder<UserDetailsViewModel>) activity.getSupportFragmentManager()
                                 .findFragmentByTag(UserDetailsViewModel.class.getSimpleName());
 
-                if (!forceRecreate && userDetailsVM != null && userDetailsVM.getViewmodel() != null) {
+                if (userDetailsVM != null && userDetailsVM.getViewmodel() != null) {
                     viewModel = userDetailsVM.getViewmodel();
                     ((UserDetailsViewModel) viewModel).setCreatedFromViewHolder(true);
                     return viewModel;
@@ -114,7 +115,7 @@ public class PersistedFragmentsUtil {
                         (ViewModelHolder<SettingsViewModel>) activity.getSupportFragmentManager()
                                 .findFragmentByTag(SettingsViewModel.class.getSimpleName());
 
-                if (!forceRecreate && settingsVM != null && settingsVM.getViewmodel() != null) {
+                if (settingsVM != null && settingsVM.getViewmodel() != null) {
                     viewModel = settingsVM.getViewmodel();
                     ((SettingsViewModel) viewModel).setCreatedFromViewHolder(true);
                     return viewModel;
@@ -130,7 +131,7 @@ public class PersistedFragmentsUtil {
                         (ViewModelHolder<GeofenceEventsViewModel>) activity.getSupportFragmentManager()
                                 .findFragmentByTag(GeofenceEventsViewModel.class.getSimpleName());
 
-                if (!forceRecreate && geofenceEventsVM != null &&
+                if (geofenceEventsVM != null &&
                         geofenceEventsVM.getViewmodel() != null) {
                     viewModel = geofenceEventsVM.getViewmodel();
                     ((GeofenceEventsViewModel) viewModel).setCreatedFromViewHolder(true);
@@ -148,7 +149,7 @@ public class PersistedFragmentsUtil {
                         (ViewModelHolder<UserMembershipViewModel>) activity.getSupportFragmentManager()
                                 .findFragmentByTag(UserMembershipViewModel.class.getSimpleName());
 
-                if (!forceRecreate && membershipVM != null &&
+                if (membershipVM != null &&
                         membershipVM.getViewmodel() != null) {
                     viewModel = membershipVM.getViewmodel();
                     ((UserMembershipViewModel) viewModel).setCreatedFromViewHolder(true);
@@ -159,6 +160,24 @@ public class PersistedFragmentsUtil {
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
                     ((UserMembershipViewModel) viewModel).setNavigator(navigator);
                     ((UserMembershipViewModel) viewModel).setCreatedFromViewHolder(false);
+                }
+                break;
+            case CONTENT_USER_HISTORY_CHART:
+                ViewModelHolder<UserHistoryChartViewModel> historyVM =
+                        (ViewModelHolder<UserHistoryChartViewModel>) activity.getSupportFragmentManager()
+                                .findFragmentByTag(UserHistoryChartViewModel.class.getSimpleName());
+
+                if (historyVM != null &&
+                        historyVM.getViewmodel() != null) {
+                    viewModel = historyVM.getViewmodel();
+                    ((UserHistoryChartViewModel) viewModel).setCreatedFromViewHolder(true);
+                    return viewModel;
+                } else {
+                    viewModel = new UserHistoryChartViewModel(context,
+                            currentUserUuid,
+                            new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
+                    ((UserHistoryChartViewModel) viewModel).setNavigator(navigator);
+                    ((UserHistoryChartViewModel) viewModel).setCreatedFromViewHolder(false);
                 }
                 break;
             default:

@@ -28,6 +28,7 @@ import com.volynski.familytrack.databinding.FragmentUserHistoryChartBinding;
 import com.volynski.familytrack.databinding.FragmentUserOnMapBinding;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
+import com.volynski.familytrack.views.MainActivity;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.ArrayList;
@@ -73,6 +74,7 @@ public class UserHistoryChartFragment extends Fragment implements View.OnClickLi
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_history_chart);
         mViewModel.start();
     }
 

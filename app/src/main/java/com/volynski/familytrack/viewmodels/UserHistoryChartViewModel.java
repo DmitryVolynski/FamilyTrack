@@ -29,15 +29,10 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 25.09.2017.
  */
 
-public class UserHistoryChartViewModel extends BaseObservable {
+public class UserHistoryChartViewModel extends AbstractViewModel {
     public final static String UI_CONTEXT = "UserHistoryChartViewModel";
 
-    private final Context mContext;
-    private String mCurrentUserUuid = "";
-    private User mCurrentUser;
     private User mSelectedUser;
-    private boolean mIsDataLoading = false;
-    private FamilyTrackDataSource mRepository;
 
     public ObservableBoolean redrawChart = new ObservableBoolean(false);
     public final ObservableList<UserListItemViewModel> viewModels = new ObservableArrayList<>();
@@ -55,10 +50,7 @@ public class UserHistoryChartViewModel extends BaseObservable {
     public UserHistoryChartViewModel(Context context,
                                      String currentUserUuid,
                                      FamilyTrackDataSource dataSource) {
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
-
+        super(context, currentUserUuid, dataSource);
         initToggleButtons();
     }
 
@@ -82,7 +74,7 @@ public class UserHistoryChartViewModel extends BaseObservable {
             return;
         }
 
-        mIsDataLoading = true;
+        isDataLoading.set(true);
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -90,9 +82,12 @@ public class UserHistoryChartViewModel extends BaseObservable {
                     mCurrentUser = result.getData();
                     if (mCurrentUser.getActiveMembership() != null) {
                         loadUsersList(mCurrentUser.getActiveMembership().getGroupUuid());
+                    } else {
+                        isDataLoading.set(false);
                     }
                 } else {
                     Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    isDataLoading.set(false);
                 }
             }
         });
@@ -109,7 +104,7 @@ public class UserHistoryChartViewModel extends BaseObservable {
                     @Override
                     public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                         populateUserListFromDbResult(result);
-                        mIsDataLoading = false;
+                        isDataLoading.set(false);
                     }
                 });
     }
@@ -122,7 +117,8 @@ public class UserHistoryChartViewModel extends BaseObservable {
     private void populateUserListFromDbResult(FirebaseResult<Group> result) {
         if (result.getData() != null && result.getData().getMembers() != null) {
             for (User user : result.getData().getMembers().values()) {
-                if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
+                if (user.getActiveMembership() != null &&
+                        user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
                     this.viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
                 }
             }

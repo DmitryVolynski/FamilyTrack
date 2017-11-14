@@ -37,6 +37,7 @@ public class StringKeys {
 
     public static final String SETTINGS_CHANGED_FLAG_KEY = "SETTINGS_CHANGED_FLAG";
     public static final String TRACKING_SERVICE_COMMAND_KEY = "TRACKING_SERVICE_COMMAND";
+    public static final String FRAGMENT_ALREADY_CREATED_KEY = "FRAGMENT_ALREADY_CREATED";
 
     public static String NEW_GROUP_NAME_KEY = "NEW_GROUP_NAME";
 }
@@ -58,14 +59,13 @@ public class StringKeys {
 // 04.11.2017 разработка виджета
 // 11.11.2017 исключение пользователя группы свайпом
 // 11.11.2017 работа приложения при изменении ориентации
+// 14.11.2017 Изменить механизм позиционирования клиента (увеличить точность)
+// 14.11.2017 Переделать позиционирование клиента под событийную модель
 
 // === функционал
-// TODO: Изменить механизм позиционирования клиента (увеличить точность)
-// TODO: Переделать позиционирование клиента под событийную модель
 // TODO: проверка ролей
 
 // === UI
-// TODO: опция для отображения маркеров в пути + динамическое отображение пути (либо seekBar)
 // TODO: адаптация форм для планшета
 // TODO: Material design
 // TODO: добавить индикатор ожидания при загрузке данных

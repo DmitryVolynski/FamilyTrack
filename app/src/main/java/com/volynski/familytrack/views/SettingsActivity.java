@@ -2,26 +2,18 @@ package com.volynski.familytrack.views;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
-import android.databinding.Observable;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
-import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.databinding.ActivitySettingsBinding;
-import com.volynski.familytrack.databinding.ActivityUserDetailsBinding;
 import com.volynski.familytrack.utils.IntentUtil;
-import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.SettingsViewModel;
-import com.volynski.familytrack.viewmodels.UserDetailsViewModel;
 import com.volynski.familytrack.views.navigators.SettingsNavigator;
 
 /**
@@ -133,11 +125,10 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
 
     private void setupBindings() {
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_settings);
-        mViewModel = (SettingsViewModel) PersistedFragmentsUtil.findOrCreateViewModel(this,
+        mViewModel = (SettingsViewModel) FragmentsUtil.findOrCreateViewModel(this,
                 MainActivity.CONTENT_SETTINGS,
                 mCurrentUserUuid,
-                null,
-                false);
+                null);
         mViewModel.setNavigator(this);
         mBinding.setViewmodel(mViewModel);
     }

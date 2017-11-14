@@ -23,10 +23,16 @@ import timber.log.Timber;
 
 public class TrackingJobService extends JobService {
     public static final String TAG = TrackingJobService.class.getSimpleName();
+    private boolean mIsStarted = false;
 
     @Override
     public boolean onStartJob(final JobParameters job) {
         Timber.v("onStartJob");
+        if (mIsStarted) {
+            Timber.v("Already started");
+            return true;
+        }
+
         final String userUuid = IntentUtil.extractValueFromBundle(job.getExtras(),
                 StringKeys.CURRENT_USER_UUID_KEY);
         TrackingTask task = new TrackingTask(userUuid, this, new TrackingTaskCallback() {
@@ -42,6 +48,7 @@ public class TrackingJobService extends JobService {
             }
         });
         task.run();
+        mIsStarted = true;
         return true;
     }
 
@@ -59,6 +66,7 @@ public class TrackingJobService extends JobService {
         FirebaseJobDispatcher dispatcher =
                 new FirebaseJobDispatcher(new GooglePlayDriver(this));
         dispatcher.cancel(TrackingJobService.TAG);
+        mIsStarted = false;
         return false;
     }
 

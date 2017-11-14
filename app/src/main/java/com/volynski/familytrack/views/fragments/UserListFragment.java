@@ -1,8 +1,6 @@
 package com.volynski.familytrack.views.fragments;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.databinding.DataBindingUtil;
 import android.databinding.Observable;
@@ -12,41 +10,29 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
-import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.databinding.FragmentUserListBinding;
-import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
-import com.volynski.familytrack.viewmodels.GeofenceEventListItemViewModel;
 import com.volynski.familytrack.viewmodels.InviteUsersViewModel;
 import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.views.MainActivity;
-import com.volynski.familytrack.views.PersistedFragmentsUtil;
-import com.volynski.familytrack.views.navigators.UserListNavigator;
+import com.volynski.familytrack.views.FragmentsUtil;
 
 import java.util.List;
 
 import timber.log.Timber;
-
-import static android.content.Context.LAYOUT_INFLATER_SERVICE;
-import static com.volynski.familytrack.StringKeys.INVITE_USERS_DIALOG_SHOW_KEY;
 
 /**
  * Created by DmitryVolynski on 22.08.2017.
@@ -87,8 +73,8 @@ public class UserListFragment
 
     @Override
     public void onResume() {
-
         super.onResume();
+        ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_user_list);
         if (getArguments() == null) {
             Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
             return;
@@ -208,12 +194,11 @@ public class UserListFragment
         }
 
         InviteUsersViewModel viewModel =
-                (InviteUsersViewModel)PersistedFragmentsUtil.findOrCreateViewModel(
+                (InviteUsersViewModel) FragmentsUtil.findOrCreateViewModel(
                         (AppCompatActivity)getActivity(),
                         MainActivity.CONTENT_INVITE_USERS,
                         mCurrentUserUuid,
-                        mViewModel.getNavigator(),
-                        false);
+                        mViewModel.getNavigator());
 
         //viewModel.restoreFromBundle(savedInstanceState);
 
