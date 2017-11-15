@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="user_list_side_margin">128dp</dimen>
+    <dimen name="settings_list_side_margin">128dp</dimen>
+    <item name="map_guideline_view_mode_percent" format="float" type="dimen">0.8</item>
+    <item name="map_guideline_edit_mode_percent" format="float" type="dimen">0.65</item>
+    <item name="map_leftguideline_view_mode_percent" format="float" type="dimen">0.08</item>
+    <item name="map_leftguideline_edit_mode_percent" format="float" type="dimen">0.0</item>
+
+</resources>

@@ -21,6 +21,7 @@
 
     <item name="map_guideline_view_mode_percent" format="float" type="dimen">0.7</item>
     <item name="map_guideline_edit_mode_percent" format="float" type="dimen">0.3</item>
+    <item name="map_guideline_geofence_events" format="float" type="dimen">0.65</item>
 
     <!--
 Refer to App Widget Documentation for margin information
@@ -29,4 +30,6 @@ http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     <dimen name="widget_margin">8dp</dimen>
     <dimen name="create_group_dialog_width">350dp</dimen>
     <dimen name="create_group_dialog_height">500dp</dimen>
+    <dimen name="user_list_side_margin">0dp</dimen>
+    <dimen name="settings_list_side_margin">16dp</dimen>
 </resources>

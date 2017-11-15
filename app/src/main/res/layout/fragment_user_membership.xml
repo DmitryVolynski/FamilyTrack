@@ -12,6 +12,8 @@
     <!--app:viewModels="@{viewmodel.viewModels}"-->
     <FrameLayout
         android:id="@+id/framelayout_fragmentusermembership"
+        android:layout_marginStart="@dimen/user_list_side_margin"
+        android:layout_marginEnd="@dimen/user_list_side_margin"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <android.support.v7.widget.RecyclerView

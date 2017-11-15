@@ -9,7 +9,7 @@
     <color name="colorSecondaryLight">#ffc246</color>
     <color name="colorEditGeofenceFill">#66ff9100</color>
     <color name="colorEditGeofenceStroke">#eeff9100</color>
-    <color name="colorGeofenceStroke">#662196F3</color>
+    <color name="colorGeofenceStroke">#662196f3</color>
     <color name="colorGeofenceFill">#66BBDEFB</color>
     <color name="itemSeparator">#c0c0c0</color>
 </resources>

@@ -6,4 +6,7 @@
     <item name="map_leftguideline_edit_mode_percent" format="float" type="dimen">0.0</item>
     <dimen name="create_group_dialog_width">450dp</dimen>
     <dimen name="create_group_dialog_height">300dp</dimen>
+    <dimen name="user_list_side_margin">72dp</dimen>
+    <dimen name="settings_list_side_margin">72dp</dimen>
+
 </resources>

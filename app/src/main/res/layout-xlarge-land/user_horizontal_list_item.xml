@@ -17,8 +17,8 @@
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_width="@dimen/user_photo_normal_width"
-            android:layout_height="@dimen/user_photo_normal_height"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             tools:srcCompat="@mipmap/ic_no_user_photo"

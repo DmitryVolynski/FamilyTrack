@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <data>
+        <variable
+            name="viewmodel"
+            type="com.volynski.familytrack.viewmodels.UserOnMapViewModel"/>
+        <import type="android.view.View"/>
+    </data>
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <FrameLayout
+                android:id="@+id/map_activitymain"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/verticalOneThird"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <android.support.constraint.Guideline
+                android:id="@+id/verticalOneThird"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:orientation="horizontal"
+                android:visibility="visible"
+                app:layout_constraintGuide_percent="0.8"
+                tools:layout_editor_absoluteX="0dp"
+                tools:layout_editor_absoluteY="486dp" />
+
+            <LinearLayout
+                android:visibility="visible"
+                android:id="@+id/linlayout_frguseronmap_users"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="16dp"
+                android:layout_marginEnd="32dp"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="32dp"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="8dp"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/verticalOneThird">
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="horizontal"
+                    android:stretchColumns="*">
+
+                    <TableRow>
+
+                        <ToggleButton
+                            android:id="@+id/tbut_frguseronmap_off"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["OFF"]}'
+                            android:textOff="OFF"
+                            android:textOn="OFF" />
+
+                        <ToggleButton
+                            android:id="@+id/tbut_frguseronmap_1h"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["1H"]}'
+                            android:textOff="1H"
+
+                            android:textOn="1H" />
+
+                        <ToggleButton
+                            android:id="@+id/tbut_frguseronmap_8h"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["8H"]}'
+                            android:textOff="8H"
+                            android:textOn="8H" />
+
+                        <ToggleButton
+                            android:id="@+id/tbut_frguseronmap_1d"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginEnd="16dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["1D"]}'
+                            android:textOff="1D"
+                            android:textOn="1D" />
+
+                        <ToggleButton
+                            android:id="@+id/tbut_frguseronmap_1w"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:background="@drawable/toggle_button_selector"
+                            android:checked='@{viewmodel.toggleButtons["1W"]}'
+                            android:textOff="1W"
+                            android:textOn="1W" />
+                    </TableRow>
+
+
+                </TableLayout>
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/recyclerview_frguseronmap_userslist"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:viewModels="@{viewmodel.viewModels}"
+                    tools:layout_editor_absoluteX="8dp"
+                    tools:layout_editor_absoluteY="25dp">
+
+                </android.support.v7.widget.RecyclerView>
+            </LinearLayout>
+            <android.support.constraint.ConstraintLayout
+                android:id="@+id/conslayout_frguseronmap_editgeofence"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginBottom="32dp"
+                android:layout_marginEnd="72dp"
+                android:layout_marginLeft="72dp"
+                android:layout_marginRight="72dp"
+                android:layout_marginStart="72dp"
+                android:layout_marginTop="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/verticalOneThird">
+                <TextView
+                    android:layout_marginLeft="8dp"
+                    android:text="Edit geofence data"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView8"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:layout_marginRight="8dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    android:layout_marginTop="0dp"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <EditText
+                    android:text="@={viewmodel.zoneName}"
+                    android:hint="Geofence name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginLeft="8dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView8"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:id="@+id/editText"
+                    android:layout_marginTop="-1dp"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintRight_toRightOf="parent" />
+                <android.support.constraint.Guideline
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:id="@+id/horizontalTwoThirds"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    app:layout_constraintGuide_percent="0.7" />
+
+                <android.support.constraint.Guideline
+                    app:layout_constraintTop_toTopOf="parent"
+                    android:id="@+id/horizontalOneHalf"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:visibility="visible"
+                    app:layout_constraintGuide_percent="0.5" />
+
+                <SeekBar
+                    android:id="@+id/seekBar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="8dp"
+                    android:max="5000"
+                    android:progress="@={viewmodel.zoneRadius}"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toLeftOf="@+id/horizontalTwoThirds"
+                    app:layout_constraintTop_toBottomOf="@+id/editText" />
+                <TextView
+                    android:textAlignment="textEnd"
+                    tools:text="R:500m"
+                    android:text='@{String.format("R:%1$dm", viewmodel.zoneRadius.get())}'
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    app:layout_constraintLeft_toLeftOf="@+id/horizontalTwoThirds"
+                    android:layout_marginRight="8dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/seekBar"
+                    android:layout_marginTop="0dp" />
+
+                <Button
+                    android:onClick="@{() -> viewmodel.saveZone()}"
+                    android:id="@+id/button_frguseronmap_save"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="SAVE"
+                    android:layout_marginRight="8dp"
+                    app:layout_constraintTop_toBottomOf="@+id/frameLayout_dialogfirsttime"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <Button
+                    android:id="@+id/button_frguseronmap_cancel"
+                    style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="8dp"
+                    android:text="CANCEL"
+                    app:layout_constraintRight_toLeftOf="@+id/button_frguseronmap_save"
+                    android:layout_marginRight="8dp"
+                    android:padding="8dp"
+                    app:layout_constraintTop_toTopOf="@+id/button_frguseronmap_save"
+                    android:layout_marginTop="0dp" />
+                <ImageView
+                    android:id="@+id/imageview_frguseronmap_removezone"
+                    android:visibility="@{viewmodel.zoneEditMode == viewmodel.EM_EDIT ? View.VISIBLE : View.INVISIBLE}"
+                    android:src="@drawable/ic_delete"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="8dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/textView9"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Lat/Long"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/seekBar" />
+
+                <TextView
+                    android:id="@+id/textView10"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    tools:text="55.2323232/36.173562"
+                    android:text='@{String.format("%1$f/%2$f", viewmodel.zoneCenterLatitude.get() , viewmodel.zoneCenterLongitude.get())}'
+                    app:layout_constraintTop_toBottomOf="@+id/seekBar"
+                    app:layout_constraintLeft_toRightOf="@+id/textView9"
+                    android:layout_marginRight="8dp"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+                <ScrollView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginLeft="8dp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    android:layout_marginRight="8dp"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toTopOf="@+id/button_frguseronmap_cancel"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@+id/textView10">
+                    <android.support.v7.widget.RecyclerView
+                        android:layout_gravity="top"
+                        android:id="@+id/recyclerview_frguseronmap_geosettings"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        app:viewModels="@{viewmodel.viewModels}">
+
+                    </android.support.v7.widget.RecyclerView>
+
+                </ScrollView>
+
+            </android.support.constraint.ConstraintLayout>
+
+        </android.support.constraint.ConstraintLayout>
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

@@ -70,3 +70,5 @@ public class StringKeys {
 // TODO: Material design
 // TODO: добавить индикатор ожидания при загрузке данных
 // TODO: тестирование
+
+// License: Linkware (Backlink to http://www.alienvalley.com required)

@@ -19,6 +19,7 @@
             android:layout_height="@dimen/user_photo_normal_height"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
+            tools:srcCompat="@mipmap/ic_no_user_photo"
             app:roundImageUrl="@{viewmodel.user.photoUrl}" />
 
         <TextView

@@ -10,6 +10,8 @@
     </data>
     <LinearLayout
         android:id="@+id/linearlayout_fragmentuserslist_rootlayout"
+        android:layout_marginStart="@dimen/user_list_side_margin"
+        android:layout_marginEnd="@dimen/user_list_side_margin"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
