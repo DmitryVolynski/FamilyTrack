@@ -61,8 +61,7 @@ public class FirebaseListenersService
         extends Service
         implements
             GoogleApiClient.ConnectionCallbacks,
-            GoogleApiClient.OnConnectionFailedListener,
-            ResultCallback<Status> {
+            GoogleApiClient.OnConnectionFailedListener {
 
     private static final String FIREBASE_CONNECTION_STATUS_REF = ".info/connected";
 
@@ -85,7 +84,6 @@ public class FirebaseListenersService
     private ValueEventListener mConnectionStatusListener;   // listen to firebase connection status
 
     private GoogleApiClient mGoogleApiClient;
-    private PendingIntent mGeofencePendingIntent;
 
     public FirebaseListenersService() {
     }
@@ -146,8 +144,11 @@ public class FirebaseListenersService
     public int onStartCommand(Intent intent, int flags, int startId) {
         int result = START_STICKY;
 
-        mCurrentUserUuid = (intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY) ?
-                intent.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY) : "");
+        if (intent != null && intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
+            mCurrentUserUuid = intent.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY);
+        } else {
+            mCurrentUserUuid = "";
+        }
 
         if (mCurrentUserUuid.equals("")) {
             Timber.v("UserUuid from SharedPrefs is empty. Can't start settings listener service");
@@ -181,18 +182,29 @@ public class FirebaseListenersService
     private void createGroupGeofencesListener(String groupUuid) {
         if (mGroupGeofencesListener != null) {
             mGroupGeofencesRef.removeEventListener(mGroupGeofencesListener);
+            mGroupGeofencesListener = null;
         }
 
+        if (groupUuid == null || groupUuid.equals("")) {
+            return;
+        }
         mGroupGeofencesListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<Zone> zones = new ArrayList<Zone>();
+                Map<String, Zone> zones = new HashMap<>();
                 if (dataSnapshot.getChildren() != null) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        zones.add((Zone)snapshot.getValue(Zone.class));
+                        Zone zone = (Zone)snapshot.getValue(Zone.class);
+                        zone.setUuid(snapshot.getKey());
+                        zones.put(zone.getUuid(), zone);
                     }
                 }
-                registerGeofences(zones);
+                SharedPrefsUtil.setGeofences(FirebaseListenersService.this, zones);
+                runTrackingServiceCommand(
+                        new Intent(FirebaseListenersService.this,
+                                TrackingService.class),
+                        TrackingService.COMMAND_RECONFIG_GEOFENCES,
+                        mCurrentUserUuid);
             }
 
             @Override
@@ -207,61 +219,6 @@ public class FirebaseListenersService
         mGroupGeofencesRef.addValueEventListener(mGroupGeofencesListener);
     }
 
-
-    /**
-     *
-     * @param zones
-     */
-    private void registerGeofences(List<Zone> zones) {
-        // remove all previous geofences
-        unregisterGeofences();
-
-        Settings settings = SharedPrefsUtil.getSettings(this);
-        if (settings == null) {
-            Timber.v("No settings found in shared preferences. Can't create geofences");
-            return;
-        }
-
-        if (settings.getIsSimulationOn() || !settings.getIsTrackingOn()) {
-            Timber.v("Simulation is on or tracking is off. No geofences created");
-            return;
-        }
-
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            GeofencingRequest request = getGeofencingRequest(zones);
-            if (request != null) {
-                LocationServices.GeofencingApi.addGeofences(
-                        mGoogleApiClient,
-                        request,
-                        getGeofencePendingIntent()
-                ).setResultCallback(this);
-            }
-        } else {
-            Timber.v("ACCESS_FINE_LOCATION not granted. Unable to use geofences");
-        }
-    }
-
-    private void unregisterGeofences() {
-        LocationServices.GeofencingApi.removeGeofences(
-                mGoogleApiClient,
-                // This is the same pending intent that was used in addGeofences().
-                getGeofencePendingIntent()
-        ).setResultCallback(this); // Result processed in onResult().
-    }
-
-    private PendingIntent getGeofencePendingIntent() {
-        // Reuse the PendingIntent if we already have it.
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-        Intent intent = new Intent(this, GeofenceIntentService.class);
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-        return PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
-    }
 
     @Override
     public void onCreate() {
@@ -278,17 +235,21 @@ public class FirebaseListenersService
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 if (user != null) {
+                    SharedPrefsUtil.setCurrentUser(FirebaseListenersService.this, user);
                     if (user.getActiveMembership() == null) {
                         // user has left the group - clear current settings
                         SharedPrefsUtil.removeSettings(FirebaseListenersService.this);
                         mActiveGroupUuid = "";
                         createGroupListener(mActiveGroupUuid);
+                        createSettingsListener(mActiveGroupUuid);
+                        createGroupGeofencesListener(mActiveGroupUuid);
                     } else {
                         if (!mActiveGroupUuid.equals(user.getActiveMembership().getGroupUuid())) {
                             // get setting for new user group
                             mActiveGroupUuid = user.getActiveMembership().getGroupUuid();
                             createSettingsListener(mActiveGroupUuid);
                             createGroupListener(mActiveGroupUuid);
+                            createGroupGeofencesListener(mActiveGroupUuid);
                         }
                     }
                 } else {
@@ -314,30 +275,31 @@ public class FirebaseListenersService
             mGroupListener = null;
         }
 
-        if (mActiveGroupUuid.equals("")) {
-            Timber.v("mActiveGroupUuid is empty. No group listener was created");
+        if (groupUuid == null || groupUuid.equals("")) {
+            Timber.v("groupUuid is empty. No group listener was created");
             SharedPrefsUtil.removeActiveGroup(FirebaseListenersService.this);
             notifyWidgets();
-        } else {
-            mGroupListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Group group = dataSnapshot.getValue(Group.class);
-                    SharedPrefsUtil.setActiveGroup(FirebaseListenersService.this, group);
-                    notifyWidgets();
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            };
-
-            mGroupRef = mDataSource.getFirebaseConnection()
-                    .getReference(FamilyTrackDbRefsHelper.groupRef(mActiveGroupUuid));
-
-            mGroupRef.addValueEventListener(mGroupListener);
+            return;
         }
+
+        mGroupListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Group group = dataSnapshot.getValue(Group.class);
+                SharedPrefsUtil.setActiveGroup(FirebaseListenersService.this, group);
+                notifyWidgets();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        mGroupRef = mDataSource.getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.groupRef(groupUuid));
+
+        mGroupRef.addValueEventListener(mGroupListener);
     }
 
     /**
@@ -367,6 +329,15 @@ public class FirebaseListenersService
      * @param userUuid
      */
     private void createGeofenceEventsListener(final String userUuid) {
+        if (mGeofenceEventsListener != null) {
+            mGeofenceEventsRef.removeEventListener(mGeofenceEventsListener);
+            mGeofenceEventsListener = null;
+        }
+
+        if (userUuid == null || userUuid.equals("")) {
+            return;
+        }
+
         mGeofenceEventsListener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -399,39 +370,46 @@ public class FirebaseListenersService
      * @param activeGroupUuid
      */
     private void createSettingsListener(final String activeGroupUuid) {
-        mSettingsRef = null;
-        if (!mActiveGroupUuid.equals("")) {
-            mSettingsListener = new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    Settings oldSettings = SharedPrefsUtil.getSettings(FirebaseListenersService.this);
-                    Settings settings = dataSnapshot.getValue(Settings.class);
-                    updateTrackingServiceState(oldSettings, settings);
-                    if (oldSettings != null &&
-                            !oldSettings.getIsTrackingOn() &&
-                            settings.getIsTrackingOn()) {
-                        // if tracking mode was off and now is on - we need to place
-                        // group geofences into shared preferences to recreate them
-                        createGeofencesInSharedPrefs(activeGroupUuid);
-                    }
-                    if (settings != null) {
-                        SharedPrefsUtil.setSettings(FirebaseListenersService.this, settings);
-                    } else {
-                        Timber.v("Unexpected error: null settings received for group " + activeGroupUuid);
-                    }
-                }
-
-                @Override
-                public void onCancelled(DatabaseError databaseError) {
-
-                }
-            };
-            mSettingsRef = mDataSource.getFirebaseConnection()
-                    .getReference(FamilyTrackDbRefsHelper.groupSettingsRef(activeGroupUuid));
-
-            mSettingsRef.addValueEventListener(mSettingsListener);
+        if (mSettingsListener != null) {
+            mSettingsRef.removeEventListener(mSettingsListener);
+            mSettingsListener = null;
         }
 
+        if (activeGroupUuid == null || activeGroupUuid.equals("")) {
+            return;
+        }
+
+        mSettingsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Settings oldSettings = SharedPrefsUtil.getSettings(FirebaseListenersService.this);
+                Settings settings = dataSnapshot.getValue(Settings.class);
+                updateTrackingServiceState(oldSettings, settings);
+/*
+                if (oldSettings != null &&
+                        !oldSettings.getIsTrackingOn() &&
+                        settings.getIsTrackingOn()) {
+                    // if tracking mode was off and now is on - we need to place
+                    // group geofences into shared preferences to recreate them
+                    createGeofencesInSharedPrefs(activeGroupUuid);
+                }
+*/
+                if (settings != null) {
+                    SharedPrefsUtil.setSettings(FirebaseListenersService.this, settings);
+                } else {
+                    Timber.v("Unexpected error: null settings received for group " + activeGroupUuid);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+        mSettingsRef = mDataSource.getFirebaseConnection()
+                .getReference(FamilyTrackDbRefsHelper.groupSettingsRef(activeGroupUuid));
+
+        mSettingsRef.addValueEventListener(mSettingsListener);
     }
 
     /**
@@ -445,7 +423,8 @@ public class FirebaseListenersService
     private void updateTrackingServiceState(Settings oldSettings, Settings settings) {
         if (settings == null) {
             TrackingJobService.stopJobService(this);
-            stopServiceViaIntent(new Intent(this, TrackingService.class));
+            runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                    TrackingService.COMMAND_STOP, mCurrentUserUuid);
             return;
         }
 
@@ -455,7 +434,7 @@ public class FirebaseListenersService
                     TrackingJobService.startJobService(this, mCurrentUserUuid,
                             0, 5);
                 } else {
-                    startServiceViaIntent(new Intent(this, TrackingService.class),
+                    runTrackingServiceCommand(new Intent(this, TrackingService.class),
                             TrackingService.COMMAND_START, mCurrentUserUuid);
                 }
             }
@@ -465,7 +444,8 @@ public class FirebaseListenersService
         if (oldSettings.getIsTrackingOn() && !settings.getIsTrackingOn()) {
             // stop tracking services
             TrackingJobService.stopJobService(this);
-            stopServiceViaIntent(new Intent(this, TrackingService.class));
+            runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                    TrackingService.COMMAND_STOP, mCurrentUserUuid);
             return;
         }
 
@@ -474,7 +454,7 @@ public class FirebaseListenersService
                 TrackingJobService.startJobService(this, mCurrentUserUuid,
                         0, 5);
             } else {
-                startServiceViaIntent(new Intent(this, TrackingService.class),
+                runTrackingServiceCommand(new Intent(this, TrackingService.class),
                         TrackingService.COMMAND_START, mCurrentUserUuid);
             }
             return;
@@ -484,11 +464,13 @@ public class FirebaseListenersService
             if (oldSettings.getIsSimulationOn() && !settings.getIsSimulationOn()) {
                 // switch from simulation tracking mode to real tracking mode
                 TrackingJobService.stopJobService(this);
-                startService(new Intent(this, TrackingService.class));
+                runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                        TrackingService.COMMAND_START, mCurrentUserUuid);
             } else {
                 if (!oldSettings.getIsSimulationOn() && settings.getIsSimulationOn()) {
                     // switch from real tracking mode to simulation tracking mode
-                    stopServiceViaIntent(new Intent(this, TrackingService.class));
+                    runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                            TrackingService.COMMAND_STOP, mCurrentUserUuid);
                     TrackingJobService.startJobService(this, mCurrentUserUuid,
                             0, 5);
                 }
@@ -496,23 +478,21 @@ public class FirebaseListenersService
         }
     }
 
-    private void startServiceViaIntent(Intent intent,
-                                       String commandStart,
-                                       String currentUserUuid) {
-        intent.setAction(TrackingService.COMMAND_START);
+    private void runTrackingServiceCommand(Intent intent,
+                                           String command,
+                                           String currentUserUuid) {
+        intent.setAction(command);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
         this.startService(intent);
     }
 
-    private void stopServiceViaIntent(Intent intent) {
-        intent.setAction(TrackingService.COMMAND_STOP);
-        this.startService(intent);
-    }
-
-    /**
+/*
+    */
+/**
      * Reads list of geofences from specified group and stores them in shared preferences
      * @param groupUuid - group uuid which geofences should be read
-     */
+     *//*
+
     private void createGeofencesInSharedPrefs(String groupUuid) {
         mDataSource.getGroupByUuid(groupUuid, false,
                 new FamilyTrackDataSource.GetGroupByUuidCallback() {
@@ -525,41 +505,7 @@ public class FirebaseListenersService
             }
         });
     }
-
-    @Override
-    public void onResult(@NonNull Status status) {
-
-    }
-
-    /**
-     *
-     * @param zones
-     * @return
-     */
-    private GeofencingRequest getGeofencingRequest(List<Zone> zones) {
-        GeofencingRequest result = null;
-        if (zones != null) {
-            List<Geofence> geofences = new ArrayList<>();
-            for (Zone zone : zones) {
-                if (zone.getTrackedUsers().contains(mCurrentUserUuid)) {
-                    geofences.add(new Geofence.Builder()
-                            .setRequestId(zone.getUuid())
-                            .setCircularRegion(zone.getLatitude(), zone.getLongitude(), zone.getRadius())
-                            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL)
-                            .build());
-                }
-            }
-
-            if (geofences.size() > 0) {
-                GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-                builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
-                builder.addGeofences(geofences);
-                result = builder.build();
-            }
-        }
-        return result;
-    }
+*/
 
     /**
      * Notify widgets to update list of users

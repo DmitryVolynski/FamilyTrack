@@ -26,6 +26,8 @@ import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.ActivityMainBinding;
 import com.volynski.familytrack.databinding.NavHeaderMainBinding;
+import com.volynski.familytrack.services.TrackingJobService;
+import com.volynski.familytrack.services.TrackingService;
 import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
@@ -35,6 +37,7 @@ import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
+import com.volynski.familytrack.views.fragments.FirstTimeUserDialogFragment;
 import com.volynski.familytrack.views.fragments.GeofenceEventsFragment;
 import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
@@ -90,10 +93,26 @@ public class MainActivity
             mContentId = savedInstanceState.getInt(StringKeys.MAIN_ACTIVITY_MODE_KEY);
             mCurrentUserUuid = savedInstanceState.getString(StringKeys.CURRENT_USER_UUID_KEY);
         }
+        startLocationServices();
         setupFragmentIds();
         setupCommonContent();
         setupFragment(mContentId);
 
+    }
+
+    private void startLocationServices() {
+        // start service if app running for the first time
+        Settings settings = SharedPrefsUtil.getSettings(this);
+        if (settings.getIsTrackingOn()) {
+            if (settings.getIsSimulationOn()) {
+                TrackingJobService.startJobService(this, mCurrentUserUuid, 0, 5);
+            } else {
+                Intent intent = new Intent(this, TrackingService.class);
+                intent.setAction(TrackingService.COMMAND_START);
+                intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
+                startService(intent);
+            }
+        }
     }
 
     private void setupFragmentIds() {

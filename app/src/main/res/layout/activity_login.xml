@@ -25,9 +25,9 @@
             android:scaleType="fitXY"
             android:adjustViewBounds="true"
             android:src="@drawable/maps_icon_512px"
-            android:layout_marginBottom="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_marginBottom="24dp"
+            android:layout_width="230dp"
+            android:layout_height="230dp"/>
         <ImageView
             android:src="@drawable/family_track_logo"
             android:layout_width="wrap_content"

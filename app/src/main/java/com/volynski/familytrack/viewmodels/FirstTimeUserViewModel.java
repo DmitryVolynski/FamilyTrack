@@ -1,5 +1,6 @@
 package com.volynski.familytrack.viewmodels;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableArrayList;
@@ -8,7 +9,10 @@ import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.databinding.ObservableList;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.HintRequest;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
@@ -38,7 +42,8 @@ public class FirstTimeUserViewModel extends BaseObservable {
     private FamilyTrackDataSource mRepository;
 
     // model fields
-    public final ObservableField<String> phoneNumber = new ObservableField<>("+79857602865");
+    public final ObservableField<String> phoneNumber =
+            new ObservableField<>("");
     public final ObservableInt  dialogStepNo = new ObservableInt(STEP_ENTER_YOUR_PHONE_NUMBER);
     public final ObservableBoolean createNewGroupOption = new ObservableBoolean(true);
     public final ObservableBoolean joinExistingGroupOption = new ObservableBoolean(false);
@@ -59,6 +64,7 @@ public class FirstTimeUserViewModel extends BaseObservable {
      */
     public void start() {
         mIsDataLoading = true;
+
         loadGroupsList();
     }
 

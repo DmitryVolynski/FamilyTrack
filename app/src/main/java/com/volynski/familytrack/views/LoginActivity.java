@@ -1,6 +1,7 @@
 package com.volynski.familytrack.views;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
@@ -17,6 +18,8 @@ import android.widget.TextView;
 //import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 //import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.Credential;
+import com.google.android.gms.auth.api.credentials.HintRequest;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
@@ -63,6 +66,8 @@ public class LoginActivity extends AppCompatActivity implements
     private static final int STATE_SIGNING_IN = 1;
     private static final int STATE_IN_PROGRESS = 2;
     private static final int RC_SIGN_IN = 0;
+    private static final int RC_PHONE_NUMBER = 12;
+
     private static final String TAG = LoginActivity.class.getSimpleName();
     private static final int PERMISSIONS_ACCESS_FINE_LOCATION = 2;
     private static final int PERMISSIONS_ACCESS_COARSE_LOCATION = 3;
@@ -79,6 +84,7 @@ public class LoginActivity extends AppCompatActivity implements
     FirebaseAuth mFirebaseAuth;
     private GoogleSignInAccount mGoogleSignInAccount;
     private String mUserEmail;
+    private boolean phoneHintStarted;
 
 
     @Override
@@ -114,13 +120,14 @@ public class LoginActivity extends AppCompatActivity implements
 
         GoogleSignInOptions gso = new
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("994450542296-cnp3qee96s737dbggug542af6dssih2m.apps.googleusercontent.com")
+                //.requestIdToken("994450542296-cnp3qee96s737dbggug542af6dssih2m.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addApi(Auth.CREDENTIALS_API)
                 .build();
 
     }
@@ -157,6 +164,23 @@ public class LoginActivity extends AppCompatActivity implements
                 }
             });
 
+        }
+    }
+    // Construct a request for phone numbers and show the picker
+    private void requestHint() {
+        if (phoneHintStarted) return;
+        HintRequest hintRequest = new HintRequest.Builder()
+                .setPhoneNumberIdentifierSupported(true)
+                .build();
+
+        PendingIntent intent = Auth.CredentialsApi.getHintPickerIntent(
+                mGoogleApiClient, hintRequest);
+        try {
+            startIntentSenderForResult(intent.getIntentSender(),
+                    RC_PHONE_NUMBER, null, 0, 0, 0, null);
+            phoneHintStarted = true;
+        } catch (Exception ex) {
+            Timber.e(ex);
         }
     }
 
@@ -220,10 +244,28 @@ public class LoginActivity extends AppCompatActivity implements
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
+        switch (requestCode) {
+            case RC_SIGN_IN:
+                // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                handleSignInResult(result);
+                break;
+            case RC_PHONE_NUMBER:
+                String phoneNumber = "";
+                if (resultCode == RESULT_OK) {
+                    Credential credential = data.getParcelableExtra(Credential.EXTRA_KEY);
+                    phoneNumber = credential.getId();
+                }
+                showFirstTimeUserDialog(phoneNumber);
+                break;
+            }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mGoogleApiClient != null) {
+            mGoogleApiClient.disconnect();
         }
     }
 
@@ -313,8 +355,6 @@ public class LoginActivity extends AppCompatActivity implements
         serviceIntent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         startService(serviceIntent);
 
-        //startJobServices(userUuid);
-
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         intent.putExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, MainActivity.CONTENT_MAP);
@@ -326,20 +366,17 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
         // TODO: проверить необходимость закомментированного условия
-        if (result.getData() == null /*|| result.getData().getActiveMembership() == null*/) {
-            mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(this,
-                    mGoogleSignInAccount, this);
-            mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
+        if (result.getData() == null) {
+            requestHint();
         } else {
             proceedToMainActivity(result.getData().getUserUuid());
         }
     }
 
-    private void checkObject(Object o) {
-        int i = 0;
+    private void showFirstTimeUserDialog(String phoneNumber) {
+        mFirstTimeDialog = FirstTimeUserDialogFragment.newInstance(this,
+                mGoogleSignInAccount, phoneNumber,  this);
+        mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
     }
 
-    private void startJobServices(String userUuid) {
-        TrackingJobService.startJobService(this, userUuid, 0, 5);
-    }
 }

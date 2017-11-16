@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
@@ -12,6 +13,7 @@ import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -217,7 +219,8 @@ public class SharedPrefsUtil {
 
         String geofencesJson = preferences.getString(StringKeys.SHARED_PREFS_GEOFENCES_KEY, "");
         if (!geofencesJson.equals("")) {
-            result = new Gson().fromJson(geofencesJson, result.getClass());
+            Type type = new TypeToken<Map<String, Zone>>(){}.getType();
+            result = new Gson().fromJson(geofencesJson, type);
         }
         return result;
     }

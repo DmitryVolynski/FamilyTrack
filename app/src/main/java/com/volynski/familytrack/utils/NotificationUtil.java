@@ -46,9 +46,10 @@ public class NotificationUtil {
 
         for (String key : events.keySet()) {
             GeofenceEvent event = events.get(key);
-            inboxStyle.addLine(String.format("%1$s entered '%2$s' %3$d",
-                    event.getDisplayName(), event.getZone().getName(),
-                    Calendar.getInstance().getTimeInMillis()));
+            Calendar ts = Calendar.getInstance();
+            ts.setTimeInMillis(event.getTimestamp());
+            inboxStyle.addLine(String.format("%1$s entered '%2$s' %3$tD %3$tT",
+                    event.getDisplayName(), event.getZone().getName(), ts));
         }
 
 

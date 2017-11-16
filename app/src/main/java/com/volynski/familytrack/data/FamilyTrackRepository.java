@@ -225,11 +225,17 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         getUserByUuid(adminUuid, new GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
+                String currentGroupUuid = null;
                 if (result.getData() != null) {
                     User currentUser = result.getData();
-                    String currentGroupUuid = currentUser.getActiveMembership().getGroupUuid();
 
-                    DatabaseReference ref = getFirebaseConnection().getReference(FamilyTrackDbRefsHelper.NODE_GROUPS);
+                    // если пользователь не входит в группу, то исключать его не нужно
+                    if (currentUser.getActiveMembership() != null) {
+                        currentGroupUuid = currentUser.getActiveMembership().getGroupUuid();
+                    }
+
+                    DatabaseReference ref = getFirebaseConnection()
+                            .getReference(FamilyTrackDbRefsHelper.NODE_GROUPS);
                     String newGroupKey = ref.push().getKey();
 
                     Membership newMembership = new Membership(newGroupKey, group.getName(),
@@ -240,15 +246,22 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     group.setGroupUuid(newGroupKey);
                     group.addMember(currentUser);
 
-                    DatabaseReference newGroupRef = mFirebaseDatabase.getReference(FamilyTrackDbRefsHelper.groupRef(newGroupKey));
+                    DatabaseReference newGroupRef = mFirebaseDatabase
+                            .getReference(FamilyTrackDbRefsHelper.groupRef(newGroupKey));
                     newGroupRef.setValue(group);
 
+
                     Map<String, Object> childUpdates = new HashMap<>();
-                    childUpdates.put(FamilyTrackDbRefsHelper.userMembershipRef(currentUser.getUserUuid(), currentGroupUuid) +
-                            Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
-                    childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(currentUser.getUserUuid(), currentGroupUuid) +
-                            Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
-                    childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(currentUser.getUserUuid(), newGroupKey),
+                    if (currentGroupUuid != null) {
+                        childUpdates.put(FamilyTrackDbRefsHelper
+                                .userMembershipRef(currentUser.getUserUuid(), currentGroupUuid) +
+                                Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
+                        childUpdates.put(FamilyTrackDbRefsHelper
+                                .groupOfUserRef(currentUser.getUserUuid(), currentGroupUuid) +
+                                Membership.FIELD_STATUS_ID, Membership.USER_DEPARTED);
+                    }
+                    childUpdates.put(FamilyTrackDbRefsHelper
+                                    .groupOfUserRef(currentUser.getUserUuid(), newGroupKey),
                             newMembership);
 
                     mFirebaseDatabase.getReference()

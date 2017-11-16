@@ -1,9 +1,11 @@
 package com.volynski.familytrack.views.fragments;
 
 import android.app.Dialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.DividerItemDecoration;
@@ -13,7 +15,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RadioGroup;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.credentials.HintRequest;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
@@ -25,16 +32,27 @@ import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.FirstTimeUserViewModel;
 import com.volynski.familytrack.views.navigators.LoginNavigator;
 
+import timber.log.Timber;
+
 /**
  * Created by DmitryVolynski on 02.09.2017.
  */
 
-public class FirstTimeUserDialogFragment extends DialogFragment implements RecyclerViewListAdapterOnClickHandler{
+public class FirstTimeUserDialogFragment
+        extends DialogFragment
+        implements
+            RecyclerViewListAdapterOnClickHandler {
     private FirstTimeUserViewModel mViewModel;
     private GridLayoutManager mLayoutManager;
     private View mRootView;
     FragmentFirstTimeUserBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
+    private GoogleApiClient mGoogleApiClient;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Nullable
     @Override
@@ -59,7 +77,12 @@ public class FirstTimeUserDialogFragment extends DialogFragment implements Recyc
 
         mBinding.setViewmodel(mViewModel);
         mRootView = mBinding.getRoot();
+
         return mRootView;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        mViewModel.phoneNumber.set(phoneNumber);
     }
 
     @Override
@@ -77,6 +100,7 @@ public class FirstTimeUserDialogFragment extends DialogFragment implements Recyc
 
     public static FirstTimeUserDialogFragment newInstance(Context context,
                                                           GoogleSignInAccount signInAccount,
+                                                          String phoneNumber,
                                                           LoginNavigator navigator) {
 
         FirstTimeUserDialogFragment result = new FirstTimeUserDialogFragment();
@@ -84,7 +108,7 @@ public class FirstTimeUserDialogFragment extends DialogFragment implements Recyc
         FirstTimeUserViewModel viewModel =
                 new FirstTimeUserViewModel(context, signInAccount,
                         new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-
+        viewModel.phoneNumber.set(phoneNumber);
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
         return result;
