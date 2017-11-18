@@ -46,6 +46,7 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service
+            android:stopWithTask="false"
             android:name=".services.TrackingJobService"
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
@@ -56,9 +57,11 @@
             android:exported="false"
             android:stopWithTask="false" />
         <service
+            android:stopWithTask="false"
             android:name=".services.GeofenceIntentService"
             android:exported="false" />
         <service
+            android:stopWithTask="false"
             android:name=".services.TrackingService"
             android:exported="false"/>
 

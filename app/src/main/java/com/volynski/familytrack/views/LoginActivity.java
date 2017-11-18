@@ -120,7 +120,7 @@ public class LoginActivity extends AppCompatActivity implements
 
         GoogleSignInOptions gso = new
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                //.requestIdToken("994450542296-cnp3qee96s737dbggug542af6dssih2m.apps.googleusercontent.com")
+                .requestIdToken("994450542296-cnp3qee96s737dbggug542af6dssih2m.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
 
@@ -160,6 +160,8 @@ public class LoginActivity extends AppCompatActivity implements
                     //hideProgressDialog();
                     if (googleSignInResult.isSuccess()) {
                         handleSignInResult(googleSignInResult);
+                    } else {
+                        mSignInButton.setVisibility(View.VISIBLE);
                     }
                 }
             });
@@ -203,9 +205,10 @@ public class LoginActivity extends AppCompatActivity implements
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
+            mSignInButton.setEnabled(false);
             mGoogleSignInAccount = result.getSignInAccount();
             mStatus.setText(mGoogleSignInAccount.getDisplayName());
-            mSignInButton.setEnabled(false);
+            //mSignInButton.setEnabled(false);
             mUserEmail = mGoogleSignInAccount.getEmail();
 
             String idToken = mGoogleSignInAccount.getIdToken();

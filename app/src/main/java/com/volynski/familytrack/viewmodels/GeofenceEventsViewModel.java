@@ -98,6 +98,11 @@ public class GeofenceEventsViewModel extends AbstractViewModel {
 
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
+        if (viewModels != null) {
+            for (GeofenceEventListItemViewModel listItemViewModel : viewModels) {
+                listItemViewModel.setNavigator(mNavigator);
+            }
+        }
     }
 
     /**

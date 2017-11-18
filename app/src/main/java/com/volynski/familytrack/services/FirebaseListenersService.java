@@ -1,22 +1,15 @@
 package com.volynski.familytrack.services;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.appwidget.AppWidgetManager;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -37,9 +30,7 @@ import com.volynski.familytrack.utils.NotificationUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.widget.FamilyTrackWidgetProvider;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -142,7 +133,7 @@ public class FirebaseListenersService
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        int result = START_STICKY;
+        int result = START_REDELIVER_INTENT;
 
         if (intent != null && intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
             mCurrentUserUuid = intent.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY);
@@ -151,7 +142,7 @@ public class FirebaseListenersService
         }
 
         if (mCurrentUserUuid.equals("")) {
-            Timber.v("UserUuid from SharedPrefs is empty. Can't start settings listener service");
+            Timber.v("Start intent doesn't contain CURRENT_USER_UUID_KEY. Can't start settings listener service");
             return result;
         }
 
@@ -200,10 +191,7 @@ public class FirebaseListenersService
                     }
                 }
                 SharedPrefsUtil.setGeofences(FirebaseListenersService.this, zones);
-                runTrackingServiceCommand(
-                        new Intent(FirebaseListenersService.this,
-                                TrackingService.class),
-                        TrackingService.COMMAND_RECONFIG_GEOFENCES,
+                runGeofenceIntentServiceCommand(GeofenceIntentService.COMMAND_RECONFIG_GEOFENCES,
                         mCurrentUserUuid);
             }
 
@@ -349,7 +337,8 @@ public class FirebaseListenersService
 
                 if (result != null) {
                     Timber.v("Creating notifications for " + result.size() + " events ");
-                    NotificationUtil.createNotifications(FirebaseListenersService.this, result);
+                    NotificationUtil.createNotifications(FirebaseListenersService.this,
+                            mCurrentUserUuid, result);
                 }
             }
 
@@ -421,12 +410,24 @@ public class FirebaseListenersService
      * @param settings
      */
     private void updateTrackingServiceState(Settings oldSettings, Settings settings) {
-        if (settings == null) {
+        if (settings == null || !settings.getIsTrackingOn()) {
+            // user not a member of any group - just stop tracking
             TrackingJobService.stopJobService(this);
-            runTrackingServiceCommand(new Intent(this, TrackingService.class),
-                    TrackingService.COMMAND_STOP, mCurrentUserUuid);
+            startTrackingService(mCurrentUserUuid);
             return;
         }
+
+        if (settings.getIsTrackingOn()) {
+            if (!settings.getIsSimulationOn()) {
+                startTrackingService(mCurrentUserUuid);
+                TrackingJobService.stopJobService(this);
+            } else {
+                stopTrackingService(mCurrentUserUuid);
+                TrackingJobService.startJobService(this, mCurrentUserUuid,
+                        0, 5);
+            }
+        }
+/*
 
         if (oldSettings == null) {
             if (settings.getIsTrackingOn()) {
@@ -434,7 +435,7 @@ public class FirebaseListenersService
                     TrackingJobService.startJobService(this, mCurrentUserUuid,
                             0, 5);
                 } else {
-                    runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                    runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
                             TrackingService.COMMAND_START, mCurrentUserUuid);
                 }
             }
@@ -444,7 +445,7 @@ public class FirebaseListenersService
         if (oldSettings.getIsTrackingOn() && !settings.getIsTrackingOn()) {
             // stop tracking services
             TrackingJobService.stopJobService(this);
-            runTrackingServiceCommand(new Intent(this, TrackingService.class),
+            runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
                     TrackingService.COMMAND_STOP, mCurrentUserUuid);
             return;
         }
@@ -454,7 +455,7 @@ public class FirebaseListenersService
                 TrackingJobService.startJobService(this, mCurrentUserUuid,
                         0, 5);
             } else {
-                runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
                         TrackingService.COMMAND_START, mCurrentUserUuid);
             }
             return;
@@ -464,23 +465,38 @@ public class FirebaseListenersService
             if (oldSettings.getIsSimulationOn() && !settings.getIsSimulationOn()) {
                 // switch from simulation tracking mode to real tracking mode
                 TrackingJobService.stopJobService(this);
-                runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
                         TrackingService.COMMAND_START, mCurrentUserUuid);
             } else {
                 if (!oldSettings.getIsSimulationOn() && settings.getIsSimulationOn()) {
                     // switch from real tracking mode to simulation tracking mode
-                    runTrackingServiceCommand(new Intent(this, TrackingService.class),
+                    runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
                             TrackingService.COMMAND_STOP, mCurrentUserUuid);
                     TrackingJobService.startJobService(this, mCurrentUserUuid,
                             0, 5);
                 }
             }
         }
+*/
     }
 
-    private void runTrackingServiceCommand(Intent intent,
-                                           String command,
-                                           String currentUserUuid) {
+    private void stopTrackingService(String currentUserUuid) {
+        runGeofenceIntentServiceCommand(GeofenceIntentService.COMMAND_UNREGISTER_GEOFENCES,
+                currentUserUuid);
+        stopService(new Intent(this, TrackingService.class));
+    }
+
+    private void startTrackingService(String currentUserUuid) {
+        runGeofenceIntentServiceCommand(GeofenceIntentService.COMMAND_RECONFIG_GEOFENCES,
+                currentUserUuid);
+        Intent intent = new Intent(this, TrackingService.class);
+        intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
+        startService(intent);
+    }
+
+    private void runGeofenceIntentServiceCommand(String command,
+                                                 String currentUserUuid) {
+        Intent intent = new Intent(this, GeofenceIntentService.class);
         intent.setAction(command);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
         this.startService(intent);

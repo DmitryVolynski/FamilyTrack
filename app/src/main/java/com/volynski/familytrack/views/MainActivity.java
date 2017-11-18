@@ -7,6 +7,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -47,6 +48,7 @@ import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -93,14 +95,14 @@ public class MainActivity
             mContentId = savedInstanceState.getInt(StringKeys.MAIN_ACTIVITY_MODE_KEY);
             mCurrentUserUuid = savedInstanceState.getString(StringKeys.CURRENT_USER_UUID_KEY);
         }
-        startLocationServices();
+        //startLocationServices();
         setupFragmentIds();
         setupCommonContent();
         setupFragment(mContentId);
 
     }
 
-    private void startLocationServices() {
+/*    private void startLocationServices() {
         // start service if app running for the first time
         Settings settings = SharedPrefsUtil.getSettings(this);
         if (settings.getIsTrackingOn()) {
@@ -113,7 +115,7 @@ public class MainActivity
                 startService(intent);
             }
         }
-    }
+    }*/
 
     private void setupFragmentIds() {
         fragmentIds = new HashMap<>();
@@ -141,7 +143,9 @@ public class MainActivity
 
     private void setupFragment(int contentId) {
         Fragment newFragment =
-                getSupportFragmentManager().findFragmentByTag("F" + contentId);
+                getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
+
+        //boolean fragmentRestored = (newFragment != null);
 
         Object viewModel = FragmentsUtil.findOrCreateViewModel(this,
                         contentId, mCurrentUserUuid, this);
@@ -150,30 +154,35 @@ public class MainActivity
                 if (newFragment == null) {
                     newFragment = UserOnMapFragment.newInstance(mCurrentUserUuid);
                 }
+                ((UserOnMapViewModel)viewModel).setNavigator(this);
                 ((UserOnMapFragment) newFragment).setViewModel((UserOnMapViewModel)viewModel);
                 break;
             case CONTENT_USER_LIST:
                 if (newFragment == null) {
                     newFragment = UserListFragment.newInstance(mCurrentUserUuid);
                 }
+                ((UserListViewModel)viewModel).setNavigator(this);
                 ((UserListFragment)newFragment).setViewModel((UserListViewModel)viewModel);
                 break;
             case CONTENT_USER_HISTORY_CHART:
                 if (newFragment == null) {
                     newFragment = UserHistoryChartFragment.newInstance(this, mCurrentUserUuid, this);
                 }
+                ((UserHistoryChartViewModel)viewModel).setNavigator(this);
                 ((UserHistoryChartFragment)newFragment).setViewModel((UserHistoryChartViewModel)viewModel);
                 break;
             case CONTENT_MEMBERSHIP:
                 if (newFragment == null) {
                     newFragment = UserMembershipFragment.newInstance(this, mCurrentUserUuid, this);
                 }
+                ((UserMembershipViewModel) viewModel).setNavigator(this);
                 ((UserMembershipFragment) newFragment).setViewModel((UserMembershipViewModel) viewModel);
                 break;
             case CONTENT_GEOFENCE_EVENTS:
                 if (newFragment == null) {
                     newFragment = GeofenceEventsFragment.newInstance(mCurrentUserUuid);
                 }
+                ((GeofenceEventsViewModel)viewModel).setNavigator(this);
                 ((GeofenceEventsFragment)newFragment).setViewModel((GeofenceEventsViewModel)viewModel);
                 break;
             default:
@@ -183,9 +192,10 @@ public class MainActivity
         if (newFragment != null) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main_fcontainer, newFragment, "F" + contentId)
-                    .addToBackStack(null)
+                    .replace(R.id.main_fcontainer, newFragment, getFragmentTagByContentId(contentId))
+                    .addToBackStack(getFragmentTagByContentId(contentId))
                     .commit();
+            getSupportFragmentManager().executePendingTransactions();
         }
     }
 
@@ -216,8 +226,9 @@ public class MainActivity
         switch (requestCode) {
             case REQUEST_CODE_EDIT_USER_DETAILS:
                 UserListFragment f =
-                        (UserListFragment) FragmentUtil
-                                .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+                        (UserListFragment) getSupportFragmentManager()
+                            .findFragmentByTag(getFragmentTagByContentId(CONTENT_USER_LIST));
+                                //.findFragmentByClassName(this, UserListFragment.class.getSimpleName());
                 if (f != null) {
                     f.refreshList();
                 }
@@ -266,9 +277,12 @@ public class MainActivity
 
     @Override
     public void inviteCompleted() {
-        UserListFragment f =
+        UserListFragment f = (UserListFragment)getSupportFragmentManager()
+                .findFragmentByTag(getFragmentTagByContentId(CONTENT_USER_LIST));
+/*
                 (UserListFragment) FragmentUtil
                         .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+*/
         if (f != null) {
             f.dismissInviteUsersDialog();
             f.refreshList();
@@ -277,9 +291,13 @@ public class MainActivity
 
     @Override
     public void dismissInviteUsersDialog() {
+        UserListFragment f = (UserListFragment)getSupportFragmentManager()
+                .findFragmentByTag(getFragmentTagByContentId(CONTENT_USER_LIST));
+/*
         UserListFragment f =
                 (UserListFragment) FragmentUtil
                         .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+*/
         if (f != null) {
             f.dismissInviteUsersDialog();
         }
@@ -289,18 +307,26 @@ public class MainActivity
     public void userClicked(User user, String uiContext) {
         switch (mContentId) {
             case CONTENT_USER_HISTORY_CHART:
-                UserHistoryChartFragment f0 =
+                UserHistoryChartFragment f0 = (UserHistoryChartFragment)getSupportFragmentManager()
+                        .findFragmentByTag(getFragmentTagByContentId(mContentId));
+/*
                         (UserHistoryChartFragment) FragmentUtil
                                 .findFragmentByClassName(this, UserHistoryChartFragment.class.getSimpleName());
+*/
                 if (f0 != null) {
                     f0.userClicked(user);
                 }
                 break;
 
             case CONTENT_MAP:
-                UserOnMapFragment f1 =
+                UserOnMapFragment f1 = (UserOnMapFragment)getSupportFragmentManager()
+                        .findFragmentById(R.id.main_fcontainer);
+/*
+                UserOnMapFragment f1 = (UserOnMapFragment)getSupportFragmentManager()
+                    .findFragmentByTag(getFragmentTagByContentId(mContentId));
                         (UserOnMapFragment)FragmentUtil
                                 .findFragmentByClassName(this, UserOnMapFragment.class.getSimpleName());
+*/
                 if (f1 != null) {
                     f1.userClicked(user);
                 }
@@ -509,5 +535,9 @@ public class MainActivity
                 break;
         }
         mFab.setImageResource(resId);
+    }
+
+    private String getFragmentTagByContentId(int contentId) {
+        return "F" + contentId;
     }
 }

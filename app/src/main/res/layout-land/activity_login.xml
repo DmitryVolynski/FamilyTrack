@@ -8,6 +8,7 @@
     tools:context="com.volynski.familytrack.views.LoginActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -21,31 +22,32 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:scaleType="fitXY"
-            android:adjustViewBounds="true"
-            android:src="@drawable/maps_icon_512px"
             android:layout_marginBottom="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:adjustViewBounds="true"
+            android:scaleType="fitXY"
+            android:src="@drawable/maps_icon_512px" />
+
         <ImageView
-            android:layout_marginTop="64dp"
-            android:src="@drawable/family_track_logo"
+            android:id="@+id/imageview_logo"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:src="@drawable/family_track_logo" />
     </LinearLayout>
 
     <com.google.android.gms.common.SignInButton
+        android:visibility="invisible"
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
         android:enabled="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toBottomOf="@+id/linearLayout2"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayout2" />
 
     <LinearLayout
         android:layout_width="150dp"

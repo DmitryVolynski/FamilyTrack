@@ -7,6 +7,7 @@
         <variable
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserListItemViewModel"/>
+        <import type="android.view.View"/>
     </data>
 
     <LinearLayout
@@ -15,12 +16,19 @@
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:orientation="horizontal">
-
+        <View
+            android:visibility="@{viewmodel.checked ? View.VISIBLE : View.INVISIBLE}"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="2dp"
+            android:layout_marginStart="8dp"
+            android:background="@color/colorAccent"
+            android:layout_width="4dp"
+            android:layout_height="match_parent"/>
         <ImageView
             android:layout_width="@dimen/user_photo_normal_width"
             android:layout_height="@dimen/user_photo_normal_height"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="8dp"
             tools:srcCompat="@mipmap/ic_no_user_photo"
             app:roundImageUrl="@{viewmodel.user.photoUrl}" />
 

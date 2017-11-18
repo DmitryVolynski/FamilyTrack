@@ -182,6 +182,11 @@ public class InviteUsersViewModel
 
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
+        if (viewModels != null) {
+            for (UserListItemViewModel listItemViewModel : viewModels) {
+                listItemViewModel.setNavigator(mNavigator);
+            }
+        }
     }
 
     // save valuable parms to use them after configuration change

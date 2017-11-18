@@ -259,7 +259,9 @@ public class UserOnMapFragment
         mViewModel.zoneRadius.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
-                mCurrentGeofence.setRadius(mViewModel.zoneRadius.get());
+                if (mCurrentGeofence != null) {
+                    mCurrentGeofence.setRadius(mViewModel.zoneRadius.get());
+                }
             }
         });
 

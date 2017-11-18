@@ -119,6 +119,8 @@ public class UserMembershipViewModel
 
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
+
+
     }
 
     /**

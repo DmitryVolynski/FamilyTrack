@@ -10,6 +10,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.app.NotificationCompat;
 
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.views.MainActivity;
 
@@ -30,6 +31,7 @@ public class NotificationUtil {
      * @param events - set of events to create notifications for
      */
     public static void createNotifications(Context context,
+                                           String currentUserUuid,
                                            Map<String, GeofenceEvent> events) {
         NotificationCompat.InboxStyle inboxStyle =
                 new NotificationCompat.InboxStyle();
@@ -39,6 +41,9 @@ public class NotificationUtil {
         }
 
         Intent intent = new Intent(context, MainActivity.class);
+        intent.putExtra(StringKeys.STARTED_FROM_NOTIFICATION_KEY, true);
+        intent.putExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, MainActivity.CONTENT_GEOFENCE_EVENTS);
+        intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
 
         // use System.currentTimeMillis() to have a unique ID for the pending intent
         PendingIntent pIntent = PendingIntent.getActivity(context,

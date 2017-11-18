@@ -2,11 +2,13 @@ package com.volynski.familytrack.services;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -53,7 +55,7 @@ import timber.log.Timber;
  */
 
 public class TrackingService
-        extends IntentService
+        extends Service
         implements
             GoogleApiClient.ConnectionCallbacks,
             GoogleApiClient.OnConnectionFailedListener,
@@ -61,7 +63,6 @@ public class TrackingService
 
     public static final String COMMAND_START = "START";
     public static final String COMMAND_STOP = "STOP";
-    public static final String COMMAND_RECONFIG_GEOFENCES = "RECONFIG_GEOFENCES";
 
     private Settings mOldSettings;
     private String mCurrentUserUuid;
@@ -83,14 +84,25 @@ public class TrackingService
         }
     };
 
-    private boolean mIsTrackingOn = false;
-
-    public TrackingService() { super("TrackingService");}
-
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int result = START_REDELIVER_INTENT;
+
         mIntentToHandle = intent;
         initGoogleApiClient();
+
+        return result;
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     private void reconfigTracking(Settings newSettings) {
@@ -102,55 +114,6 @@ public class TrackingService
         int i = 0;
     }
 
-    private void reconfigGeofences() {
-        mGeofencingClient = LocationServices.getGeofencingClient(this);
-        Map<String, Zone> zones = SharedPrefsUtil.getGeofences(this);
-
-        Settings settings = SharedPrefsUtil.getSettings(this);
-        if (settings == null) {
-            Timber.v("No settings found in shared preferences. Can't create geofences");
-            return;
-        }
-
-        if (settings.getIsSimulationOn() || !settings.getIsTrackingOn()) {
-            Timber.v("Simulation is on or tracking is off. No geofences created");
-            return;
-        }
-
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            GeofencingRequest request = getGeofencingRequest(zones);
-            if (request != null) {
-                mGeofencingClient.addGeofences(request, getGeofencePendingIntent())
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                                int i = 0;
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                int i = 0;
-                            }
-                });
-
-                /*
-                LocationServices.GeofencingApi.addGeofences(
-                        mGoogleApiClient,
-                        request,
-                        getGeofencePendingIntent()
-                ).setResultCallback(this);
-                */
-            } else {
-                // request == null, just delete geofences
-                unregisterGeofences();
-            }
-        } else {
-            Timber.v("ACCESS_FINE_LOCATION not granted. Unable to use geofences");
-        }
-    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
@@ -166,31 +129,13 @@ public class TrackingService
             return;
         }
 
-        String command = mIntentToHandle.getAction();
-        if (command == null) {
-            Timber.e("Null command received");
+        if (!mIntentToHandle.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
+            Timber.v("Current user uuid was expected but not found. Can't start tracking service");
             return;
         }
 
-        if (command.equals(COMMAND_START)) {
-            if (!mIntentToHandle.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
-                Timber.v("Current user uuid was expected but not found. Can't start tracking service");
-                return;
-            }
-            mCurrentUserUuid = mIntentToHandle.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY);
-            startTracking();
-        } else {
-            if (command.equals(COMMAND_STOP)) {
-                stopTracking();
-            } else {
-                if (command.equals(COMMAND_RECONFIG_GEOFENCES)) {
-                    reconfigGeofences();
-                } else {
-                    Timber.e("Intent contains unknown command: " + command);
-                }
-            }
-
-        }
+        mCurrentUserUuid = mIntentToHandle.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY);
+        startTracking();
     }
 
 
@@ -221,6 +166,7 @@ public class TrackingService
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopTracking();
     }
 
     /**
@@ -231,12 +177,11 @@ public class TrackingService
                 LocationServices.getFusedLocationProviderClient(TrackingService.this);
 
         fusedLocationClient.removeLocationUpdates(mLocationCallback);
-        unregisterGeofences();
+        //unregisterGeofences();
 
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();
         }
-        mIsTrackingOn = false;
     }
 
     /**
@@ -277,8 +222,7 @@ public class TrackingService
                         == PackageManager.PERMISSION_GRANTED) {
                     mFusedLocationClient.requestLocationUpdates(mLocationRequest,
                             mLocationCallback, null);
-                    mIsTrackingOn = true;
-                    reconfigGeofences();
+                    //reconfigGeofences();
                 } else {
                     Timber.e("android.Manifest.permission.ACCESS_FINE_LOCATION not granted");
                 }
@@ -341,64 +285,6 @@ public class TrackingService
                 //mCallback.onTaskCompleted(mRescheduleFlag);
             }
         });
-    }
-
-    /**
-     *
-     * @param zones
-     * @return
-     */
-    private GeofencingRequest getGeofencingRequest(Map<String, Zone> zones) {
-        GeofencingRequest result = null;
-        if (zones != null) {
-            List<Geofence> geofences = new ArrayList<>();
-            for (String key : zones.keySet()) {
-                Zone zone = zones.get(key);
-                if (zone.getTrackedUsers().contains(mCurrentUserUuid)) {
-                    geofences.add(new Geofence.Builder()
-                            .setRequestId(zone.getUuid())
-                            .setCircularRegion(zone.getLatitude(), zone.getLongitude(), zone.getRadius())
-                            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER)
-                            .setLoiteringDelay(10000)
-                            .build());
-                }
-            }
-
-            if (geofences.size() > 0) {
-                GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-                builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL |
-                        GeofencingRequest.INITIAL_TRIGGER_ENTER);
-                builder.addGeofences(geofences);
-                result = builder.build();
-            }
-        }
-        return result;
-    }
-
-    private void unregisterGeofences() {
-        if (mGeofencingClient != null) {
-            mGeofencingClient.removeGeofences(getGeofencePendingIntent());
-        }
-/*
-        LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient,
-                getGeofencePendingIntent());
-*/
-    }
-
-    private PendingIntent getGeofencePendingIntent() {
-        // Reuse the PendingIntent if we already have it.
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-
-        Intent intent = new Intent(this, GeofenceIntentService.class);
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-        mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
-
-        return mGeofencePendingIntent;
     }
 
 

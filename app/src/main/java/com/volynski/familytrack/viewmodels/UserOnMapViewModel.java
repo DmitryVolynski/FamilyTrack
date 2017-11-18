@@ -182,6 +182,11 @@ public class UserOnMapViewModel extends AbstractViewModel {
     }
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
+        if (viewModels != null) {
+            for (UserListItemViewModel listItemViewModel : viewModels) {
+                listItemViewModel.setNavigator(mNavigator);
+            }
+        }
     }
 
     public void onToggleButtonClick(String period) {
@@ -219,8 +224,21 @@ public class UserOnMapViewModel extends AbstractViewModel {
     }
 
     public void selectUser(User user) {
-        mSelectedUser = user;
-        setupUserTrack();
+        boolean unselect = false;
+        if (user != null) {
+            if (mSelectedUser != null &&
+                    mSelectedUser.getUserUuid().equals(user.getUserUuid())) {
+                // unselect user if selected user was clicked again
+                mSelectedUser = null;
+                unselect = true;
+            } else {
+                mSelectedUser = user;
+            }
+            for (UserListItemViewModel vm : viewModels) {
+                vm.checked.set(vm.getUser().getUserUuid().equals(user.getUserUuid()) && !unselect);
+            }
+            setupUserTrack();
+        }
     }
 
     public void startEditZone(String zoneKey) {

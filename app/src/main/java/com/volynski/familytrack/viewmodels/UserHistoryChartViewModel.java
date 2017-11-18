@@ -127,6 +127,11 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
 
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
+        if (viewModels != null) {
+            for (UserListItemViewModel listItemViewModel : viewModels) {
+                listItemViewModel.setNavigator(mNavigator);
+            }
+        }
     }
 
     public void onToggleButtonClick(String period) {

@@ -138,7 +138,13 @@ public class UserListViewModel
 
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
+        if (viewModels != null) {
+            for (UserListItemViewModel listItemViewModel : viewModels) {
+                listItemViewModel.setNavigator(mNavigator);
+            }
+        }
     }
+
     public UserListNavigator getNavigator() {
         return mNavigator;
     }

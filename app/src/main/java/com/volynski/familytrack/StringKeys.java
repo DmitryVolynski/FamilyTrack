@@ -38,6 +38,7 @@ public class StringKeys {
     public static final String SETTINGS_CHANGED_FLAG_KEY = "SETTINGS_CHANGED_FLAG";
     public static final String TRACKING_SERVICE_COMMAND_KEY = "TRACKING_SERVICE_COMMAND";
     public static final String FRAGMENT_ALREADY_CREATED_KEY = "FRAGMENT_ALREADY_CREATED";
+    public static final String STARTED_FROM_NOTIFICATION_KEY = "STARTED_FROM_NOTIFICATION";
 
     public static String NEW_GROUP_NAME_KEY = "NEW_GROUP_NAME";
 }
@@ -63,10 +64,10 @@ public class StringKeys {
 // 14.11.2017 Переделать позиционирование клиента под событийную модель
 // 15.11.2017 адаптация форм для планшета
 // 16.11.2017 запрос № телефона через API
+// 18.11.2017 проверка geofences
 
 // === функционал
 // TODO: проверка ролей
-// TODO: проверка geofences
 
 // === UI
 // TODO: Material design + цветовая схема

@@ -1,5 +1,6 @@
 package com.volynski.familytrack.data.models.firebase;
 
+import com.google.android.gms.location.Geofence;
 import com.google.firebase.database.Exclude;
 
 import java.util.Calendar;
@@ -112,5 +113,19 @@ public class GeofenceEvent {
         Calendar c = Calendar.getInstance();
         c.setTimeInMillis(mTimestamp);
         return String.format("%1$tF %1tT", c.getTime());
+    }
+
+    @Exclude
+    public String getEventTypeName() {
+        switch (mEventTypeId) {
+            case Geofence.GEOFENCE_TRANSITION_ENTER:
+                return "Enter";
+            case Geofence.GEOFENCE_TRANSITION_EXIT:
+                return "Exit";
+            case Geofence.GEOFENCE_TRANSITION_DWELL:
+                return "Dwell";
+            default:
+                return "Unknown";
+        }
     }
 }

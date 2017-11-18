@@ -1,5 +1,6 @@
 package com.volynski.familytrack.views;
 
+import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -50,15 +51,17 @@ public class FragmentsUtil {
 
                 if (userListVM != null && userListVM.getViewmodel() != null) {
                     viewModel = userListVM.getViewmodel();
+                    ((UserListViewModel) viewModel).setNavigator(navigator);
                     ((UserListViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new UserListViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context),
                             navigator);
                     ((UserListViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
+                //((UserOnMapViewModel) viewModel).setNavigator(navigator);
                 break;
             case CONTENT_MAP:
                 ViewModelHolder<UserOnMapViewModel> userOnMapVM =
@@ -68,14 +71,15 @@ public class FragmentsUtil {
                 if (userOnMapVM != null && userOnMapVM.getViewmodel() != null) {
                     viewModel = userOnMapVM.getViewmodel();
                     ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new UserOnMapViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context),
                             navigator);
                     ((UserOnMapViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
+                //((UserOnMapViewModel) viewModel).setNavigator(navigator);
                 break;
             case CONTENT_INVITE_USERS:
                 ViewModelHolder<InviteUsersViewModel> inviteUsersVM =
@@ -85,14 +89,15 @@ public class FragmentsUtil {
                 if (inviteUsersVM != null && inviteUsersVM.getViewmodel() != null) {
                     viewModel = inviteUsersVM.getViewmodel();
                     ((InviteUsersViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new InviteUsersViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context),
                             navigator);
                     ((InviteUsersViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
+                //((InviteUsersViewModel) viewModel).setNavigator(navigator);
                 break;
             case CONTENT_USER_DETAILS:
                 ViewModelHolder<UserDetailsViewModel> userDetailsVM =
@@ -102,12 +107,12 @@ public class FragmentsUtil {
                 if (userDetailsVM != null && userDetailsVM.getViewmodel() != null) {
                     viewModel = userDetailsVM.getViewmodel();
                     ((UserDetailsViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new UserDetailsViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
                     ((UserDetailsViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
                 break;
             case CONTENT_SETTINGS:
@@ -118,12 +123,12 @@ public class FragmentsUtil {
                 if (settingsVM != null && settingsVM.getViewmodel() != null) {
                     viewModel = settingsVM.getViewmodel();
                     ((SettingsViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new SettingsViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
                     ((SettingsViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
                 break;
             case CONTENT_GEOFENCE_EVENTS:
@@ -135,14 +140,14 @@ public class FragmentsUtil {
                         geofenceEventsVM.getViewmodel() != null) {
                     viewModel = geofenceEventsVM.getViewmodel();
                     ((GeofenceEventsViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new GeofenceEventsViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-                    ((GeofenceEventsViewModel) viewModel).setNavigator(navigator);
                     ((GeofenceEventsViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
+                //((GeofenceEventsViewModel) viewModel).setNavigator(navigator);
                 break;
             case CONTENT_MEMBERSHIP:
                 ViewModelHolder<UserMembershipViewModel> membershipVM =
@@ -153,14 +158,14 @@ public class FragmentsUtil {
                         membershipVM.getViewmodel() != null) {
                     viewModel = membershipVM.getViewmodel();
                     ((UserMembershipViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new UserMembershipViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-                    ((UserMembershipViewModel) viewModel).setNavigator(navigator);
                     ((UserMembershipViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
+                //((UserMembershipViewModel) viewModel).setNavigator(navigator);
                 break;
             case CONTENT_USER_HISTORY_CHART:
                 ViewModelHolder<UserHistoryChartViewModel> historyVM =
@@ -171,22 +176,26 @@ public class FragmentsUtil {
                         historyVM.getViewmodel() != null) {
                     viewModel = historyVM.getViewmodel();
                     ((UserHistoryChartViewModel) viewModel).setCreatedFromViewHolder(true);
-                    return viewModel;
                 } else {
                     viewModel = new UserHistoryChartViewModel(context,
                             currentUserUuid,
                             new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-                    ((UserHistoryChartViewModel) viewModel).setNavigator(navigator);
                     ((UserHistoryChartViewModel) viewModel).setCreatedFromViewHolder(false);
+                    saveViewModelInFragment(activity, viewModel);
                 }
+                //((UserHistoryChartViewModel) viewModel).setNavigator(navigator);
                 break;
             default:
                 viewModel = null;
         }
+        return viewModel;
+    }
+
+    private static void saveViewModelInFragment(AppCompatActivity activity, Object viewModel) {
         activity.getSupportFragmentManager()
                 .beginTransaction()
                 .add(ViewModelHolder.createContainer(viewModel), viewModel.getClass().getSimpleName())
                 .commit();
-        return viewModel;
+        activity.getSupportFragmentManager().executePendingTransactions();
     }
 }
