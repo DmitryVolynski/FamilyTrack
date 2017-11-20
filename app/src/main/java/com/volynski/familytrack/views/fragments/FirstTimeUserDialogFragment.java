@@ -23,13 +23,17 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 import com.volynski.familytrack.BR;
 import com.volynski.familytrack.R;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapterOnClickHandler;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentFirstTimeUserBinding;
+import com.volynski.familytrack.utils.FragmentUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.FirstTimeUserViewModel;
+import com.volynski.familytrack.views.FragmentsUtil;
+import com.volynski.familytrack.views.LoginActivity;
 import com.volynski.familytrack.views.navigators.LoginNavigator;
 
 import timber.log.Timber;
@@ -86,6 +90,12 @@ public class FirstTimeUserDialogFragment
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(StringKeys.FIRST_TIME_USER_DIALOG_KEY, true);
+    }
+
+    @Override
     public void onClick(int itemId, View v) {
         mViewModel.selectGroup(itemId);
     }
@@ -93,24 +103,27 @@ public class FirstTimeUserDialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Select mUsers to invite");
-        //dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        //dialog.setTitle("Select mUsers to invite");
+        if (savedInstanceState != null)
+            if (savedInstanceState
+                    .getBoolean(StringKeys.FIRST_TIME_USER_DIALOG_KEY, false)) {
+                mViewModel = ((LoginActivity)getActivity()).findOrCreateViewModel();
+            }
         return dialog;
     }
 
-    public static FirstTimeUserDialogFragment newInstance(Context context,
-                                                          GoogleSignInAccount signInAccount,
-                                                          String phoneNumber,
-                                                          LoginNavigator navigator) {
+    public static FirstTimeUserDialogFragment newInstance() {
 
         FirstTimeUserDialogFragment result = new FirstTimeUserDialogFragment();
 
+/*
         FirstTimeUserViewModel viewModel =
                 new FirstTimeUserViewModel(context, signInAccount,
                         new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
         viewModel.phoneNumber.set(phoneNumber);
         viewModel.setNavigator(navigator);
         result.setViewModel(viewModel);
+*/
         return result;
     }
 
@@ -127,4 +140,6 @@ public class FirstTimeUserDialogFragment
     public View getRootView() {
         return mRootView;
     }
+
+
 }

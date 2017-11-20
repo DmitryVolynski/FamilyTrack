@@ -205,7 +205,6 @@ public class InviteUsersViewModel
         selectedUsers.toArray(selUsers);
         bundle.putStringArray(StringKeys.INVITE_USERS_VM_SELECTED_USERS_KEY, selUsers);
         return bundle;
-
     }
 
     public void restoreFromBundle(Bundle b) {

@@ -40,7 +40,6 @@
             android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
             android:text="next"
-            android:textColor="@android:color/white"
             android:onClick="@{()->viewmodel.goStepTwo()}"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/editText_dialogfirsttime_phone" />
@@ -76,23 +75,22 @@
             app:layout_constraintLeft_toLeftOf="parent"
             android:layout_marginTop="8dp"
             app:layout_constraintHorizontal_bias="0.0">
+
             <TextView
                 android:id="@+id/textView5"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:text="Now decide how you want to start app"
-                app:layout_constraintLeft_toLeftOf="parent"
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="8dp"
-                app:layout_constraintRight_toRightOf="parent"
-                android:layout_marginEnd="8dp"
                 android:layout_marginTop="8dp"
+                android:text="Now decide how you want to start app.\nYou could create new group, join existing group or decide anytime later"
                 app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintTop_toTopOf="@+id/textView6" />
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <RadioGroup
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
                 android:layout_marginLeft="16dp"
@@ -100,7 +98,7 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
                 android:orientation="horizontal"
-                android:weightSum="1"
+                android:weightSum="3"
                 android:checkedButton="@+id/radio_dialogfirsttime_newgroup"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -109,21 +107,28 @@
                 android:id="@+id/radioGroup2">
 
                 <RadioButton
+                    android:layout_weight="1"
                     android:checked="@={viewmodel.createNewGroupOption}"
                     android:id="@+id/radio_dialogfirsttime_newgroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="Create new group" />
+                    android:text="CREATE" />
 
                 <RadioButton
+                    android:layout_weight="1"
                     android:checked="@={viewmodel.joinExistingGroupOption}"
                     android:id="@+id/radio_dialogfirsttime_joingroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:foregroundGravity="top"
-                    android:text="Join existing group" />
+                    android:text="JOIN" />
+                <RadioButton
+                    android:layout_weight="1"
+                    android:text="LATER"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
             </RadioGroup>
 
@@ -193,7 +198,6 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="DECIDE"
-                android:textColor="@android:color/white"
                 android:layout_marginRight="8dp"
                 app:layout_constraintTop_toBottomOf="@+id/frameLayout_dialogfirsttime"
                 app:layout_constraintRight_toRightOf="parent"
@@ -203,6 +207,7 @@
 
 
             <Button
+                android:visibility="invisible"
                 android:onClick="@{()->viewmodel.doItLater()}"
                 android:id="@+id/button_dialogfirsttimeuser_later"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"

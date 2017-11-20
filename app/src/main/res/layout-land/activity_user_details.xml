@@ -32,6 +32,7 @@
                 android:id="@+id/conslayout_userdetails_left"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
+                android:background="@color/colorPrimaryLight"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/verticalOneThird"
                 app:layout_constraintStart_toStartOf="parent"
@@ -43,6 +44,7 @@
                     android:layout_height="wrap_content"
                     android:fitsSystemWindows="true"
                     android:transitionGroup="true"
+                    android:theme="@style/AppTheme.AppBarOverlay"
                     app:layout_scrollFlags="scroll|exitUntilCollapsed|enterAlwaysCollapsed">
 
                     <android.support.design.widget.CollapsingToolbarLayout
@@ -56,6 +58,7 @@
                         <android.support.v7.widget.Toolbar
                             android:id="@+id/toolbar_userdetails"
                             android:layout_width="match_parent"
+                            app:popupTheme="@style/AppTheme.PopupOverlay"
                             android:layout_height="?attr/actionBarSize"
                             app:layout_collapseMode="pin" />
                     </android.support.design.widget.CollapsingToolbarLayout>

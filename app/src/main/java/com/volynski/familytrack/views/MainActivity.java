@@ -142,8 +142,8 @@ public class MainActivity
     }
 
     private void setupFragment(int contentId) {
-        Fragment newFragment =
-                getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
+        Fragment newFragment = null;
+                //getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
 
         //boolean fragmentRestored = (newFragment != null);
 
@@ -449,12 +449,14 @@ public class MainActivity
         }
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

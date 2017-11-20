@@ -26,6 +26,7 @@ public abstract class AbstractViewModel extends BaseObservable {
     String mCurrentUserUuid = "";
     User mCurrentUser;
 
+
     public AbstractViewModel(Context context,
                              String currentUserUuid,
                              FamilyTrackDataSource dataSource) {

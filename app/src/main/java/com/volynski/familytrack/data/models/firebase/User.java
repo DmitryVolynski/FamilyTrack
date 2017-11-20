@@ -192,7 +192,7 @@ public class User {
         HashMap<String, Membership> map = new HashMap<>();
 
         User clonedUser = new User(mUserUuid, mFamilyName, mGivenName, mDisplayName, mPhotoUrl, mEmail, mPhone,
-                map, mLastKnownLocation.clone());
+                map, mLastKnownLocation);
 
         if (mMemberships != null) {
             for (String key : mMemberships.keySet()) {

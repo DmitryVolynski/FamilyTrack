@@ -41,7 +41,6 @@ import static android.content.Context.LAYOUT_INFLATER_SERVICE;
 
 public class UserMembershipFragment extends Fragment {
     private UserMembershipViewModel mViewModel;
-    private String mCurrentUserUuid;
     private GridLayoutManager mLayoutManager;
 
     FragmentUserMembershipBinding mBinding;
@@ -123,7 +122,6 @@ public class UserMembershipFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
 
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_membership,

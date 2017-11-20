@@ -28,18 +28,17 @@ import timber.log.Timber;
  * Created by DmitryVolynski on 02.09.2017.
  */
 
-public class FirstTimeUserViewModel extends BaseObservable {
+public class FirstTimeUserViewModel extends AbstractViewModel {
     private final static int STEP_ENTER_YOUR_PHONE_NUMBER = 0;
     private final static int STEP_HOW_TO_START_APP = 1;
     private final static int OPTION_CREATE_NEW_GROUP = 0;
     private final static int OPTION_JOIN_GROUP = 1;
+    private final static int OPTION_DECIDE_LATER = 2;
 
     private final static String TAG = UserListViewModel.class.getSimpleName();
-    private final Context mContext;
     private GoogleSignInAccount mGoogleSignInAccount;
     private boolean mIsDataLoading = false;
     private LoginNavigator mNavigator;
-    private FamilyTrackDataSource mRepository;
 
     // model fields
     public final ObservableField<String> phoneNumber =
@@ -48,15 +47,15 @@ public class FirstTimeUserViewModel extends BaseObservable {
     public final ObservableBoolean createNewGroupOption = new ObservableBoolean(true);
     public final ObservableBoolean joinExistingGroupOption = new ObservableBoolean(false);
     public final ObservableField<String> newGroupName = new ObservableField<>("My group");
-    public final ObservableList<MembershipListItemViewModel> availableGroups = new ObservableArrayList<>();
+    public final ObservableList<MembershipListItemViewModel> availableGroups =
+            new ObservableArrayList<>();
     private int mSelectedGroupIndex = -1;
 
     public FirstTimeUserViewModel(Context context,
                                   GoogleSignInAccount googleSignInAccount,
                                   FamilyTrackDataSource dataSource) {
-        mContext = context.getApplicationContext();
+        super(context, "", dataSource);
         mGoogleSignInAccount = googleSignInAccount;
-        mRepository = dataSource;
     }
 
     /**
@@ -100,6 +99,10 @@ public class FirstTimeUserViewModel extends BaseObservable {
         dialogStepNo.set(STEP_HOW_TO_START_APP);
     }
 
+    // нужно пересмотреть работу данного метода
+    // пользователь добавляется всегда, если существует - то апдейт
+    // плюс сохранение состояния viewmodel
+
     public void decide() {
 
         mRepository.getUserByEmail(mGoogleSignInAccount.getEmail(),
@@ -116,7 +119,6 @@ public class FirstTimeUserViewModel extends BaseObservable {
                                 @Override
                                 public void onCreateUserCompleted(FirebaseResult<User> result) {
                                     if (result.getData() != null) {
-                                        SharedPrefsUtil.setCurrentUserUuid(mContext, result.getData().getUserUuid());
                                         proceedUserChoice(result.getData().getUserUuid());
                                     } else {
                                         Timber.e("Create user failed.", result.getException());
@@ -124,9 +126,21 @@ public class FirstTimeUserViewModel extends BaseObservable {
                                 }
                             });
                         } else {
-                            // user already registered in db, just save him in SharedPreferences
-                            SharedPrefsUtil.setCurrentUserUuid(mContext, result.getData().getUserUuid());
-                            proceedUserChoice(result.getData().getUserUuid());
+                            // user already registered in db, update user record from Google account
+                            User user = result.getData();
+                            final String userUuid = user.getUserUuid();
+                            user.setFamilyName(mGoogleSignInAccount.getFamilyName());
+                            user.setGivenName(mGoogleSignInAccount.getGivenName());
+                            user.setEmail(mGoogleSignInAccount.getEmail());
+                            user.setPhotoUrl(mGoogleSignInAccount.getPhotoUrl().buildUpon().toString());
+                            mRepository.updateUser(user, new FamilyTrackDataSource.UpdateUserCallback() {
+                                @Override
+                                public void onUpdateUserCompleted(FirebaseResult<String> result) {
+                                    if (result.getData().equals(FirebaseResult.RESULT_OK)) {
+                                        proceedUserChoice(userUuid);
+                                    }
+                                }
+                            });
                         }
                     }
                 });

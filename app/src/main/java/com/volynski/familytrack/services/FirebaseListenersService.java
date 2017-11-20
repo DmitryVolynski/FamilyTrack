@@ -413,7 +413,7 @@ public class FirebaseListenersService
         if (settings == null || !settings.getIsTrackingOn()) {
             // user not a member of any group - just stop tracking
             TrackingJobService.stopJobService(this);
-            startTrackingService(mCurrentUserUuid);
+            stopTrackingService(mCurrentUserUuid);
             return;
         }
 

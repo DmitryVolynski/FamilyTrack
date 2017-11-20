@@ -19,6 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
@@ -385,7 +386,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             if (isNew) {
                 String givenName = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
                 user = new User(key, "", "", cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)),
-                        "", "", "", null, null);
+                        StringKeys.CREATED_FROM_CONTACTS_KEY, "", "", null, null);
             } else {
                 user = contacts.get(key);
             }

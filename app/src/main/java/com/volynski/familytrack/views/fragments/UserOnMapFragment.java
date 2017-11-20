@@ -82,11 +82,10 @@ public class UserOnMapFragment
     private PlaceDetectionClient mPlaceDetectionClient;
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
-    //private String mCurrentUserUuid;
+
     private LinearLayoutManager mLayoutManager;
     private HashMap<String, Marker> mMarkers = new HashMap<>();
     private HashMap<String, Circle> mCircles = new HashMap<>();
-    private boolean mGeofenceEditingMode = false;
     private Circle mCurrentGeofence;
     private Observable.OnPropertyChangedCallback mSnackbarCallback;
 
@@ -650,7 +649,6 @@ public class UserOnMapFragment
 
 
     private void startEditGeofence(Circle circle) {
-        changeUiLayout(true);
         mCurrentGeofence = circle;
         mCurrentGeofence.setFillColor(getResources().getColor(R.color.colorEditGeofenceFill, null));
         mCurrentGeofence.setStrokeColor(getResources().getColor(R.color.colorEditGeofenceStroke, null));
@@ -660,6 +658,7 @@ public class UserOnMapFragment
                 break;
             }
         }
+        changeUiLayout(true);
     }
 
 }

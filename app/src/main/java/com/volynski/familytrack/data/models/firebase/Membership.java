@@ -18,6 +18,7 @@ public class Membership {
     public static final int USER_JOINED = 2;
     public static final int USER_CREATED = 3;
     public static final int USER_DEPARTED = 3;
+
     private static final String ROLE_ADMIN_NAME = "Admin";
     private static final String ROLE_MEMBER_NAME = "Member";
     private static final String ROLE_UNDEFINED_NAME = "Unknown";

@@ -40,7 +40,6 @@ import java.util.List;
 
 public class UserHistoryChartFragment extends Fragment implements View.OnClickListener{
     private UserHistoryChartViewModel mViewModel;
-    private String mCurrentUserUuid;
     private LinearLayoutManager mLayoutManager;
 
     FragmentUserHistoryChartBinding mBinding;
@@ -81,8 +80,6 @@ public class UserHistoryChartFragment extends Fragment implements View.OnClickLi
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
-
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_history_chart,
                 container,
