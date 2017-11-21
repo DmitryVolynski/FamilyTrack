@@ -17,7 +17,11 @@ public abstract class AbstractViewModel extends BaseObservable {
     public final ObservableField<String> snackbarText = new ObservableField<>();
     public final ObservableField<String> title = new ObservableField<>();
     public final ObservableField<String> description = new ObservableField<>();
-    public final ObservableBoolean isDataLoading = new ObservableBoolean(false);
+
+    public final ObservableBoolean isDataLoading =
+            new ObservableBoolean(false);
+    public ObservableBoolean adminPermissions =
+            new ObservableBoolean(false);
 
     private boolean mCreatedFromViewHolder = false;
 

@@ -12,6 +12,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Location;
+import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.views.navigators.UserDetailsNavigator;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
@@ -111,7 +112,9 @@ public class UserDetailsViewModel extends AbstractViewModel {
                             activeGroup.set(u.getActiveMembership().getGroupName());
                             mActiveGroupUuid = u.getActiveMembership().getGroupUuid();
                             userRole.set(u.getActiveMembership().getRoleName());
+                            adminPermissions.set(u.getActiveMembership().getRoleId() == Membership.ROLE_ADMIN);
                         } else {
+                            adminPermissions.set(false);
                             activeGroup.set("Not set");
                         }
                         user.set(u);

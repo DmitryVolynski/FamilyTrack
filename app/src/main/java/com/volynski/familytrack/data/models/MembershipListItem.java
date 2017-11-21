@@ -131,8 +131,8 @@ public class MembershipListItem {
                 User user = group.getMembers().get(key);
                 Membership membership = user.getMembershipForGroup(group.getGroupUuid());
                 if (membership != null &&
-                        (membership.getStatusId() == Membership.USER_JOINED ||
-                                membership.getStatusId() == Membership.USER_INVITED)) {
+                        (membership.getStatusId() == Membership.USER_JOINED)) //||
+                                /*membership.getStatusId() == Membership.USER_INVITED))*/ {
                     result.add(new MembershipListItem(user));
                 }
             }

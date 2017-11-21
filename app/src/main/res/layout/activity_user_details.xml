@@ -7,6 +7,7 @@
         <variable
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserDetailsViewModel"/>
+        <import type="android.view.View"/>
     </data>
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/coordinatorlayout_userdetails"
@@ -233,6 +234,7 @@
                         android:src="@drawable/ic_group" />
 
                     <Spinner
+                        android:visibility="@{viewmodel.adminPermissions ? View.VISIBLE : View.INVISIBLE}"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"

@@ -74,7 +74,6 @@ public class SettingsViewModel extends AbstractViewModel {
     }
 
     public void updateSettings() {
-        // TODO: add value checks for settings here
         if (mCurrentUser.getActiveMembership() != null) {
             String groupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
             mRepository.updateSettingsByGroupUuid(groupUuid, settings.get(),

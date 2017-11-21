@@ -115,6 +115,7 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
      * @param result - Firebase result of getGroupByUuid
      */
     private void populateUserListFromDbResult(FirebaseResult<Group> result) {
+        viewModels.clear();
         if (result.getData() != null && result.getData().getMembers() != null) {
             for (User user : result.getData().getMembers().values()) {
                 if (user.getActiveMembership() != null &&

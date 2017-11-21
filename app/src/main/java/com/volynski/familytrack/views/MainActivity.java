@@ -23,6 +23,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
+import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.ActivityMainBinding;
@@ -59,7 +60,7 @@ public class MainActivity
             NavigationView.OnNavigationItemSelectedListener,
             UserListNavigator {
 
-    public static final int FAB_STYLE_ADD_ITEM = 0;
+    public static final int FAB_STYLE_NORMAL = 0;
     public static final int FAB_STYLE_REMOVE_ITEM = 1;
 
     public static final int CONTENT_MAP = 0;
@@ -142,6 +143,7 @@ public class MainActivity
     }
 
     private void setupFragment(int contentId) {
+        int newFabStyle = FAB_STYLE_NORMAL;
         Fragment newFragment = null;
                 //getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
 
@@ -184,11 +186,12 @@ public class MainActivity
                 }
                 ((GeofenceEventsViewModel)viewModel).setNavigator(this);
                 ((GeofenceEventsFragment)newFragment).setViewModel((GeofenceEventsViewModel)viewModel);
+                newFabStyle = FAB_STYLE_REMOVE_ITEM;
                 break;
             default:
                 Timber.v("Unsupported content id=" + contentId);
         }
-
+        setFabStyle(newFabStyle);
         if (newFragment != null) {
             getSupportFragmentManager()
                     .beginTransaction()
@@ -247,7 +250,22 @@ public class MainActivity
     //
 
     @Override
+    public void showUserOnMap(User user) {
+        mContentId = CONTENT_MAP;
+        setupFragment(CONTENT_MAP);
+        UserOnMapFragment f = (UserOnMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.main_fcontainer);
+        f.getViewModel().selectUser(user);
+    }
+
+    @Override
     public void editUserDetails(String userUuid, View rootView) {
+        if (!mViewModel.adminPermissions.get() &&
+                !userUuid.equals(mCurrentUserUuid)) {
+            SnackbarUtil.showSnackbar(getViewForSnackbar(), "You could edit own details only");
+            return;
+        }
+
         Intent intent = new Intent(getApplicationContext(), UserDetailsActivity.class);
         intent.putExtra(StringKeys.USER_UUID_KEY, userUuid);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
@@ -265,14 +283,13 @@ public class MainActivity
     }
 
     private void editSettings(String userUuid) {
+        if (!mViewModel.adminPermissions.get()) {
+            SnackbarUtil.showSnackbar(getViewForSnackbar(), "Admins only");
+            return;
+        }
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
         intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, userUuid);
         startActivityForResult(intent, REQUEST_CODE_EDIT_SETTINGS);
-    }
-
-    @Override
-    public void removeUser(String userUuid) {
-
     }
 
     @Override
@@ -304,7 +321,7 @@ public class MainActivity
     }
 
     @Override
-    public void userClicked(User user, String uiContext) {
+    public void userClicked(User user) {
         switch (mContentId) {
             case CONTENT_USER_HISTORY_CHART:
                 UserHistoryChartFragment f0 = (UserHistoryChartFragment)getSupportFragmentManager()
@@ -356,7 +373,7 @@ public class MainActivity
 
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-
+        mBinding.setViewmodel(mViewModel);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -537,6 +554,17 @@ public class MainActivity
                 break;
         }
         mFab.setImageResource(resId);
+/*
+        int v = View.INVISIBLE;
+        if (mViewModel != null) {
+            if (mViewModel.user.get() != null &&
+                    mViewModel.user.get().getActiveMembership() != null &&
+                    mViewModel.user.get().getActiveMembership().getRoleId() == Membership.ROLE_ADMIN) {
+                v = View.VISIBLE;
+            }
+        }
+        mFab.setVisibility(v);
+*/
     }
 
     private String getFragmentTagByContentId(int contentId) {

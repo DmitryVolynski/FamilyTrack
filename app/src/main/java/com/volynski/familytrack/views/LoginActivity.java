@@ -2,6 +2,7 @@ package com.volynski.familytrack.views;
 
 import android.Manifest;
 import android.app.PendingIntent;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.PersistableBundle;
@@ -41,6 +42,7 @@ import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.services.FirebaseListenersService;
 import com.volynski.familytrack.utils.MyDebugTree;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
@@ -374,5 +376,18 @@ public class LoginActivity extends AppCompatActivity implements
                     .executePendingTransactions();
         }
         return viewModel;
+    }
+
+    @Override
+    public void showPopupDialog(String title, String message) {
+        final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
+        confirmDialog.setParms(title, message, "Ok",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        confirmDialog.dismiss();
+                    }
+                });
+        confirmDialog.show(getFragmentManager(), "dialog");
     }
 }

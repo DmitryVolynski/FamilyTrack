@@ -6,4 +6,5 @@ package com.volynski.familytrack.views.navigators;
 
 public interface LoginNavigator {
     void proceedToMainActivity(String userUuid);
+    void showPopupDialog(String title, String message);
 }

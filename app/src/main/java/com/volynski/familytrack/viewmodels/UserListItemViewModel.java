@@ -48,7 +48,7 @@ public class UserListItemViewModel extends BaseObservable
     @Override
     public void onClick(int itemId, View v) {
         if (mUser.getLastKnownLocation() != null) {
-            mNavigator.userClicked(mUser, mUiContext);
+            mNavigator.userClicked(mUser);
         }
     }
 
@@ -59,12 +59,9 @@ public class UserListItemViewModel extends BaseObservable
             return;
         }
         switch (item.getItemId()) {
-            case R.id.menuitem_userpopupmenu_remove:
-                mNavigator.removeUser(mUser.getUserUuid());
-                break;
             case R.id.menuitem_userpopupmenu_showonmap:
-                //mNavigator.userClicked(mUser.getUserUuid());
-                //break;
+                mNavigator.showUserOnMap(mUser);
+                break;
             case R.id.menuitem_userpopupmenu_userdetails:
                 mNavigator.editUserDetails(mUser.getUserUuid(), rootView);
                 break;

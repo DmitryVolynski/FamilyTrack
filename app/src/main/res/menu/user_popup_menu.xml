@@ -6,7 +6,4 @@
     <item
         android:id="@+id/menuitem_userpopupmenu_showonmap"
         android:title="@string/popup_menu_item_show_on_map"/>
-    <item
-        android:id="@+id/menuitem_userpopupmenu_remove"
-        android:title="@string/popup_menu_item_remove"/>
 </menu>

@@ -77,6 +77,7 @@ public class UserOnMapFragment
     public static final int DEFAULT_ZOOM = 15;
 
     private boolean mNewlyCreated = true;
+
     private UserOnMapViewModel mViewModel;
     private GeoDataClient mGeoDataClient;
     private PlaceDetectionClient mPlaceDetectionClient;
@@ -499,7 +500,8 @@ public class UserOnMapFragment
 
 
     private void changeUiLayout(boolean isForEditMode) {
-        boolean isLandscape = getContext().getResources().getBoolean(R.bool.is_landscape);
+        boolean isLandscape = getContext().getApplicationContext()
+                .getResources().getBoolean(R.bool.is_landscape);
 
         int trans1;
         int trans2;
@@ -660,5 +662,10 @@ public class UserOnMapFragment
         }
         changeUiLayout(true);
     }
+
+    public UserOnMapViewModel getViewModel() {
+        return mViewModel;
+    }
+
 
 }

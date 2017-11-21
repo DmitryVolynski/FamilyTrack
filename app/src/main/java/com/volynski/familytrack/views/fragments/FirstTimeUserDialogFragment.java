@@ -43,9 +43,7 @@ import timber.log.Timber;
  */
 
 public class FirstTimeUserDialogFragment
-        extends DialogFragment
-        implements
-            RecyclerViewListAdapterOnClickHandler {
+        extends DialogFragment {
     private FirstTimeUserViewModel mViewModel;
     private GridLayoutManager mLayoutManager;
     private View mRootView;
@@ -75,8 +73,8 @@ public class FirstTimeUserDialogFragment
         mBinding.recyclerViewDialogfirsttimeuser.addItemDecoration(dividerItemDecoration);
 
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.availableGroups,
-                R.layout.group_list_item, BR.viewmodel);
-        mAdapter.setItemClickHandler(this);
+                R.layout.join_group_list_item, BR.viewmodel);
+        //mAdapter.setItemClickHandler(this);
         mBinding.recyclerViewDialogfirsttimeuser.setAdapter(mAdapter);
 
         mBinding.setViewmodel(mViewModel);
@@ -95,10 +93,10 @@ public class FirstTimeUserDialogFragment
         outState.putBoolean(StringKeys.FIRST_TIME_USER_DIALOG_KEY, true);
     }
 
-    @Override
+/*    @Override
     public void onClick(int itemId, View v) {
         mViewModel.selectGroup(itemId);
-    }
+    }*/
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

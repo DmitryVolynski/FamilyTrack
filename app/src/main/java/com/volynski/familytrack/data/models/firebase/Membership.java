@@ -9,6 +9,7 @@ import com.volynski.familytrack.R;
 
 public class Membership {
     public static final String FIELD_STATUS_ID = "statusId";
+    public static final String FIELD_ROLE_ID = "roleId";
 
     public static final int ROLE_ADMIN = 1;
     public static final int ROLE_MEMBER = 2;

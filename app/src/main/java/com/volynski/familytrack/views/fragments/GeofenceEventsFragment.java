@@ -154,7 +154,6 @@ public class GeofenceEventsFragment extends Fragment
 
         mBinding.setViewmodel(mViewModel);
 
-        ((MainActivity)getActivity()).setFabStyle(MainActivity.FAB_STYLE_REMOVE_ITEM);
         return mBinding.getRoot();
     }
 

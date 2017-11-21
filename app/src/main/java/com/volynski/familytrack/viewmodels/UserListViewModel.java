@@ -95,6 +95,8 @@ public class UserListViewModel
                             isDataLoading.set(false);
                         }
                     });
+        } else {
+            groupName.set("Not joined any group");
         }
     }
 

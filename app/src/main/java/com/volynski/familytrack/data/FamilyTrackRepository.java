@@ -393,18 +393,14 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
             Timber.v(user.getDisplayName() + "/" + cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE)));
 
-
             String mimeType = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
 
-            if (key.equals("320")) {
-                int u = 0;
-            }
             try {
                 String data = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DATA1));
                 if (mimeType.equals(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)) {
                     user.setEmail(data);
                 } else {
-                    user.setPhone(data);
+                    user.setPhone(formatPhoneString(data));
                 }
 
                 if (isNew) {
@@ -443,6 +439,14 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 callback.onGetContactsToInviteCompleted(new FirebaseResult<List<User>>(users));
             }
         });
+    }
+
+    private String formatPhoneString(String data) {
+        String result = null;
+        if (data != null) {
+            result = data.replaceAll("[ ()-]", "");
+        }
+        return result;
     }
 
     /**
@@ -616,6 +620,10 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     Membership.FIELD_STATUS_ID, Membership.USER_JOINED);
             childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(userUuid, toGroupUuid) +
                     Membership.FIELD_STATUS_ID, Membership.USER_JOINED);
+            childUpdates.put(FamilyTrackDbRefsHelper.userMembershipRef(userUuid, toGroupUuid) +
+                    Membership.FIELD_ROLE_ID, Membership.ROLE_MEMBER);
+            childUpdates.put(FamilyTrackDbRefsHelper.groupOfUserRef(userUuid, toGroupUuid) +
+                    Membership.FIELD_ROLE_ID, Membership.ROLE_MEMBER);
         }
 
         mFirebaseDatabase.getReference()
@@ -637,7 +645,6 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         this.getUserByPhone(phoneNumber, new GetUserByPhoneCallback() {
             @Override
             public void onGetUserByPhoneCompleted(FirebaseResult<User> result) {
-                checkObject(result);
                 if (result.getException() != null) {
                     callback.onGetGroupsAvailableToJoinCompleted(new FirebaseResult<List<Group>>(result.getException()));
                 }

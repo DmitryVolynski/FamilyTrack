@@ -14,6 +14,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.viewmodels.GeofenceEventListItemViewModel;
+import com.volynski.familytrack.viewmodels.GroupListItemViewModel;
 import com.volynski.familytrack.viewmodels.MembershipListItemViewModel;
 import com.volynski.familytrack.viewmodels.UserListItemViewModel;
 
@@ -72,9 +73,10 @@ public class BindingsHelper {
     }
 
     @BindingAdapter("app:groups")
-    public static void setGroups(RecyclerView recyclerView, List<MembershipListItemViewModel> viewModels) {
-        RecyclerViewListAdapter<MembershipListItemViewModel>
-                adapter = (RecyclerViewListAdapter<MembershipListItemViewModel>) recyclerView.getAdapter();
+    public static void setGroups(RecyclerView recyclerView,
+                                 List<GroupListItemViewModel> viewModels) {
+        RecyclerViewListAdapter<GroupListItemViewModel>
+                adapter = (RecyclerViewListAdapter<GroupListItemViewModel>) recyclerView.getAdapter();
         if (adapter != null) {
             adapter.setViewModels(viewModels);
         }
@@ -82,7 +84,7 @@ public class BindingsHelper {
 
     @BindingAdapter("app:roundImageUrl")
     public static void bindRoundImage(ImageView view, String imageUrl) {
-        if (imageUrl != null && !imageUrl.equals("")) {
+        if (imageUrl != null && !imageUrl.equals("") && !imageUrl.equals("---")) {
             Picasso.with(view.getContext())
                     .load(imageUrl)
                     .transform(new CropCircleTransformation())
