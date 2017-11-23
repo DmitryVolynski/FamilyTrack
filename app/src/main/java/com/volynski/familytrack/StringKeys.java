@@ -41,8 +41,10 @@ public class StringKeys {
     public static final String STARTED_FROM_NOTIFICATION_KEY = "STARTED_FROM_NOTIFICATION";
     public static final String FIRST_TIME_USER_DIALOG_KEY = "FIRST_TIME_USER_DIALOG";
     public static final String CREATED_FROM_CONTACTS_KEY = "---";
+    public static final String FAB_VISIBILITY_KEY = "FAB_VISIBILITY";
 
-    public static String NEW_GROUP_NAME_KEY = "NEW_GROUP_NAME";
+    public static final String NEW_GROUP_DIALOG_VISIBILITY_KEY = "NEW_GROUP_DIALOG_VISIBILITY";
+    public static final String NEW_GROUP_NAME_KEY = "NEW_GROUP_NAME";
 }
 
 // 12.10.2017 Доделать детальную форму контакта с редактированием, сохранением и удалением
@@ -68,9 +70,9 @@ public class StringKeys {
 // 16.11.2017 запрос № телефона через API
 // 18.11.2017 проверка geofences
 // 20.11.2017 Material design + цветовая схема
+// 21.11.2017 проверка ролей
 
 // === функционал
-// TODO: проверка ролей
 
 // === UI
 // TODO: добавить индикатор ожидания при загрузке данных

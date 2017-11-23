@@ -8,5 +8,7 @@
     <dimen name="create_group_dialog_height">300dp</dimen>
     <dimen name="user_list_side_margin">72dp</dimen>
     <dimen name="settings_list_side_margin">72dp</dimen>
+    <dimen name="background_circle_size">150dp</dimen>
+    <dimen name="user_details_photo_size">120dp</dimen>
 
 </resources>

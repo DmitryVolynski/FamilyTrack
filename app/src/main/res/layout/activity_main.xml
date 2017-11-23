@@ -17,12 +17,6 @@
         android:fitsSystemWindows="true"
         tools:openDrawer="start">
 
-<!--
-        <include
-            layout="@layout/app_bar_main"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
--->
         <android.support.design.widget.CoordinatorLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -36,21 +30,21 @@
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/toolbar"
+                    app:titleTextAppearance="@style/ToolbarTitle"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
                     android:background="?attr/colorPrimary"
                     app:popupTheme="@style/AppTheme.PopupOverlay" />
-
             </android.support.design.widget.AppBarLayout>
 
             <include layout="@layout/content_main" />
 
             <android.support.design.widget.FloatingActionButton
-                android:visibility="@{viewmodel.adminPermissions ? View.VISIBLE : View.INVISIBLE}"
                 android:id="@+id/fab"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
+                android:contentDescription="@string/content_descr_floating_action_button"
                 android:layout_margin="@dimen/fab_margin"
                 app:srcCompat="@drawable/ic_action_add" />
 

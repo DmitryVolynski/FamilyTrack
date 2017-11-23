@@ -62,15 +62,6 @@ public class UserListFragment
         return result;
     }
 
-/*
-    public static UserListFragment newInstance(String currentUserUuid,
-                                               UserListViewModel viewModel) {
-        UserListFragment fragment = newInstance(currentUserUuid);
-        fragment.setViewModel(viewModel);
-        return fragment;
-    }
-*/
-
     @Override
     public void onResume() {
         super.onResume();
@@ -91,10 +82,6 @@ public class UserListFragment
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if (savedInstanceState != null &&
-                savedInstanceState.containsKey(StringKeys.INVITE_USERS_DIALOG_SHOW_KEY)) {
-            showInviteUsersDialog(savedInstanceState);
-        }
     }
 
     @Nullable
@@ -104,6 +91,10 @@ public class UserListFragment
                              @Nullable Bundle savedInstanceState) {
         View view = setupFragmentContent(inflater, container, savedInstanceState);
         setupSnackbar();
+        if (savedInstanceState != null &&
+                savedInstanceState.containsKey(StringKeys.INVITE_USERS_DIALOG_SHOW_KEY)) {
+            showInviteUsersDialog(savedInstanceState);
+        }
         return view;
     }
 
@@ -176,7 +167,7 @@ public class UserListFragment
                 mInviteUsersDialog.getDialog() != null &&
                 mInviteUsersDialog.getDialog().isShowing()) {
             // if invite dialog is visible - save the state of dialog & data
-            mInviteUsersDialog.onSaveInstanceState(outState);
+            outState.putBoolean(StringKeys.INVITE_USERS_DIALOG_SHOW_KEY, true);
         }
     }
 
@@ -200,11 +191,11 @@ public class UserListFragment
                         mCurrentUserUuid,
                         mViewModel.getNavigator());
 
-        //viewModel.restoreFromBundle(savedInstanceState);
-
+        viewModel.setNavigator(mViewModel.getNavigator());
         mInviteUsersDialog = (InviteUsersDialogFragment) getActivity()
                 .getSupportFragmentManager()
                 .findFragmentByTag(InviteUsersDialogFragment.class.getSimpleName());
+
         if (mInviteUsersDialog == null) {
             mInviteUsersDialog = InviteUsersDialogFragment.newInstance(mCurrentUserUuid);
             mInviteUsersDialog.show(getActivity().getSupportFragmentManager(),

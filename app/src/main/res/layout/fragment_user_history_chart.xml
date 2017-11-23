@@ -16,17 +16,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <com.github.mikephil.charting.charts.PieChart
+                android:background="@color/itemSeparator"
                 android:id="@+id/chart_frguserhistorychart"
                 android:name="com.google.android.gms.maps.MapFragment"
                 android:layout_width="0dp"
-                android:contentDescription="User history chart"
+                android:contentDescription="@string/content_descr_chart"
                 android:layout_height="0dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_margin="@dimen/margin_small"
                 app:layout_constraintBottom_toTopOf="@+id/verticalOneThird"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintLeft_toLeftOf="parent"
@@ -46,78 +42,61 @@
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_margin="@dimen/margin_small"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/verticalOneThird"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp">
+                app:layout_constraintTop_toTopOf="@+id/verticalOneThird">
 
                 <TableLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:stretchColumns="*"
-                    android:layout_marginBottom="8dp"
+                    android:layout_marginBottom="@dimen/margin_small"
                     android:orientation="horizontal">
                     <TableRow>
                         <ToggleButton
+                            android:contentDescription="@string/content_descr_time_period_is_off"
                             android:enabled="false"
                             android:id="@+id/tbut_off"
-                            android:layout_width="64dp"
-                            android:layout_height="36dp"
-                            android:layout_marginEnd="4dp"
-                            android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["OFF"]}'
-                            android:textOff="OFF"
-                            android:textOn="OFF" />
+                            android:textOff="@string/toggle_button_off"
+                            android:textOn="@string/toggle_button_off"
+                            style="@style/ToggleButtonHistoryChart" />
 
                         <ToggleButton
+                            android:contentDescription="@string/content_descr_time_period_is_one_hour"
                             android:id="@+id/tbut_1h"
-                            android:layout_width="64dp"
-                            android:layout_height="36dp"
-                            android:layout_marginEnd="4dp"
-                            android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1H"]}'
-                            android:textOff="1H"
-
-                            android:textOn="1H" />
+                            android:textOff="@string/toggle_button_1h"
+                            android:textOn="@string/toggle_button_1h"
+                            style="@style/ToggleButtonHistoryChart" />
 
                         <ToggleButton
+                            android:contentDescription="@string/content_descr_time_period_is_eight_hours"
                             android:id="@+id/tbut_8h"
-                            android:layout_width="64dp"
-                            android:layout_height="36dp"
-                            android:layout_marginEnd="4dp"
-                            android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["8H"]}'
-                            android:textOff="8H"
-                            android:textOn="8H" />
+                            android:textOff="@string/toggle_button_8h"
+                            android:textOn="@string/toggle_button_8h"
+                            style="@style/ToggleButtonHistoryChart" />
 
                         <ToggleButton
+                            android:contentDescription="@string/content_descr_time_period_is_one_day"
                             android:id="@+id/tbut_1d"
-                            android:layout_width="64dp"
-                            android:layout_height="36dp"
-                            android:layout_marginEnd="4dp"
-                            android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1D"]}'
-                            android:textOff="1D"
-                            android:textOn="1D" />
+                            android:textOff="@string/toggle_button_1d"
+                            android:textOn="@string/toggle_button_1d"
+                            style="@style/ToggleButtonHistoryChart" />
 
                         <ToggleButton
+                            android:contentDescription="@string/content_descr_time_period_is_one_week"
                             android:id="@+id/tbut_1w"
-                            android:layout_width="64dp"
-                            android:layout_height="36dp"
-                            android:background="@drawable/toggle_button_selector"
+                            style="@style/ToggleButtonHistoryChart"                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1W"]}'
-                            android:textOff="1W"
-                            android:textOn="1W" />
+                            android:textOff="@string/toggle_button_1w"
+                            android:textOn="@string/toggle_button_1w" />
                     </TableRow>
-
-
                 </TableLayout>
 
                 <android.support.v7.widget.RecyclerView

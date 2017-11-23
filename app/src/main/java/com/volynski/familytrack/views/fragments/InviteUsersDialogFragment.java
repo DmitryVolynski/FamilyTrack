@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
 import android.view.LayoutInflater;
@@ -18,6 +19,8 @@ import com.volynski.familytrack.adapters.RecyclerViewListAdapter;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.FragmentInviteUsersBinding;
 import com.volynski.familytrack.viewmodels.InviteUsersViewModel;
+import com.volynski.familytrack.views.FragmentsUtil;
+import com.volynski.familytrack.views.MainActivity;
 
 import timber.log.Timber;
 
@@ -32,10 +35,13 @@ public class InviteUsersDialogFragment extends DialogFragment {
     private View mRootView;
     FragmentInviteUsersBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
+    private boolean mOrientationChanged = false;
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_invite_users,
                 container,
@@ -53,7 +59,6 @@ public class InviteUsersDialogFragment extends DialogFragment {
 
         mBinding.recyclerViewDialoginviteusers.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
-
         mRootView = mBinding.getRoot();
         return mRootView;
     }

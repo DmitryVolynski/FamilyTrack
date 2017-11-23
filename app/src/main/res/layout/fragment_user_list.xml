@@ -15,25 +15,19 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <Button
-            android:text="DWELL!"
-            android:visibility="gone"
-            android:onClick="@{() -> viewmodel.createGeofenceEvent()}"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
         <TextView
             style="@style/Base.TextAppearance.AppCompat.Headline"
             android:onClick="@{() -> viewmodel.createGeofenceEvent()}"
             android:fontFamily="sans-serif-condensed"
             tools:text="My group"
             android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="@dimen/margin_normal"
+            android:paddingEnd="@dimen/margin_normal"
             android:background="@color/colorAccent"
             android:textColor="@android:color/white"
             android:layout_width="match_parent"
             android:text="@{viewmodel.groupName}"
-            android:layout_height="56dp" />
+            android:layout_height="@dimen/user_list_header_height" />
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview_fragmentuserslist_userslist"
             app:viewModels="@{viewmodel.viewModels}"

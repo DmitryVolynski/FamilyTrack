@@ -63,11 +63,14 @@ public class NotificationUtil {
                         .setSmallIcon(R.drawable.ic_location)
                         .setGroup(NOTIFICATION_GROUP_KEY)
                         .setStyle(inboxStyle)
-                        .addAction(new NotificationCompat.Action(R.mipmap.ic_no_user_photo, "GOT IT", pIntent))
+                        .addAction(new NotificationCompat.Action(R.mipmap.ic_no_user_photo, "VIEW", pIntent))
                         .setContentTitle("Geofence notification");
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(context, MainActivity.class);
+        resultIntent.putExtra(StringKeys.STARTED_FROM_NOTIFICATION_KEY, true);
+        resultIntent.putExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, MainActivity.CONTENT_GEOFENCE_EVENTS);
+        resultIntent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
 
         // The stack builder object will contain an artificial back stack for the
         // started Activity.

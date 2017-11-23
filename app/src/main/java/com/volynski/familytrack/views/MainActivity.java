@@ -1,13 +1,14 @@
 package com.volynski.familytrack.views;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.databinding.Observable;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.util.Pair;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -18,19 +19,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.support.v4.widget.DrawerLayout;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
-import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.ActivityMainBinding;
 import com.volynski.familytrack.databinding.NavHeaderMainBinding;
-import com.volynski.familytrack.services.TrackingJobService;
-import com.volynski.familytrack.services.TrackingService;
-import com.volynski.familytrack.utils.FragmentUtil;
+import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.GeofenceEventsViewModel;
@@ -39,7 +36,6 @@ import com.volynski.familytrack.viewmodels.UserHistoryChartViewModel;
 import com.volynski.familytrack.viewmodels.UserListViewModel;
 import com.volynski.familytrack.viewmodels.UserMembershipViewModel;
 import com.volynski.familytrack.viewmodels.UserOnMapViewModel;
-import com.volynski.familytrack.views.fragments.FirstTimeUserDialogFragment;
 import com.volynski.familytrack.views.fragments.GeofenceEventsFragment;
 import com.volynski.familytrack.views.fragments.InviteUsersDialogFragment;
 import com.volynski.familytrack.views.fragments.UserHistoryChartFragment;
@@ -49,7 +45,6 @@ import com.volynski.familytrack.views.fragments.UserOnMapFragment;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import timber.log.Timber;
@@ -74,18 +69,17 @@ public class MainActivity
 
     private static final int REQUEST_CODE_EDIT_USER_DETAILS = 1000;
     private static final int REQUEST_CODE_EDIT_SETTINGS = 1001;
-    private static final String TAG = "viewmodel";
 
     private String mCurrentUserUuid;
     private int mContentId;
 
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
-    private GoogleApiClient mGoogleApiClient;
     private FloatingActionButton mFab;
-    private int mCurrentMenuId = R.id.drawer_nav_map;
+    private int mCurrentMenuId = 0;
 
     private Map<String, Integer> fragmentIds;
+    private int mFabVisibility;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,28 +89,13 @@ public class MainActivity
         } else {
             mContentId = savedInstanceState.getInt(StringKeys.MAIN_ACTIVITY_MODE_KEY);
             mCurrentUserUuid = savedInstanceState.getString(StringKeys.CURRENT_USER_UUID_KEY);
+            mFabVisibility = savedInstanceState.getInt(StringKeys.FAB_VISIBILITY_KEY);
         }
-        //startLocationServices();
         setupFragmentIds();
         setupCommonContent();
         setupFragment(mContentId);
 
     }
-
-/*    private void startLocationServices() {
-        // start service if app running for the first time
-        Settings settings = SharedPrefsUtil.getSettings(this);
-        if (settings.getIsTrackingOn()) {
-            if (settings.getIsSimulationOn()) {
-                TrackingJobService.startJobService(this, mCurrentUserUuid, 0, 5);
-            } else {
-                Intent intent = new Intent(this, TrackingService.class);
-                intent.setAction(TrackingService.COMMAND_START);
-                intent.putExtra(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
-                startService(intent);
-            }
-        }
-    }*/
 
     private void setupFragmentIds() {
         fragmentIds = new HashMap<>();
@@ -140,26 +119,31 @@ public class MainActivity
         super.onSaveInstanceState(outState);
         outState.putInt(StringKeys.MAIN_ACTIVITY_MODE_KEY, mContentId);
         outState.putString(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
+        //outState.putInt(StringKeys.FAB_VISIBILITY_KEY, mFab.getVisibility());
     }
 
     private void setupFragment(int contentId) {
         int newFabStyle = FAB_STYLE_NORMAL;
+        boolean found = false;
         Fragment newFragment = null;
-                //getSupportFragmentManager().findFragmentById(R.id.main_fcontainer);
-
-        //boolean fragmentRestored = (newFragment != null);
 
         Object viewModel = FragmentsUtil.findOrCreateViewModel(this,
                         contentId, mCurrentUserUuid, this);
         switch (contentId) {
             case CONTENT_MAP:
+                newFragment = getSupportFragmentManager()
+                        .findFragmentByTag(UserOnMapFragment.class.getSimpleName());
                 if (newFragment == null) {
                     newFragment = UserOnMapFragment.newInstance(mCurrentUserUuid);
+                } else {
+                    found = true;
                 }
                 ((UserOnMapViewModel)viewModel).setNavigator(this);
                 ((UserOnMapFragment) newFragment).setViewModel((UserOnMapViewModel)viewModel);
                 break;
             case CONTENT_USER_LIST:
+                newFragment = getSupportFragmentManager()
+                        .findFragmentByTag(UserListFragment.class.getSimpleName());
                 if (newFragment == null) {
                     newFragment = UserListFragment.newInstance(mCurrentUserUuid);
                 }
@@ -174,6 +158,8 @@ public class MainActivity
                 ((UserHistoryChartFragment)newFragment).setViewModel((UserHistoryChartViewModel)viewModel);
                 break;
             case CONTENT_MEMBERSHIP:
+                newFragment = getSupportFragmentManager()
+                        .findFragmentByTag(UserMembershipFragment.class.getSimpleName());
                 if (newFragment == null) {
                     newFragment = UserMembershipFragment.newInstance(this, mCurrentUserUuid, this);
                 }
@@ -189,14 +175,13 @@ public class MainActivity
                 newFabStyle = FAB_STYLE_REMOVE_ITEM;
                 break;
             default:
-                Timber.v("Unsupported content id=" + contentId);
+                Timber.v(getString(R.string.er_unsupported_content_id) + contentId);
         }
         setFabStyle(newFabStyle);
-        if (newFragment != null) {
+        if (newFragment != null && !found) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.main_fcontainer, newFragment, getFragmentTagByContentId(contentId))
-                    .addToBackStack(getFragmentTagByContentId(contentId))
+                    .replace(R.id.main_fcontainer, newFragment, newFragment.getClass().getSimpleName())
                     .commit();
             getSupportFragmentManager().executePendingTransactions();
         }
@@ -208,14 +193,14 @@ public class MainActivity
             if (intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
                 mCurrentUserUuid = intent.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY);
             } else {
-                Timber.e("Current user uuid expected but not found in intent");
+                Timber.e(getString(R.string.ex_user_uuid_not_found));
                 return;
             }
             if (intent.hasExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY)) {
                 mContentId = intent.getIntExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, 0);
             }
         } else {
-            Timber.e("Intent is null");
+            Timber.v(getString(R.string.er_null_intent));
         }
     }
 
@@ -230,8 +215,7 @@ public class MainActivity
             case REQUEST_CODE_EDIT_USER_DETAILS:
                 UserListFragment f =
                         (UserListFragment) getSupportFragmentManager()
-                            .findFragmentByTag(getFragmentTagByContentId(CONTENT_USER_LIST));
-                                //.findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+                            .findFragmentByTag(UserListFragment.class.getSimpleName());
                 if (f != null) {
                     f.refreshList();
                 }
@@ -244,18 +228,30 @@ public class MainActivity
         SnackbarUtil.showSnackbar(getViewForSnackbar(), snackbarText);
     }
 
-
-    //
+//
     // @UserListNavigator implementation
     //
 
     @Override
-    public void showUserOnMap(User user) {
+    public void showPopupDialog(String title, String message) {
+        final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
+        confirmDialog.setParms(title, message, "Ok",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        confirmDialog.dismiss();
+                    }
+                });
+        confirmDialog.show(getFragmentManager(), "dialog");
+    }
+
+    @Override
+    public void showUserOnMap(User user, boolean forceSelect) {
         mContentId = CONTENT_MAP;
         setupFragment(CONTENT_MAP);
         UserOnMapFragment f = (UserOnMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.main_fcontainer);
-        f.getViewModel().selectUser(user);
+        f.getViewModel().selectUser(user, forceSelect);
     }
 
     @Override
@@ -295,11 +291,7 @@ public class MainActivity
     @Override
     public void inviteCompleted() {
         UserListFragment f = (UserListFragment)getSupportFragmentManager()
-                .findFragmentByTag(getFragmentTagByContentId(CONTENT_USER_LIST));
-/*
-                (UserListFragment) FragmentUtil
-                        .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
-*/
+                .findFragmentByTag(UserListFragment.class.getSimpleName());
         if (f != null) {
             f.dismissInviteUsersDialog();
             f.refreshList();
@@ -309,12 +301,7 @@ public class MainActivity
     @Override
     public void dismissInviteUsersDialog() {
         UserListFragment f = (UserListFragment)getSupportFragmentManager()
-                .findFragmentByTag(getFragmentTagByContentId(CONTENT_USER_LIST));
-/*
-        UserListFragment f =
-                (UserListFragment) FragmentUtil
-                        .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
-*/
+                .findFragmentByTag(UserListFragment.class.getSimpleName());
         if (f != null) {
             f.dismissInviteUsersDialog();
         }
@@ -325,11 +312,7 @@ public class MainActivity
         switch (mContentId) {
             case CONTENT_USER_HISTORY_CHART:
                 UserHistoryChartFragment f0 = (UserHistoryChartFragment)getSupportFragmentManager()
-                        .findFragmentByTag(getFragmentTagByContentId(mContentId));
-/*
-                        (UserHistoryChartFragment) FragmentUtil
-                                .findFragmentByClassName(this, UserHistoryChartFragment.class.getSimpleName());
-*/
+                        .findFragmentByTag(UserHistoryChartFragment.class.getSimpleName());
                 if (f0 != null) {
                     f0.userClicked(user);
                 }
@@ -338,12 +321,6 @@ public class MainActivity
             case CONTENT_MAP:
                 UserOnMapFragment f1 = (UserOnMapFragment)getSupportFragmentManager()
                         .findFragmentById(R.id.main_fcontainer);
-/*
-                UserOnMapFragment f1 = (UserOnMapFragment)getSupportFragmentManager()
-                    .findFragmentByTag(getFragmentTagByContentId(mContentId));
-                        (UserOnMapFragment)FragmentUtil
-                                .findFragmentByClassName(this, UserOnMapFragment.class.getSimpleName());
-*/
                 if (f1 != null) {
                     f1.userClicked(user);
                 }
@@ -356,8 +333,8 @@ public class MainActivity
     @Override
     public void eventClicked(GeofenceEvent event, String mUiContext) {
         GeofenceEventsFragment f =
-                (GeofenceEventsFragment) FragmentUtil
-                        .findFragmentByClassName(this, GeofenceEventsFragment.class.getSimpleName());
+                (GeofenceEventsFragment) getSupportFragmentManager()
+                        .findFragmentByTag(GeofenceEventsFragment.class.getSimpleName());
         if (f != null) {
             f.eventClicked(event);
         }
@@ -367,7 +344,6 @@ public class MainActivity
     // activity ui setup functions
     //
     private void setupCommonContent() {
-
         mViewModel = new MainActivityViewModel(this, mCurrentUserUuid,
                 new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this));
 
@@ -395,6 +371,14 @@ public class MainActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mViewModel.adminPermissions.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                if (!mViewModel.adminPermissions.get()) {
+                    mFab.hide();
+                }
+            }
+        });
         mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -404,12 +388,11 @@ public class MainActivity
     }
 
     private void fabButtonClicked() {
-
         switch (mContentId) {
             case CONTENT_USER_LIST:
                 UserListFragment f0 =
-                        (UserListFragment) FragmentUtil
-                                .findFragmentByClassName(this, UserListFragment.class.getSimpleName());
+                        (UserListFragment) getSupportFragmentManager()
+                                .findFragmentByTag(UserListFragment.class.getSimpleName());
                 if (f0 != null) {
                     f0.showInviteUsersDialog(null);
                 }
@@ -417,8 +400,8 @@ public class MainActivity
 
             case CONTENT_MAP:
                 UserOnMapFragment f1 =
-                        (UserOnMapFragment)FragmentUtil
-                                .findFragmentByClassName(this, UserOnMapFragment.class.getSimpleName());
+                        (UserOnMapFragment)getSupportFragmentManager()
+                                .findFragmentByTag(UserOnMapFragment.class.getSimpleName());
                 if (f1 != null) {
                     f1.startAddingGeofence();
                     hideFab();
@@ -426,16 +409,16 @@ public class MainActivity
                 break;
             case CONTENT_MEMBERSHIP:
                 UserMembershipFragment f2 =
-                        (UserMembershipFragment) FragmentUtil
-                        .findFragmentByClassName(this, UserMembershipFragment.class.getSimpleName());
+                        (UserMembershipFragment) getSupportFragmentManager()
+                        .findFragmentByTag(UserMembershipFragment.class.getSimpleName());
                 if (f2 != null) {
                     f2.createNewGroupDialog(null);
                 }
                 break;
             case CONTENT_GEOFENCE_EVENTS:
                 GeofenceEventsFragment f3 =
-                        (GeofenceEventsFragment) FragmentUtil
-                        .findFragmentByClassName(this, GeofenceEventsFragment.class.getSimpleName());
+                        (GeofenceEventsFragment) getSupportFragmentManager()
+                        .findFragmentByTag(GeofenceEventsFragment.class.getSimpleName());
                 if (f3 != null) {
                     f3.deleteEvents();
                 }
@@ -469,7 +452,6 @@ public class MainActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
@@ -477,12 +459,8 @@ public class MainActivity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -537,13 +515,13 @@ public class MainActivity
     }
 
     public void hideFab() {
-        mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
-        mFab.setVisibility(View.INVISIBLE);
+        //mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
+        mFab.hide();
     }
 
     public void restoreFab() {
-        mFab.animate().scaleX(1).scaleY(1).rotation(180).setDuration(200).start();
-        mFab.setVisibility(View.VISIBLE);
+        mFab.show();
+        //mFab.animate().scaleX(1).scaleY(1).rotation(180).setDuration(200).start();
     }
 
     public void setFabStyle(int fabStyle) {
@@ -554,20 +532,5 @@ public class MainActivity
                 break;
         }
         mFab.setImageResource(resId);
-/*
-        int v = View.INVISIBLE;
-        if (mViewModel != null) {
-            if (mViewModel.user.get() != null &&
-                    mViewModel.user.get().getActiveMembership() != null &&
-                    mViewModel.user.get().getActiveMembership().getRoleId() == Membership.ROLE_ADMIN) {
-                v = View.VISIBLE;
-            }
-        }
-        mFab.setVisibility(v);
-*/
-    }
-
-    private String getFragmentTagByContentId(int contentId) {
-        return "F" + contentId;
     }
 }

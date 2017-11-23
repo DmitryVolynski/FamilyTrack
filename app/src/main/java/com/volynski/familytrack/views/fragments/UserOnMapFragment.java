@@ -299,9 +299,16 @@ public class UserOnMapFragment
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
             redrawZones();
             redrawMarkers();
+            if (!mBinding.tbutFrguseronmapOff.isChecked() &&
+                    mViewModel.getSelectedUser() != null) {
+                // redraw path if time period selected & selected user is not null
+                redrawPath();
+            }
+
         } catch (Exception e) {
             Timber.e(e);
         }
+
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -317,6 +324,23 @@ public class UserOnMapFragment
                 }
             }
         });
+
+        if (mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_NEW ||
+                mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_EDIT) {
+            LatLng latLng = new LatLng(mViewModel.zoneCenterLatitude.get(),
+                    mViewModel.zoneCenterLongitude.get());
+            CircleOptions circleOptions = new CircleOptions()
+                    .center(latLng)
+                    .clickable(true)
+                    .fillColor(getResources().getColor(R.color.colorEditGeofenceFill, null))
+                    .strokeColor(getResources().getColor(R.color.colorEditGeofenceStroke, null))
+                    .strokeWidth(GEOFENCE_STROKE_WIDTH)
+                    .radius(mViewModel.zoneRadius.get());
+            mCurrentGeofence = mMap.addCircle(circleOptions);
+
+            moveCameraTo(latLng);
+            return;
+        }
 
         if (mViewModel != null &&
                 mViewModel.getSelectedUser() != null &&
@@ -365,16 +389,8 @@ public class UserOnMapFragment
         User user = mViewModel.getSelectedUser();
         for (Location location : mViewModel.path) {
             options.add(location.getLatLng());
-/*
-            MarkerOptions markerOptions = new MarkerOptions()
-                    .position(location.getLatLng())
-                    .title(user.getDisplayName())
-                    .snippet(location.getTextForSnippet())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-
-            mMap.addMarker(markerOptions);
-*/
         }
+
         if (mPolyline != null) {
             mPolyline.remove();
         }
@@ -401,14 +417,17 @@ public class UserOnMapFragment
         for (User user : users) {
             Location location = user.getLastKnownLocation();
             if (location != null) {
+                Float markerColor = BitmapDescriptorFactory.HUE_AZURE;
+                if (mViewModel.getSelectedUser() != null &&
+                        mViewModel.getSelectedUser().getUserUuid().equals(user.getUserUuid())) {
+                    markerColor = BitmapDescriptorFactory.HUE_ORANGE;
+                    newCameraPos = location.getLatLng();
+                }
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(location.getLatLng())
                         .title(user.getDisplayName())
                         .snippet(user.getTextForSnippet())
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE));
-                if (mViewModel.getSelectedUser() != null &&
-                        mViewModel.getSelectedUser().getUserUuid().equals(user.getUserUuid()))
-                    newCameraPos = location.getLatLng();
+                        .icon(BitmapDescriptorFactory.defaultMarker(markerColor));
                 mMarkers.put(user.getUserUuid(), mMap.addMarker(markerOptions));
             }
         }
@@ -437,14 +456,17 @@ public class UserOnMapFragment
         mCircles.clear();
         for (String key : zones.keySet()) {
             Zone zone = zones.get(key);
-            CircleOptions circleOptions = new CircleOptions()
-                    .center(zone.getLatLng())
-                    .clickable(true)
-                    .fillColor(getResources().getColor(R.color.colorGeofenceFill, null))
-                    .strokeColor(getResources().getColor(R.color.colorGeofenceStroke, null))
-                    .strokeWidth(GEOFENCE_STROKE_WIDTH)
-                    .radius(zone.getRadius());
-            mCircles.put(key, mMap.addCircle(circleOptions));
+            if (!(mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_EDIT &&
+                    key.equals(mViewModel.getEditZoneUuid()))) {
+                CircleOptions circleOptions = new CircleOptions()
+                        .center(zone.getLatLng())
+                        .clickable(true)
+                        .fillColor(getResources().getColor(R.color.colorGeofenceFill, null))
+                        .strokeColor(getResources().getColor(R.color.colorGeofenceStroke, null))
+                        .strokeWidth(GEOFENCE_STROKE_WIDTH)
+                        .radius(zone.getRadius());
+                mCircles.put(key, mMap.addCircle(circleOptions));
+            }
         }
     }
 
@@ -490,16 +512,20 @@ public class UserOnMapFragment
     }
 
     public void userClicked(User user) {
+        mViewModel.selectUser(user, false);
         if (user.getLastKnownLocation() != null) {
             LatLng loc = user.getLastKnownLocation().getLatLng();
             moveCameraTo(loc);
         }
-
-        mViewModel.selectUser(user);
+        redrawMarkers();
     }
 
 
     private void changeUiLayout(boolean isForEditMode) {
+        if (!isAdded()) {
+            return;
+        }
+
         boolean isLandscape = getContext().getApplicationContext()
                 .getResources().getBoolean(R.bool.is_landscape);
 

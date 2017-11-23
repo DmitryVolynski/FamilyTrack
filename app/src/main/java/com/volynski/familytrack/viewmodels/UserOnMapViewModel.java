@@ -1,8 +1,6 @@
 package com.volynski.familytrack.viewmodels;
 
 import android.content.Context;
-import android.databinding.BaseObservable;
-import android.databinding.Observable;
 import android.databinding.ObservableArrayList;
 import android.databinding.ObservableArrayMap;
 import android.databinding.ObservableBoolean;
@@ -11,10 +9,8 @@ import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.databinding.ObservableList;
 import android.databinding.ObservableMap;
-import android.os.Bundle;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.gson.Gson;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
@@ -78,7 +74,8 @@ public class UserOnMapViewModel extends AbstractViewModel {
 
 
     private UserListNavigator mNavigator;
-    private String mZoneKey = "";
+
+    private String mEditZoneUuid = "";
 
     public UserOnMapViewModel(Context context,
                               String currentUserUuid,
@@ -223,10 +220,10 @@ public class UserOnMapViewModel extends AbstractViewModel {
         return mSelectedUser;
     }
 
-    public void selectUser(User user) {
+    public void selectUser(User user, boolean forceSelect) {
         boolean unselect = false;
         if (user != null) {
-            if (mSelectedUser != null &&
+            if (mSelectedUser != null && !forceSelect &&
                     mSelectedUser.getUserUuid().equals(user.getUserUuid())) {
                 // unselect user if selected user was clicked again
                 mSelectedUser = null;
@@ -243,7 +240,7 @@ public class UserOnMapViewModel extends AbstractViewModel {
 
     public void startEditZone(String zoneKey) {
         if (zones.containsKey(zoneKey)) {
-            mZoneKey = zoneKey;
+            mEditZoneUuid = zoneKey;
             Zone editZone = zones.get(zoneKey);
             zoneName.set(editZone.getName());
             zoneRadius.set(editZone.getRadius());
@@ -264,8 +261,26 @@ public class UserOnMapViewModel extends AbstractViewModel {
     }
 
     public void saveZone() {
+        if (zoneCenterLatitude.get() == 0 && zoneCenterLongitude.get() == 0) {
+            mNavigator.showPopupDialog("Saving geofence",
+                    "Please select a point on map to specify geofence center");
+            return;
+        }
+
+        if (zoneName.get().equals("")) {
+            mNavigator.showPopupDialog("Saving geofence",
+                    "Please specify geofence name");
+            return;
+        }
+
+        if (zoneRadius.get() == 0) {
+            mNavigator.showPopupDialog("Saving geofence",
+                    "Please specify geofence radius (should be >0)");
+            return;
+        }
+
         List<String> trackedUsers = getTrackedUsersList();
-        Zone zone = new Zone(mZoneKey, zoneName.get(),
+        Zone zone = new Zone(mEditZoneUuid, zoneName.get(),
                 new LatLng(zoneCenterLatitude.get(), zoneCenterLongitude.get()),
                 zoneRadius.get(), trackedUsers);
         if (zoneEditMode.get() == EM_NEW) {
@@ -311,12 +326,12 @@ public class UserOnMapViewModel extends AbstractViewModel {
     }
 
     public void removeZone() {
-        if (zoneEditMode.get() != EM_EDIT || mZoneKey.equals("")) {
+        if (zoneEditMode.get() != EM_EDIT || mEditZoneUuid.equals("")) {
             Timber.v("Zone key is empty or mode != EM_EDIT. Unable to remove zone");
             return;
         }
 
-        mRepository.removeZone(mCurrentUser.getActiveMembership().getGroupUuid(), mZoneKey,
+        mRepository.removeZone(mCurrentUser.getActiveMembership().getGroupUuid(), mEditZoneUuid,
                 new FamilyTrackDataSource.RemoveZoneCallback() {
                     @Override
                     public void onRemoveZoneCompleted(FirebaseResult<String> result) {
@@ -378,5 +393,9 @@ public class UserOnMapViewModel extends AbstractViewModel {
                 result = 0;
         }
         return (result < 0 ? now.getTimeInMillis() : 0);
+    }
+
+    public String getEditZoneUuid() {
+        return mEditZoneUuid;
     }
 }

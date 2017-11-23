@@ -10,10 +10,6 @@
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -21,6 +17,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:contentDescription="@string/content_descr_application_symbol"
             android:layout_gravity="center_horizontal"
             android:scaleType="fitXY"
             android:adjustViewBounds="true"
@@ -29,24 +26,25 @@
             android:layout_width="230dp"
             android:layout_height="230dp"/>
         <ImageView
+            android:contentDescription="@string/content_descr_application_logo"
             android:src="@drawable/family_track_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <com.google.android.gms.common.SignInButton
+        android:contentDescription="@string/content_descr_sign_in_button"
         android:visibility="invisible"
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginBottom="@dimen/margin_normal"
         android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+<!--
     <LinearLayout
         android:layout_width="150dp"
         android:layout_height="wrap_content"
@@ -95,5 +93,6 @@
             android:layout_height="wrap_content"
             android:text="Status" />
     </LinearLayout>
+-->
 
 </android.support.constraint.ConstraintLayout>

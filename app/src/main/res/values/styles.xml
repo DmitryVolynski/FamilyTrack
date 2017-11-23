@@ -12,8 +12,50 @@
         <item name="windowNoTitle">true</item>
     </style>
 
+    <style name="Settings"/>
+    <style name="Settings.Separator">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">@color/itemSeparator</item>
+    </style>
+
+    <style name="UserDetails"/>
+    <style name="UserDetails.ItemFrameLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="Settings.ItemFrame">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">@dimen/settings_list_side_margin</item>
+        <item name="android:layout_marginEnd">@dimen/settings_list_side_margin</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="ToolbarTitle" parent="@style/TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textSize">20sp</item>
+    </style>
 
+    <style name="UserDetails.ItemIcon">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+    </style>
+
+    <style name="ToggleButtonHistoryChart">
+        <item name="android:layout_width">64dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginEnd">4dp</item>
+        <item name="android:background">@drawable/toggle_button_selector</item>
+    </style>
 
 </resources>

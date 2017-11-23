@@ -19,5 +19,6 @@ public interface UserListNavigator {
     void dismissInviteUsersDialog();
     void userClicked(User user);
     void eventClicked(GeofenceEvent event, String mUiContext);
-    void showUserOnMap(User user);
+    void showUserOnMap(User user, boolean forceSelect);
+    void showPopupDialog(String title, String message);
 }

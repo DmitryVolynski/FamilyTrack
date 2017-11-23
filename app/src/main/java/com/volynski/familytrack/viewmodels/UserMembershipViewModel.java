@@ -191,15 +191,47 @@ public class UserMembershipViewModel
     public void createNewGroup(final String groupName) {
         Timber.v("Create group: " + groupName);
 
-        mRepository.createGroup(new Group(groupName), mCurrentUserUuid,
-                new FamilyTrackDataSource.CreateGroupCallback() {
-                    @Override
-                    public void onCreateGroupCompleted(FirebaseResult<Group> result) {
-                        if (result.getData() != null) {
-                            snackbarText.set("Group '" + groupName + "' created");
-                            start();
+        if (mCurrentUser.getActiveMembership() != null) {
+            final String activeGroupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
+            mRepository.getGroupByUuid(activeGroupUuid, false,
+                    new FamilyTrackDataSource.GetGroupByUuidCallback() {
+                        @Override
+                        public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
+                            Group group = result.getData();
+                            if (group == null) {
+                                Timber.e("Unexpected error. Group " + activeGroupUuid + " not found");
+                                return;
+                            }
+                            if (group.getAdminsCount(mCurrentUser.getUserUuid()) == 0 && group.getMembers().size() > 1) {
+                                // there is only one admin in current user group
+                                // can't leave current group or create new one
+                                showLeaveGroupWarningDialog.set(!showLeaveGroupWarningDialog.get());
+                                return;
+                            } else {
+                                mRepository.createGroup(new Group(groupName), mCurrentUserUuid,
+                                        new FamilyTrackDataSource.CreateGroupCallback() {
+                                            @Override
+                                            public void onCreateGroupCompleted(FirebaseResult<Group> result) {
+                                                if (result.getData() != null) {
+                                                    snackbarText.set("Group '" + groupName + "' created");
+                                                    start();
+                                                }
+                                            }
+                                        });
+                            }
                         }
-                    }
-                });
+                    });
+        } else {
+            mRepository.createGroup(new Group(groupName), mCurrentUserUuid,
+                    new FamilyTrackDataSource.CreateGroupCallback() {
+                        @Override
+                        public void onCreateGroupCompleted(FirebaseResult<Group> result) {
+                            if (result.getData() != null) {
+                                snackbarText.set("Group '" + groupName + "' created");
+                                start();
+                            }
+                        }
+                    });
+        }
     }
 }

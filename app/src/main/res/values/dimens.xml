@@ -32,4 +32,20 @@ http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     <dimen name="create_group_dialog_height">500dp</dimen>
     <dimen name="user_list_side_margin">0dp</dimen>
     <dimen name="settings_list_side_margin">16dp</dimen>
+    <dimen name="margin_normal">16dp</dimen>
+    <dimen name="settings_interval_width">50dp</dimen>
+    <dimen name="settings_separator_margin">4dp</dimen>
+    <dimen name="settings_separator_height">1dp</dimen>
+    <dimen name="settings_list_top_margin">8dp</dimen>
+    <dimen name="settings_list_bottom_margin">8dp</dimen>
+    <dimen name="settings_seekbar_width">120dp</dimen>
+    <dimen name="settings_margin_top">16dp</dimen>
+    <dimen name="user_details_photo_size">60dp</dimen>
+    <dimen name="user_details_edit_field_side_margin">56dp</dimen>
+    <dimen name="create_group_dialog_margin">16dp</dimen>
+    <dimen name="first_time_user_side_margin">16dp</dimen>
+    <dimen name="margin_small">8dp</dimen>
+    <dimen name="dialog_button_height">36dp</dimen>
+    <dimen name="user_list_header_height">56dp</dimen>
+    <dimen name="progress_bar_size">48dp</dimen>
 </resources>

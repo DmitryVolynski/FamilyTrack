@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="android.view.View"/>
         <variable
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserMembershipViewModel"/>
     </data>
-    <!--app:viewModels="@{viewmodel.viewModels}"-->
     <FrameLayout
         android:id="@+id/framelayout_fragmentusermembership"
         android:layout_marginStart="@dimen/user_list_side_margin"
@@ -26,7 +24,7 @@
         <ProgressBar
             android:visibility="@{viewmodel.isDataLoading ? View.VISIBLE : View.GONE}"
             android:layout_gravity="center"
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
+            android:layout_width="@dimen/progress_bar_size"
+            android:layout_height="@dimen/progress_bar_size" />
     </FrameLayout>
 </layout>

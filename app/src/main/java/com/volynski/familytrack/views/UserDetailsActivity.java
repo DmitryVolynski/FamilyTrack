@@ -45,6 +45,8 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        postponeEnterTransition();
+
         readIntentData();
         setupBindings();
         setupToolbar();
@@ -74,6 +76,15 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
                 mBinding.tilUserdetailsPhone.setError(mViewModel.phoneError.get());
+            }
+        });
+
+        mViewModel.isDataLoading.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                if (!mViewModel.isDataLoading.get()) {
+                    startPostponedEnterTransition();
+                }
             }
         });
 

@@ -94,6 +94,7 @@ public class InviteUsersViewModel
                     public void onInviteUsersCompleted(FirebaseResult<String> result) {
                         Timber.v("Invite done");
                         mNavigator.inviteCompleted();
+                        loadUsersList();
                     }
                 });
     }

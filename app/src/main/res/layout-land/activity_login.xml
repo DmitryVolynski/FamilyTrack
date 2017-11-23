@@ -11,10 +11,6 @@
         android:id="@+id/linearLayout2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -22,15 +18,15 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
+            android:contentDescription="@string/content_descr_application_symbol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="8dp"
-            android:adjustViewBounds="true"
             android:scaleType="fitXY"
             android:src="@drawable/maps_icon_512px" />
 
         <ImageView
+            android:contentDescription="@string/content_descr_application_logo"
             android:id="@+id/imageview_logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,59 +39,8 @@
         android:id="@+id/sign_in_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
         android:enabled="false"
         app:layout_constraintBottom_toBottomOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="@+id/linearLayout2" />
-
-    <LinearLayout
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="8dp"
-        android:orientation="vertical"
-        android:padding="2dip"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-
-        <Button
-            android:id="@+id/sign_out_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="true"
-            android:text="Sign Out" />
-
-        <Button
-            android:id="@+id/revoke_access_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="true"
-            android:text="Revoke Access" />
-
-        <Button
-            android:id="@+id/check_user_exists_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="CHECK USER" />
-
-        <Button
-            android:id="@+id/button_login_goto_main_activity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="MAIN" />
-
-        <TextView
-            android:id="@+id/statuslabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Status" />
-    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

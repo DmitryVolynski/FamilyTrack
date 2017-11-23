@@ -30,9 +30,10 @@
                 app:expandedTitleTextAppearance="@android:color/transparent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed">
                 <ImageView
+                    android:contentDescription="@string/content_descr_user_photo"
                     android:id="@+id/imageview_userdetails_photo"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
+                    android:layout_width="@dimen/user_details_photo_size"
+                    android:layout_height="@dimen/user_details_photo_size"
                     android:layout_gravity="center_vertical"
                     android:layout_marginBottom="30dp"
                     android:layout_marginStart="16dp"
@@ -60,7 +61,7 @@
                         android:text="@{viewmodel.user.displayName}"
                         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                         android:transitionName="userName"
-                        tools:text="Test" />
+                        tools:text="@string/test_user_display_name" />
 
                 </LinearLayout>
                 <android.support.v7.widget.Toolbar
@@ -92,121 +93,95 @@
                     android:orientation="horizontal">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="16dp"
+                        android:contentDescription="@string/content_descr_user_family_name_icon"
                         android:layout_marginTop="20dp"
-                        android:src="@drawable/ic_person" />
+                        android:src="@drawable/ic_person"
+                        style="@style/UserDetails.ItemIcon" />
+
                         <android.support.design.widget.TextInputLayout
                             android:id="@+id/til_userdetails_familyname"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginEnd="56dp"
-                            android:layout_marginRight="56dp"
-                            android:layout_marginStart="56dp"
+                            android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
+                            android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
                             app:errorEnabled="true">
 
                             <android.support.design.widget.TextInputEditText
                                 android:id="@+id/et_userdetails_familyName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:hint="Family name"
+                                android:hint="@string/hint_family_name"
                                 android:inputType="textPersonName"
                                 android:maxLines="1"
                                 android:text="@={viewmodel.user.familyName}" />
 
                     </android.support.design.widget.TextInputLayout>
                 </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
+                <FrameLayout style="@style/UserDetails.ItemFrameLayout">
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/til_userdetails_givenname"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="56dp"
-                        android:layout_marginRight="56dp"
-                        android:layout_marginStart="56dp"
+                        android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
+                        android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
                         app:errorEnabled="true">
 
                         <android.support.design.widget.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Given name"
+                            android:hint="@string/hint_given_name"
                             android:inputType="textPersonName"
                             android:maxLines="1"
                             android:text="@={viewmodel.user.givenName}" />
                     </android.support.design.widget.TextInputLayout>
                 </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
+                <FrameLayout style="@style/UserDetails.ItemFrameLayout">
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/til_userdetails_displayname"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="56dp"
-                        android:layout_marginRight="56dp"
-                        android:layout_marginStart="56dp"
+                        android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
+                        android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
                         app:errorEnabled="true">
 
                         <android.support.design.widget.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Display name"
+                            android:hint="@string/hint_display_name"
                             android:inputType="textPersonName"
                             android:maxLines="1"
                             android:text="@={viewmodel.user.displayName}" />
                     </android.support.design.widget.TextInputLayout>
                 </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
+                <FrameLayout style="@style/UserDetails.ItemFrameLayout">
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="16dp"
+                        android:contentDescription="@string/content_descr_user_phone_number_icon"
                         android:layout_marginTop="20dp"
+                        style="@style/UserDetails.ItemIcon"
                         android:src="@drawable/ic_phone" />
 
                     <android.support.design.widget.TextInputLayout
                         android:id="@+id/til_userdetails_phone"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="56dp"
-                        android:layout_marginRight="56dp"
-                        android:layout_marginStart="56dp"
+                        android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
+                        android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
                         app:errorEnabled="true">
 
                         <android.support.design.widget.TextInputEditText
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Phone"
+                            android:hint="@string/hint_phone"
                             android:inputType="phone"
                             android:maxLines="1"
                             android:text="@={viewmodel.user.phone}" />
                     </android.support.design.widget.TextInputLayout>
                 </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
+                <FrameLayout style="@style/UserDetails.ItemFrameLayout">
                     <ImageView
-                        android:layout_gravity=""
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="16dp"
+                        android:contentDescription="@string/content_descr_user_email_icon"
                         android:layout_marginTop="4dp"
+                        style="@style/UserDetails.ItemIcon"
                         android:src="@drawable/ic_email" />
 
                     <TextView
@@ -214,23 +189,19 @@
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="56dp"
-                        android:layout_marginRight="56dp"
-                        android:layout_marginStart="56dp"
-                        tools:text="volynski@hotmail.com"
+                        android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
+                        android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
+                        tools:text="@string/test_email"
                         android:text="@={viewmodel.user.email}" />
                 </FrameLayout>
                 <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
+                    style="@style/UserDetails.ItemFrameLayout"
+                    android:layout_height="50dp">
 
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="16dp"
+                        android:contentDescription="@string/content_descr_user_group_name_icon"
                         android:layout_marginTop="8dp"
+                        style="@style/UserDetails.ItemIcon"
                         android:src="@drawable/ic_group" />
 
                     <Spinner
@@ -239,53 +210,42 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
                         android:layout_marginEnd="40dp"
-                        android:layout_marginRight="56dp"
                         android:layout_marginStart="52dp"
                         android:entries="@{viewmodel.spinnerEntries}"
                         app:selectedValue="@={viewmodel.userRole}"
                         tools:text="Home, 0km" />
                 </FrameLayout>
                 <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="8dp">
+                    style="@style/UserDetails.ItemFrameLayout"
+                    android:layout_height="50dp">
                     <TextView
                         android:layout_gravity="center_vertical"
-                        android:text="Group"
-                        android:layout_marginRight="8dp"
+                        android:text="@string/label_group"
                         android:layout_marginStart="8dp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
 
                     <TextView
                         android:layout_gravity="center_vertical"
-                        android:layout_marginRight="56dp"
-                        android:layout_marginStart="56dp"
-                        android:layout_marginEnd="56dp"
+                        android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
+                        android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:text="@{viewmodel.activeGroup}"
-                        tools:text="Group name" />
+                        tools:text="@string/test_group_name" />
                 </FrameLayout>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
+                <FrameLayout style="@style/UserDetails.ItemFrameLayout">
                     <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="16dp"
+                        style="@style/UserDetails.ItemIcon"
+                        android:contentDescription="@string/content_descr_user_location_icon"
                         android:layout_marginTop="8dp"
                         android:src="@drawable/ic_location" />
                     <LinearLayout
                         android:orientation="vertical"
                         android:layout_marginTop="8dp"
-                        android:layout_marginEnd="56dp"
-                        android:layout_marginRight="56dp"
-                        android:layout_marginStart="56dp"
+                        android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
+                        android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
                         <TextView
@@ -305,7 +265,7 @@
 
                     </LinearLayout>
                     <LinearLayout
-                        android:layout_marginEnd="56dp"
+                        android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
                         android:layout_marginTop="8dp"
                         android:layout_gravity="end"
                         android:orientation="vertical"

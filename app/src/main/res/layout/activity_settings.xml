@@ -37,19 +37,12 @@
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <LinearLayout
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="@dimen/settings_margin_top"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/settings_list_side_margin"
-                    android:layout_marginEnd="@dimen/settings_list_side_margin"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:orientation="horizontal">
+                <FrameLayout style="@style/Settings.ItemFrame">
                     <LinearLayout
                         android:orientation="vertical"
                         android:layout_width="match_parent"
@@ -68,47 +61,36 @@
                     </LinearLayout>
 
                     <Switch
+                        android:contentDescription="@string/content_descr_switch_tracking_mode"
                         android:id="@+id/switch1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end|center_vertical"
-                        android:checked="@={viewmodel.settings.isTrackingOn}"
-                        android:text="" />
+                        android:checked="@={viewmodel.settings.isTrackingOn}"/>
 
                 </FrameLayout>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_height="1dp"
-                    android:background="@color/itemSeparator"/>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/settings_list_side_margin"
-                    android:layout_marginEnd="@dimen/settings_list_side_margin"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:orientation="horizontal">
+                <View style="@style/Settings.Separator"/>
+                <FrameLayout style="@style/Settings.ItemFrame">
                     <LinearLayout
                         android:orientation="vertical"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
                         <TextView
-                            android:text="Update interval"
+                            android:text="@string/label_update_interval"
                             android:textColor="@android:color/black"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView
-                            tools:text="Location update frequency in minutes"
-                            android:text="Location update frequency in minutes"
+                            tools:text="@string/label_update_interval_descr"
+                            android:text="@string/label_update_interval_descr"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
 
                     <EditText
-                        android:layout_width="50dp"
+                        android:contentDescription="@string/content_descr_location_update_interval"
+                        android:layout_width="@dimen/settings_interval_width"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end|center_vertical"
                         android:inputType="number"
@@ -116,131 +98,93 @@
                         android:maxLines="1"
                         android:text='@={"" + viewmodel.settings.locationUpdateInterval}' />
                 </FrameLayout>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_height="1dp"
-                    android:background="@color/itemSeparator"/>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/settings_list_side_margin"
-                    android:layout_marginEnd="@dimen/settings_list_side_margin"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:orientation="horizontal">
+                <View style="@style/Settings.Separator"/>
+                <FrameLayout style="@style/Settings.ItemFrame">
                     <LinearLayout
                         android:orientation="vertical"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
                         <TextView
-                            android:text="Settings update interval"
+                            android:text="@string/label_settings_update_interval"
                             android:textColor="@android:color/black"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView
-                            tools:text="Settings update frequency in minutes"
-                            android:text="Settings update frequency in minutes"
+                            tools:text="@string/label_settings_update_interval_descr"
+                            android:text="@string/label_settings_update_interval_descr"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
 
                     <EditText
+                        android:contentDescription="@string/content_descr_settings_update_interval"
                         android:text='@={"" + viewmodel.settings.settingsUpdateInterval}'
                         android:layout_gravity="end|center_vertical"
-                        android:layout_width="50dp"
+                        android:layout_width="@dimen/settings_interval_width"
                         android:inputType="number"
                         android:maxLength="5"
                         android:maxLines="1"
                         android:layout_height="wrap_content" />
                 </FrameLayout>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_height="1dp"
-                    android:background="@color/itemSeparator"/>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/settings_list_side_margin"
-                    android:layout_marginEnd="@dimen/settings_list_side_margin"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:orientation="horizontal">
+                <View style="@style/Settings.Separator"/>
+                <FrameLayout style="@style/Settings.ItemFrame">
                     <LinearLayout
                         android:orientation="vertical"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
 
                         <TextView
-                            android:text="Location accuracy"
+                            android:text="@string/label_location_accuracy"
                             android:textColor="@android:color/black"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView
-                            tools:text="Location accuracy is set to maximum"
-                            android:text="Location accuracy is set to maximum"
+                            tools:text="@string/label_location_accuracy_descr"
+                            android:text="@string/label_location_accuracy_descr"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
                     <SeekBar
+                        android:contentDescription="@string/content_descr_location_accuracy_level"
                         android:layout_gravity="end|center_vertical"
                         android:id="@+id/seekBar2"
                         style="@style/Widget.AppCompat.SeekBar.Discrete"
-                        android:layout_width="120dp"
+                        android:layout_width="@dimen/settings_seekbar_width"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="-8dp"
                         android:max="2"
                         android:progress="@={viewmodel.settings.accuracyLevel}" />
 
                 </FrameLayout>
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_marginTop="4dp"
-                    android:layout_marginBottom="4dp"
-                    android:layout_height="1dp"
-                    android:background="@color/itemSeparator"/>
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/settings_list_side_margin"
-                    android:layout_marginEnd="@dimen/settings_list_side_margin"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:orientation="horizontal">
+                <View style="@style/Settings.Separator"/>
+                <FrameLayout style="@style/Settings.ItemFrame">
                     <LinearLayout
                         android:orientation="vertical"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent">
                         <TextView
-                            android:text="Simulation mode is"
+                            android:text="@string/label_simulation_mode"
                             android:textColor="@android:color/black"
                             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                         <TextView
-                            tools:text="Allow to turn on moving simulation"
-                            android:text="Allow to turn on moving simulation"
+                            tools:text="@string/label_simulation_mode_descr"
+                            android:text="@string/label_simulation_mode_descr"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content" />
                     </LinearLayout>
 
                     <Switch
+                        android:contentDescription="@string/content_descr_switch_simulation_mode"
                         android:checked="@={viewmodel.settings.isSimulationOn}"
                         android:layout_gravity="end|center_vertical"
                         android:id="@+id/switch2"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="" />
-
+                        android:layout_height="wrap_content"/>
                 </FrameLayout>
-
             </LinearLayout>
-
         </android.support.v4.widget.NestedScrollView>
     </android.support.design.widget.CoordinatorLayout>
 </layout>

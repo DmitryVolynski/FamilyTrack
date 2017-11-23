@@ -155,6 +155,7 @@ public class UserListViewModel
         if (userUuid.equals(mCurrentUserUuid)) {
             snackbarText.set("");
             snackbarText.set("You can't exclude yourself");
+            notifyChange();
             return;
         }
 

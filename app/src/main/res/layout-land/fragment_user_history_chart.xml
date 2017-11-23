@@ -25,8 +25,8 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
-                android:background="@color/colorPrimaryLight"
-                android:contentDescription="User history chart"
+                android:background="@color/itemSeparator"
+                android:contentDescription="@string/content_descr_chart"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/verticalOneThird"
                 app:layout_constraintStart_toStartOf="@+id/verticalOneTen"
@@ -51,10 +51,10 @@
 
             <GridLayout
                 android:id="@+id/tbllayout_frguseronmap"
-                android:layout_width="104dp"
+                android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginBottom="@dimen/margin_small"
+                android:layout_marginTop="@dimen/margin_small"
                 android:columnCount="1"
                 android:orientation="vertical"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -65,54 +65,49 @@
 
                 <ToggleButton
                     android:id="@+id/tbut_off"
-                    android:layout_column="0"
                     android:layout_gravity="center"
                     android:layout_rowWeight="1"
                     android:background="@drawable/toggle_button_selector"
                     android:checked='@{viewmodel.toggleButtons["OFF"]}'
                     android:enabled="false"
-                    android:textOff="OFF"
-                    android:textOn="OFF" />
+                    android:textOff="@string/toggle_button_off"
+                    android:textOn="@string/toggle_button_off" />
 
                 <ToggleButton
                     android:id="@+id/tbut_1h"
-                    android:layout_column="0"
                     android:layout_gravity="center"
                     android:layout_rowWeight="1"
                     android:background="@drawable/toggle_button_selector"
                     android:checked='@{viewmodel.toggleButtons["1H"]}'
-                    android:textOff="1H"
-                    android:textOn="1H" />
+                    android:textOff="@string/toggle_button_1h"
+                    android:textOn="@string/toggle_button_1h" />
 
                 <ToggleButton
                     android:id="@+id/tbut_8h"
-                    android:layout_column="0"
                     android:layout_gravity="center"
                     android:layout_rowWeight="1"
                     android:background="@drawable/toggle_button_selector"
                     android:checked='@{viewmodel.toggleButtons["8H"]}'
-                    android:textOff="8H"
-                    android:textOn="8H" />
+                    android:textOff="@string/toggle_button_8h"
+                    android:textOn="@string/toggle_button_8h" />
 
                 <ToggleButton
                     android:id="@+id/tbut_1d"
-                    android:layout_column="0"
                     android:layout_gravity="center"
                     android:layout_rowWeight="1"
                     android:background="@drawable/toggle_button_selector"
                     android:checked='@{viewmodel.toggleButtons["1D"]}'
-                    android:textOff="1D"
-                    android:textOn="1D" />
+                    android:textOff="@string/toggle_button_1d"
+                    android:textOn="@string/toggle_button_1d" />
 
                 <ToggleButton
                     android:id="@+id/tbut_1w"
-                    android:layout_column="0"
                     android:layout_gravity="center"
                     android:layout_rowWeight="1"
                     android:background="@drawable/toggle_button_selector"
                     android:checked='@{viewmodel.toggleButtons["1W"]}'
-                    android:textOff="1W"
-                    android:textOn="1W" />
+                    android:textOff="@string/toggle_button_1w"
+                    android:textOn="@string/toggle_button_1w" />
             </GridLayout>
 
             <LinearLayout

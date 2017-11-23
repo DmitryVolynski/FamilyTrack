@@ -99,6 +99,9 @@ public class UserDetailsViewModel extends AbstractViewModel {
                     return;
                 }
                 mCurrentUser = result.getData();
+                adminPermissions.set(mCurrentUser.getActiveMembership().getRoleId() ==
+                        Membership.ROLE_ADMIN);
+
                 mRepository.getUserByUuid(mUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
                     @Override
                     public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -112,9 +115,7 @@ public class UserDetailsViewModel extends AbstractViewModel {
                             activeGroup.set(u.getActiveMembership().getGroupName());
                             mActiveGroupUuid = u.getActiveMembership().getGroupUuid();
                             userRole.set(u.getActiveMembership().getRoleName());
-                            adminPermissions.set(u.getActiveMembership().getRoleId() == Membership.ROLE_ADMIN);
                         } else {
-                            adminPermissions.set(false);
                             activeGroup.set("Not set");
                         }
                         user.set(u);

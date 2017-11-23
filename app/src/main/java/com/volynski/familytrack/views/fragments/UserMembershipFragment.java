@@ -10,6 +10,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.GridLayoutManager;
+import android.text.Editable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,9 +84,14 @@ public class UserMembershipFragment extends Fragment {
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null &&
-                savedInstanceState.containsKey(StringKeys.NEW_GROUP_NAME_KEY)) {
-            mGroupName = savedInstanceState.getString(StringKeys.NEW_GROUP_NAME_KEY);
+                savedInstanceState.containsKey(StringKeys.NEW_GROUP_DIALOG_VISIBILITY_KEY) &&
+                savedInstanceState.getBoolean(StringKeys.NEW_GROUP_DIALOG_VISIBILITY_KEY)) {
+            //mGroupName = savedInstanceState.getString(StringKeys.NEW_GROUP_NAME_KEY);
             mIsPopupViewVisible = true;
+            mCreateGroupDialog = (CreateGroupDialogFragment) getActivity()
+                    .getSupportFragmentManager()
+                    .findFragmentByTag(CreateGroupDialogFragment.class.getSimpleName());
+            mCreateGroupDialog.setButtonClickListener(this);
         }
     }
 
@@ -94,9 +100,6 @@ public class UserMembershipFragment extends Fragment {
         super.onResume();
         ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_membership);
         mViewModel.start();
-        if (mIsPopupViewVisible) {
-            createNewGroupDialog(mGroupName);
-        }
     }
 
     @Override
@@ -179,11 +182,7 @@ public class UserMembershipFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mIsPopupViewVisible) {
-            EditText et = (EditText)mPopupView
-                    .findViewById(R.id.edittext_dialogcreategroup_groupname);
-            outState.putString(StringKeys.NEW_GROUP_NAME_KEY, et.getText().toString());
-        }
+        outState.putBoolean(StringKeys.NEW_GROUP_DIALOG_VISIBILITY_KEY, mIsPopupViewVisible);
     }
 
     private void showLeaveGroupWarningDialog() {
@@ -201,75 +200,19 @@ public class UserMembershipFragment extends Fragment {
     }
 
     public void createNewGroupDialog(String groupName) {
-        // get a reference to the already created main layout
-
-/*
-        mCreateGroupDialog = (CreateGroupDialogFragment) getActivity()
-                .getSupportFragmentManager()
-                .findFragmentByTag(CreateGroupDialogFragment.class.getSimpleName());
-        if (mCreateGroupDialog == null) {
-*/
-            mCreateGroupDialog = new CreateGroupDialogFragment();
+            mIsPopupViewVisible = true;
+            mCreateGroupDialog = CreateGroupDialogFragment.getInstance(this);
             mCreateGroupDialog.show(getActivity().getSupportFragmentManager(),
                     CreateGroupDialogFragment.class.getSimpleName());
 
-/*
-        FrameLayout mainLayout = mBinding.framelayoutFragmentusermembership;
+    }
 
-        // inflate the layout of the popup window
-        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(LAYOUT_INFLATER_SERVICE);
-        mPopupView = inflater.inflate(R.layout.dialog_create_group, null);
+    public void createNewGroupCommand(String text) {
+        mViewModel.createNewGroup(text);
+    }
 
-        // create the popup window
-        int width =  (int) Math.round(0.8 * mainLayout.getWidth());  //LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = (int) Math.round(0.8 * mainLayout.getHeight());  //LinearLayout.LayoutParams.WRAP_CONTENT;
-
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-        final PopupWindow popupWindow = new PopupWindow(mPopupView, width, height, focusable);
-
-        mIsPopupViewVisible = true;
-
-        if (groupName != null) {
-            EditText et = (EditText)mPopupView
-                    .findViewById(R.id.edittext_dialogcreategroup_groupname);
-            et.setText(groupName);
-        }
-
-        mPopupView.findViewById(R.id.button_dialogcreategroup_cancel)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        popupWindow.dismiss();
-                        mIsPopupViewVisible = false;
-                    }
-                });
-
-        mPopupView.findViewById(R.id.button_dialogcreategroup_create)
-                .setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        EditText editText = (EditText) mPopupView
-                                .findViewById(R.id.edittext_dialogcreategroup_groupname);
-                        mViewModel.createNewGroup(editText.getText().toString());
-                        popupWindow.dismiss();
-                        mIsPopupViewVisible = false;
-                    }
-                });
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                mIsPopupViewVisible = false;
-            }
-
-        });
-        new Handler().postDelayed(new Runnable(){
-            public void run() {
-                // show the popup window
-                popupWindow.showAtLocation(mPopupView, Gravity.CENTER, 0, 0);
-            }
-
-        }, 100L);
-*/
+    public void createNewGroupCanceled() {
+        mIsPopupViewVisible = false;
     }
 }
 
