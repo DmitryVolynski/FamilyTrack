@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -11,51 +10,31 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/user_list_item_height"
         android:orientation="horizontal">
-<!--
-
-        android:background="@{viewmodel.isActive ? @drawable/shape_active_group : @drawable/shape_normal_group}"
-
--->
         <TextView
             style="@style/Base.TextAppearance.AppCompat.Headline"
             android:fontFamily="sans-serif-condensed"
             tools:text="My group"
             android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="@dimen/margin_normal"
+            android:paddingEnd="@dimen/margin_normal"
             android:background="@{viewmodel.isActive ? @drawable/shape_active_group : @drawable/shape_normal_group }"
             android:textColor="@{viewmodel.isActive ? @android:color/white : @android:color/black}"
             android:layout_width="match_parent"
             android:text="@{viewmodel.item.groupName}"
-            android:layout_height="56dp" />
-
-<!--
-        <TextView
-            android:id="@+id/textView7"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            android:text="@{viewmodel.item.groupName}"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            tools:text="My family" />
--->
-
+            android:layout_height="match_parent" />
         <Button
+            android:contentDescription="@string/content_descr_button_to_leave_or_join_group"
             android:onClick="@{()->viewmodel.changeMembership()}"
             android:id="@+id/button_grouplistitem"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="@dimen/margin_normal"
             android:textColor="@{viewmodel.isActive ? @android:color/white : @color/colorAccent}"
             tools:text="leave"
             android:text='@{viewmodel.isActive ? "leave" : "join"}'/>
-
-        <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
     </FrameLayout>
 </layout>

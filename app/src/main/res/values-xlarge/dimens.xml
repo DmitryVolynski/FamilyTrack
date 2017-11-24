@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <dimen name="user_photo_normal_width">64dp</dimen>
+    <dimen name="user_photo_normal_height">64dp</dimen>
+
     <item name="map_guideline_view_mode_percent" format="float" type="dimen">0.8</item>
     <item name="map_guideline_edit_mode_percent" format="float" type="dimen">0.6</item>
     <dimen name="user_list_side_margin">96dp</dimen>

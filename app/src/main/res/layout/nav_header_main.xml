@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <variable
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.MainActivityViewModel"/>
     </data>
     <FrameLayout
+        android:background="@drawable/side_nav_bar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/nav_header_height">
 
         <LinearLayout
-            android:background="@drawable/side_nav_bar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="bottom"
@@ -25,6 +24,7 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
             <ImageView
+                android:contentDescription="@string/content_descr_user_photo"
                 android:id="@+id/imageView"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
@@ -34,7 +34,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="8dp"
+                android:paddingTop="@dimen/margin_small"
                 android:text="@{viewmodel.user.givenName + ' ' + viewmodel.user.familyName}"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 

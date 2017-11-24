@@ -63,7 +63,7 @@
                             android:checked='@{viewmodel.toggleButtons["OFF"]}'
                             android:textOff="@string/toggle_button_off"
                             android:textOn="@string/toggle_button_off"
-                            style="@style/ToggleButtonHistoryChart" />
+                            style="@style/ToggleButton" />
 
                         <ToggleButton
                             android:contentDescription="@string/content_descr_time_period_is_one_hour"
@@ -71,7 +71,7 @@
                             android:checked='@{viewmodel.toggleButtons["1H"]}'
                             android:textOff="@string/toggle_button_1h"
                             android:textOn="@string/toggle_button_1h"
-                            style="@style/ToggleButtonHistoryChart" />
+                            style="@style/ToggleButton" />
 
                         <ToggleButton
                             android:contentDescription="@string/content_descr_time_period_is_eight_hours"
@@ -79,7 +79,7 @@
                             android:checked='@{viewmodel.toggleButtons["8H"]}'
                             android:textOff="@string/toggle_button_8h"
                             android:textOn="@string/toggle_button_8h"
-                            style="@style/ToggleButtonHistoryChart" />
+                            style="@style/ToggleButton" />
 
                         <ToggleButton
                             android:contentDescription="@string/content_descr_time_period_is_one_day"
@@ -87,12 +87,12 @@
                             android:checked='@{viewmodel.toggleButtons["1D"]}'
                             android:textOff="@string/toggle_button_1d"
                             android:textOn="@string/toggle_button_1d"
-                            style="@style/ToggleButtonHistoryChart" />
+                            style="@style/ToggleButton" />
 
                         <ToggleButton
                             android:contentDescription="@string/content_descr_time_period_is_one_week"
                             android:id="@+id/tbut_1w"
-                            style="@style/ToggleButtonHistoryChart"                             android:background="@drawable/toggle_button_selector"
+                            style="@style/ToggleButton"                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1W"]}'
                             android:textOff="@string/toggle_button_1w"
                             android:textOn="@string/toggle_button_1w" />

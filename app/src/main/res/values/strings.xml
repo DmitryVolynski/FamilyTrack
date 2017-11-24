@@ -109,4 +109,11 @@
     <string name="label_button_save">SAVE</string>
     <string name="label_lat_long">Lat/Long</string>
     <string name="delete_current_geofence">Delete current geofence</string>
+    <string name="content_descr_button_to_leave_or_join_group">Button to leave or join group</string>
+    <string name="content_descr_image_for_contact_visualisation">Image for contact visualisation</string>
+    <string name="content_descr_image_for_group_visualization">Image for group visualization</string>
+    <string name="content_descr_options_menu_expander_symbol">Options menu expander symbol</string>
+    <string name="content_descr_geofence_event_switch">Switch to include or exclude user for geofence event notifications</string>
+    <string name="label_user_not_a_member_of_any_group">User not a member of any group</string>
+    <string name="transition_name">userPhoto</string>
 </resources>

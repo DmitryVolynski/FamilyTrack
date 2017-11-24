@@ -7,9 +7,7 @@
     android:layout_height="wrap_content"
     android:background="@color/colorAccent"
     android:fontFamily="sans-serif-condensed"
-    android:paddingBottom="8dp"
-    android:paddingStart="8dp"
-    android:paddingTop="8dp"
+    android:padding="@dimen/padding_small"
     android:textColor="@android:color/white"
     tools:text="FamilyTrack">
 

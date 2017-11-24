@@ -7,7 +7,6 @@
         <variable
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserListItemViewModel"/>
-        <!--type="com.volynski.familytrack.viewmodels.UserListItemViewModel" /-->
     </data>
 
     <FrameLayout
@@ -16,11 +15,12 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:contentDescription="@string/content_descr_user_photo"
             android:id="@+id/imageview_dwellcontrol_photo"
             android:layout_gravity="center_vertical"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="16dp"
+            android:layout_width="@dimen/user_photo_normal_width"
+            android:layout_height="@dimen/user_photo_normal_height"
+            android:layout_marginStart="@dimen/margin_normal"
             android:transitionName="userPhoto"
             app:roundImageUrl="@{viewmodel.user.photoUrl}"
             app:srcCompat="@mipmap/ic_no_user_photo" />
@@ -29,58 +29,54 @@
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="72dp"
+            android:layout_marginStart="@dimen/list_item_margin_start"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/textview_dwellcontrol_username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
+                style="@style/user_name_in_list"
                 android:transitionName="userName"
                 tools:text="Dmitry Volynski"
                 android:text="@{viewmodel.user.displayName}" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="@dimen/user_list_aux_info_font_size"
                 tools:text="Home"
                 android:text="@{viewmodel.user.lastKnownLocation.knownLocationName}" />
         </LinearLayout>
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginEnd="72dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginEnd="@dimen/list_item_margin_end"
+            android:layout_marginTop="@dimen/list_item_margin_top"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="@dimen/user_list_aux_info_font_size"
                 tools:text="15min"
                 android:text="@{viewmodel.user.lastKnownLocation.periodAsString}" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:text="Admin" />
+                android:textSize="@dimen/user_list_aux_info_font_size"
+                tools:text="Admin" />
 
         </LinearLayout>
         <Switch
-            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/content_descr_geofence_event_switch"
+            android:layout_marginEnd="@dimen/margin_normal"
             android:checked="@={viewmodel.checked}"
             android:layout_gravity="end|center_vertical"
             android:id="@+id/switch_dwellcontrol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="" />
-
-        <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
     </FrameLayout>
 </layout>

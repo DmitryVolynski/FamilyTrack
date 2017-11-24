@@ -56,7 +56,7 @@
                     android:orientation="horizontal">
                     <TableRow>
                         <ToggleButton
-                            style="@style/ToggleButtonHistoryChart"
+                            style="@style/ToggleButton"
                             android:id="@+id/tbut_frguseronmap_off"
                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["OFF"]}'
@@ -65,7 +65,7 @@
 
                         <ToggleButton
                             android:id="@+id/tbut_frguseronmap_1h"
-                            style="@style/ToggleButtonHistoryChart"
+                            style="@style/ToggleButton"
                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1H"]}'
                             android:textOff="@string/toggle_button_1h"
@@ -73,7 +73,7 @@
 
                         <ToggleButton
                             android:id="@+id/tbut_frguseronmap_8h"
-                            style="@style/ToggleButtonHistoryChart"
+                            style="@style/ToggleButton"
                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["8H"]}'
                             android:textOff="@string/toggle_button_8h"
@@ -81,7 +81,7 @@
 
                         <ToggleButton
                             android:id="@+id/tbut_frguseronmap_1d"
-                            style="@style/ToggleButtonHistoryChart"
+                            style="@style/ToggleButton"
                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1D"]}'
                             android:textOff="@string/toggle_button_1d"
@@ -89,7 +89,7 @@
 
                         <ToggleButton
                             android:id="@+id/tbut_frguseronmap_1w"
-                            style="@style/ToggleButtonHistoryChart"
+                            style="@style/ToggleButton"
                             android:background="@drawable/toggle_button_selector"
                             android:checked='@{viewmodel.toggleButtons["1W"]}'
                             android:textOff="@string/toggle_button_1w"
@@ -159,7 +159,7 @@
                     android:id="@+id/seekBar"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/margin_small"
+                    android:layout_marginTop="@dimen/margin_small"
                     android:max="3000"
                     android:progress="@={viewmodel.zoneRadius}"
                     app:layout_constraintHorizontal_bias="0.0"

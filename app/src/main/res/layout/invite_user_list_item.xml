@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
@@ -8,45 +7,40 @@
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserListItemViewModel"/>
     </data>
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_item_height"
         android:orientation="horizontal">
-
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="20dp"
+            android:contentDescription="@string/content_descr_image_for_contact_visualisation"
+            android:layout_width="@dimen/user_photo_in_list_size"
+            android:layout_height="@dimen/user_photo_in_list_size"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/list_item_margin_top"
             android:background="@mipmap/ic_no_user_photo"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="72dp"
-            android:layout_marginEnd="64dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginStart="@dimen/list_item_margin_start"
+            android:layout_marginEnd="@dimen/list_item_margin_end"
+            android:layout_marginTop="@dimen/list_item_margin_top"
             android:orientation="vertical">
-
             <TextView
+                style="@style/user_name_in_list"
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
                 tools:text="Dmitry Volynski"
                 android:text="@{viewmodel.user.displayName}" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{viewmodel.user.phone}"
                 tools:text="+7 985 760 28 65"
-                android:textSize="14sp" />
+                android:textSize="@dimen/user_list_aux_info_font_size" />
         </LinearLayout>
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -62,17 +56,14 @@
                 android:text="@{viewmodel.user.phone}"
                 tools:text="+7 985 760 28 65"
                 android:textSize="14sp" />
-
         </LinearLayout>
-
         <CheckBox
             android:checked="@={viewmodel.checked}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginEnd="16dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="14dp" />
-        <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
+            android:layout_marginEnd="@dimen/margin_normal"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/margin_normal" />
     </FrameLayout>
 </layout>

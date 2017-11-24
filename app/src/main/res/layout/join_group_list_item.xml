@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
-
     <data>
         <variable
             name="viewmodel"
@@ -12,23 +10,22 @@
     <FrameLayout
         android:background="@{viewmodel.selected ? @color/colorAccent : @android:color/transparent}"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/user_list_item_height"
         android:orientation="horizontal">
 
         <ImageView
+            android:contentDescription="@string/content_descr_image_for_group_visualization"
             android:layout_gravity="center_vertical"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="16dp"
+            android:layout_width="@dimen/user_photo_in_list_size"
+            android:layout_height="@dimen/user_photo_in_list_size"
+            android:layout_marginStart="@dimen/margin_normal"
             android:background="@mipmap/ic_group"/>
         <TextView
             android:layout_gravity="center_vertical"
-            android:layout_marginStart="72dp"
+            android:layout_marginStart="@dimen/list_item_margin_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
             tools:text="Dmitry Volynski"
             android:text="@{viewmodel.groupName}" />
-        <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
     </FrameLayout>
 </layout>

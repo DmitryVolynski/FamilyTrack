@@ -7,20 +7,19 @@
         <variable
             name="viewmodel"
             type="com.volynski.familytrack.viewmodels.UserListItemViewModel"/>
-            <!--type="com.volynski.familytrack.viewmodels.UserListItemViewModel" /-->
     </data>
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/list_item_height"
         android:orientation="horizontal">
 
         <ImageView
+            android:contentDescription="@string/content_descr_user_photo"
             android:id="@+id/imageview_userlistitem_photo"
             android:layout_gravity="center_vertical"
             android:layout_width="@dimen/user_photo_normal_width"
             android:layout_height="@dimen/user_photo_normal_height"
-            android:layout_marginLeft="16dp"
+            android:layout_marginStart="@dimen/margin_normal"
             android:transitionName="userPhoto"
             app:roundImageUrl="@{viewmodel.user.photoUrl}"
             app:srcCompat="@mipmap/ic_no_user_photo" />
@@ -29,15 +28,14 @@
             android:layout_gravity="center_vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="72dp"
+            android:layout_marginStart="@dimen/list_item_margin_start"
             android:orientation="vertical">
 
             <TextView
+                style="@style/user_name_in_list"
                 android:id="@+id/textview_userlistitem_username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@android:color/black"
-                android:textSize="16sp"
                 android:transitionName="userName"
                 tools:text="Dmitry Volynski"
                 android:text="@{viewmodel.user.displayName}" />
@@ -45,7 +43,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="@dimen/user_list_aux_info_font_size"
                 tools:text="Home"
                 android:text="@{viewmodel.user.lastKnownLocation.knownLocationName}" />
         </LinearLayout>
@@ -54,35 +52,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginEnd="72dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginEnd="@dimen/list_item_margin_end"
+            android:layout_marginTop="@dimen/list_item_margin_top"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="@dimen/user_list_aux_info_font_size"
                 tools:text="15min"
                 android:text="@{viewmodel.user.lastKnownLocation.periodAsString}" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
+                android:textSize="@dimen/user_list_aux_info_font_size"
                 tools:text="Admin"
                 android:text="@{viewmodel.user.activeMembership.roleName}" />
 
         </LinearLayout>
 
         <ImageView
+            android:contentDescription="@string/content_descr_options_menu_expander_symbol"
             android:id="@+id/imageview_userslistitem_popupsymbol"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginEnd="@dimen/margin_small"
+            android:layout_marginStart="@dimen/margin_normal"
+            android:layout_marginTop="@dimen/list_item_margin_top"
             android:src="@drawable/ic_user_options" />
-            <!--android:onClick="@{() -> viewmodel.showPopupMenu()}"-->
     </FrameLayout>
 </layout>
