@@ -5,6 +5,8 @@
 
     <dimen name="user_list_side_margin">128dp</dimen>
     <dimen name="settings_list_side_margin">128dp</dimen>
+    <dimen name="first_time_user_dialog_width">600dp</dimen>
+    <dimen name="first_time_user_dialog_height">600dp</dimen>
     <item name="map_guideline_view_mode_percent" format="float" type="dimen">0.8</item>
     <item name="map_guideline_edit_mode_percent" format="float" type="dimen">0.65</item>
     <item name="map_leftguideline_view_mode_percent" format="float" type="dimen">0.08</item>

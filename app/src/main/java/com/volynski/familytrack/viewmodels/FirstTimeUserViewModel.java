@@ -14,11 +14,13 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.credentials.HintRequest;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.MembershipListItem;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.LoginNavigator;
 
@@ -43,7 +45,7 @@ public class FirstTimeUserViewModel extends AbstractViewModel {
 
     // model fields
     public final ObservableField<String> phoneNumber =
-             new ObservableField<>("+7 985 101-00-00");
+             new ObservableField<>("");
     public final ObservableInt  dialogStepNo = new ObservableInt(STEP_ENTER_YOUR_PHONE_NUMBER);
     public final ObservableBoolean createNewGroupOption = new ObservableBoolean(true);
     public final ObservableBoolean joinExistingGroupOption = new ObservableBoolean(false);
@@ -78,6 +80,11 @@ public class FirstTimeUserViewModel extends AbstractViewModel {
      * Reads list of groups in which current user was invited
      */
     private void loadGroupsList() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            mNavigator.showPopupDialog(mContext.getString(R.string.warning_dialog_title),
+                    mContext.getString(R.string.network_not_available));
+            return;
+        }
         mRepository.getGroupsAvailableToJoin(phoneNumber.get(),
                 new FamilyTrackDataSource.GetGroupsAvailableToJoinCallback() {
             @Override
@@ -100,13 +107,13 @@ public class FirstTimeUserViewModel extends AbstractViewModel {
 
     public void goStepTwo() {
         if (phoneNumber.get().equals("")) {
-            mNavigator.showPopupDialog("Phone number", "To continue please specify a phone number");
+            mNavigator.showPopupDialog(mContext.getString(R.string.phone_number_dialog_title),
+                    mContext.getString(R.string.phone_number_dialog_message));
             return;
         }
         phoneNumber.set(phoneNumber.get().replaceAll("[ ()-]", ""));
         isDataLoading.set(true);
         loadGroupsList();
-
         dialogStepNo.set(STEP_HOW_TO_START_APP);
     }
 
@@ -115,6 +122,12 @@ public class FirstTimeUserViewModel extends AbstractViewModel {
     // плюс сохранение состояния viewmodel
 
     public void decide() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            mNavigator.showPopupDialog(mContext.getString(R.string.warning_dialog_title),
+                    mContext.getString(R.string.network_not_available));
+            return;
+        }
+
         if (!validateUserData()) {
             return;
         }
@@ -163,19 +176,20 @@ public class FirstTimeUserViewModel extends AbstractViewModel {
 
     private boolean validateUserData() {
         if (phoneNumber.get().equals("")) {
-            mNavigator.showPopupDialog("Phone number", "To continue please specify a phone number");
+            mNavigator.showPopupDialog(mContext.getString(R.string.phone_number_dialog_title),
+                    mContext.getString(R.string.phone_number_dialog_message));
             return false;
         }
 
         if (mSelectedGroupUuid.equals("") && joinExistingGroupOption.get()) {
-            mNavigator.showPopupDialog("Join existing group",
-                    "In order to join any group please one from list");
+            mNavigator.showPopupDialog(mContext.getString(R.string.join_group_dialog_title),
+                    mContext.getString(R.string.join_group_dialog_message));
             return false;
         }
 
         if (newGroupName.get().equals("") && createNewGroupOption.get()) {
-            mNavigator.showPopupDialog("Create new group",
-                    "In order to create new group please specify name");
+            mNavigator.showPopupDialog(mContext.getString(R.string.create_new_group_dialog_title),
+                    mContext.getString(R.string.create_new_group_dialog_message));
             return false;
         }
 

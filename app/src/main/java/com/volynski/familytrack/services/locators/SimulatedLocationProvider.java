@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 
@@ -35,13 +36,9 @@ public class SimulatedLocationProvider implements LocationProvider {
 
         // use Google Maps Android API utility library to calculate new point using distance & angle
         return SphericalUtil.computeOffset(prevLoc, distance, heading);
-/*
-        return new LatLng(prevLoc.latitude + (rnd.nextDouble() - 0.5) * 0.0002,
-                prevLoc.longitude + (rnd.nextDouble()) * 0.0002);
-*/
     }
     public SimulatedLocationProvider() {
-        Timber.v("Using SimulatedLocationProvider");
+        //Timber.v("Using SimulatedLocationProvider");
     }
 
     @Override
@@ -49,8 +46,8 @@ public class SimulatedLocationProvider implements LocationProvider {
                                    GoogleApiClient googleApiClient,
                                    @NonNull int accuracyLevel,
                                    @NonNull GetCurrentLocationCallback callback) {
-        String address = "Unknown address";
-        String locName = "Unknown location";
+        String address = context.getString(R.string.unknown_address);
+        String locName = context.getString(R.string.unknown_location);
 
         LatLng prevLoc = SharedPrefsUtil.getLastKnownSimulatedLocation(context);
         if (prevLoc == null) {
@@ -81,7 +78,7 @@ public class SimulatedLocationProvider implements LocationProvider {
         // save last simulated location in shared preferences
         SharedPrefsUtil.setLastKnownSimulatedLocation(context, newLatLng);
 
-        Timber.v(String.format("New simulated location is %1$f/%2$f('%3$s')",
+        Timber.v(String.format(context.getString(R.string.new_simulated_location),
                 newLatLng.latitude, newLatLng.longitude, address));
         Location newLoc = new Location(Calendar.getInstance().getTimeInMillis(),
                 newLatLng.latitude, newLatLng.longitude, locName, address, 0);

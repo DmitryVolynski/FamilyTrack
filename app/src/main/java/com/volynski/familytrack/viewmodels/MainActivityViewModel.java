@@ -6,6 +6,7 @@ import android.databinding.ObservableArrayList;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Membership;
@@ -31,7 +32,7 @@ public class MainActivityViewModel extends AbstractViewModel {
 
     public void start() {
         if (mCurrentUserUuid.equals("")) {
-            Timber.e("Can't start viewmodel. UserUuid is empty");
+            Timber.e(mContext.getString(R.string.ex_useruuid_is_empty));
             return;
         }
 
@@ -49,7 +50,7 @@ public class MainActivityViewModel extends AbstractViewModel {
                     user.set(result.getData());
                     notifyChange();
                 } else {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                 }
             }
         });

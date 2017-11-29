@@ -28,6 +28,7 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.databinding.ActivityMainBinding;
 import com.volynski.familytrack.databinding.NavHeaderMainBinding;
 import com.volynski.familytrack.dialogs.SimpleDialogFragment;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.GeofenceEventsViewModel;
@@ -119,7 +120,6 @@ public class MainActivity
         super.onSaveInstanceState(outState);
         outState.putInt(StringKeys.MAIN_ACTIVITY_MODE_KEY, mContentId);
         outState.putString(StringKeys.CURRENT_USER_UUID_KEY, mCurrentUserUuid);
-        //outState.putInt(StringKeys.FAB_VISIBILITY_KEY, mFab.getVisibility());
     }
 
     private void setupFragment(int contentId) {
@@ -140,6 +140,7 @@ public class MainActivity
                 }
                 ((UserOnMapViewModel)viewModel).setNavigator(this);
                 ((UserOnMapFragment) newFragment).setViewModel((UserOnMapViewModel)viewModel);
+                mFab.show();
                 break;
             case CONTENT_USER_LIST:
                 newFragment = getSupportFragmentManager()
@@ -149,6 +150,7 @@ public class MainActivity
                 }
                 ((UserListViewModel)viewModel).setNavigator(this);
                 ((UserListFragment)newFragment).setViewModel((UserListViewModel)viewModel);
+                mFab.show();
                 break;
             case CONTENT_USER_HISTORY_CHART:
                 if (newFragment == null) {
@@ -156,6 +158,7 @@ public class MainActivity
                 }
                 ((UserHistoryChartViewModel)viewModel).setNavigator(this);
                 ((UserHistoryChartFragment)newFragment).setViewModel((UserHistoryChartViewModel)viewModel);
+                mFab.hide();
                 break;
             case CONTENT_MEMBERSHIP:
                 newFragment = getSupportFragmentManager()
@@ -165,6 +168,7 @@ public class MainActivity
                 }
                 ((UserMembershipViewModel) viewModel).setNavigator(this);
                 ((UserMembershipFragment) newFragment).setViewModel((UserMembershipViewModel) viewModel);
+                mFab.show();
                 break;
             case CONTENT_GEOFENCE_EVENTS:
                 if (newFragment == null) {
@@ -173,9 +177,10 @@ public class MainActivity
                 ((GeofenceEventsViewModel)viewModel).setNavigator(this);
                 ((GeofenceEventsFragment)newFragment).setViewModel((GeofenceEventsViewModel)viewModel);
                 newFabStyle = FAB_STYLE_REMOVE_ITEM;
+                mFab.show();
                 break;
             default:
-                Timber.v(getString(R.string.er_unsupported_content_id) + contentId);
+                Timber.v(getString(R.string.ex_unsupported_content_id) + contentId);
         }
         setFabStyle(newFabStyle);
         if (newFragment != null && !found) {
@@ -193,14 +198,14 @@ public class MainActivity
             if (intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
                 mCurrentUserUuid = intent.getStringExtra(StringKeys.CURRENT_USER_UUID_KEY);
             } else {
-                Timber.e(getString(R.string.ex_user_uuid_not_found));
+                Timber.e(getString(R.string.ex_no_user_uuid_in_intent));
                 return;
             }
             if (intent.hasExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY)) {
                 mContentId = intent.getIntExtra(StringKeys.MAIN_ACTIVITY_MODE_KEY, 0);
             }
         } else {
-            Timber.v(getString(R.string.er_null_intent));
+            Timber.v(getString(R.string.ex_null_intent));
         }
     }
 
@@ -248,6 +253,7 @@ public class MainActivity
     @Override
     public void showUserOnMap(User user, boolean forceSelect) {
         mContentId = CONTENT_MAP;
+        mCurrentMenuId = R.id.drawer_nav_map;
         setupFragment(CONTENT_MAP);
         UserOnMapFragment f = (UserOnMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.main_fcontainer);
@@ -256,9 +262,14 @@ public class MainActivity
 
     @Override
     public void editUserDetails(String userUuid, View rootView) {
+        if (!NetworkUtil.networkUp(this)) {
+            SnackbarUtil.showSnackbar(getViewForSnackbar(), getString(R.string.network_not_available));
+            return;
+        }
+
         if (!mViewModel.adminPermissions.get() &&
                 !userUuid.equals(mCurrentUserUuid)) {
-            SnackbarUtil.showSnackbar(getViewForSnackbar(), "You could edit own details only");
+            SnackbarUtil.showSnackbar(getViewForSnackbar(), getString(R.string.own_details_only_message));
             return;
         }
 
@@ -280,7 +291,7 @@ public class MainActivity
 
     private void editSettings(String userUuid) {
         if (!mViewModel.adminPermissions.get()) {
-            SnackbarUtil.showSnackbar(getViewForSnackbar(), "Admins only");
+            SnackbarUtil.showSnackbar(getViewForSnackbar(), getString(R.string.admins_only_message));
             return;
         }
         Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
@@ -326,7 +337,7 @@ public class MainActivity
                 }
                 break;
             default:
-                Timber.v("Unsupported content id=" + mContentId);
+                Timber.v(getString(R.string.ex_unsupported_content_id) + mContentId);
         }
     }
 
@@ -423,7 +434,7 @@ public class MainActivity
                     f3.deleteEvents();
                 }
             default:
-                Timber.v("Unsupported content id=" + mContentId);
+                Timber.v(getString(R.string.ex_unsupported_content_id) + mContentId);
         }
     }
 
@@ -445,7 +456,7 @@ public class MainActivity
         if (f != null && fragmentIds.containsKey(f.getClass().getSimpleName())) {
             mContentId = fragmentIds.get(f.getClass().getSimpleName());
         } else {
-            Timber.v("Can't restore contentId when back button pressed");
+            //Timber.v("Can't restore contentId when back button pressed");
         }
     }
 
@@ -501,7 +512,7 @@ public class MainActivity
                     setupFragment(mContentId);
                     break;
                 default:
-                    Timber.v("Unsupported menu id=" + id);
+                    Timber.v(getString(R.string.ex_unsupported_menu_id) + id);
             }
         }
         mCurrentMenuId = id;
@@ -515,13 +526,11 @@ public class MainActivity
     }
 
     public void hideFab() {
-        //mFab.animate().scaleX(0).scaleY(0).rotation(180).setDuration(200).start();
         mFab.hide();
     }
 
     public void restoreFab() {
         mFab.show();
-        //mFab.animate().scaleX(1).scaleY(1).rotation(180).setDuration(200).start();
     }
 
     public void setFabStyle(int fabStyle) {

@@ -10,5 +10,7 @@
     <dimen name="settings_list_side_margin">72dp</dimen>
     <dimen name="background_circle_size">150dp</dimen>
     <dimen name="user_details_photo_size">120dp</dimen>
+    <dimen name="first_time_user_dialog_width">400dp</dimen>
+    <dimen name="first_time_user_dialog_height">400dp</dimen>
 
 </resources>

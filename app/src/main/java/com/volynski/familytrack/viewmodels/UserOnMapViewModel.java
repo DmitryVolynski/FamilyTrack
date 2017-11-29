@@ -11,6 +11,7 @@ import android.databinding.ObservableList;
 import android.databinding.ObservableMap;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
@@ -18,6 +19,7 @@ import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.ArrayList;
@@ -36,15 +38,7 @@ public class UserOnMapViewModel extends AbstractViewModel {
     public final static int EM_EDIT = 1;
     public final static int EM_NEW = 2;
 
-
-/*
-    private final Context mContext;
-    private String mCurrentUserUuid = "";
-    private User mCurrentUser;
-*/
     private User mSelectedUser;
-//    private boolean mIsDataLoading = false;
-//    private FamilyTrackDataSource mRepository;
 
     public ObservableBoolean zoneDbOpCompleted = new ObservableBoolean(false);
     public ObservableBoolean redrawZones = new ObservableBoolean(false);
@@ -82,11 +76,6 @@ public class UserOnMapViewModel extends AbstractViewModel {
                               FamilyTrackDataSource dataSource,
                               UserListNavigator navigator) {
         super(context, currentUserUuid, dataSource);
-/*
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
-*/
         mNavigator = navigator;
 
         initToggleButtons();
@@ -105,9 +94,13 @@ public class UserOnMapViewModel extends AbstractViewModel {
      * ViewModel will populate the view if current user is member of any group
      */
     public void start() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
 
         if (mCurrentUserUuid.equals("")) {
-            Timber.e("Can't start viewmodel. UserUuid is empty");
+            Timber.e(mContext.getString(R.string.ex_useruuid_is_empty));
             return;
         }
 
@@ -121,7 +114,7 @@ public class UserOnMapViewModel extends AbstractViewModel {
                         populateObservables(mCurrentUser.getActiveMembership().getGroupUuid());
                     }
                 } else {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                 }
             }
         });
@@ -150,14 +143,16 @@ public class UserOnMapViewModel extends AbstractViewModel {
      * @param result - Firebase result (Group object) of getGroupByUuid
      */
     private void populateUserListFromDbResult(FirebaseResult<Group> result) {
+        boolean createViewModels = viewModels.size() == 0;
         if (result.getData() != null && result.getData().getMembers() != null) {
             this.users.clear();
-            this.viewModels.clear();
+            //this.viewModels.clear();
             for (User user : result.getData().getMembers().values()) {
                 if (user.getActiveMembership() != null &&
                         user.getActiveMembership().getStatusId() == Membership.USER_JOINED) {
                     this.users.add(user);
-                    this.viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
+                    if (createViewModels)
+                        this.viewModels.add(new UserListItemViewModel(mContext, user, mNavigator, UI_CONTEXT));
                 }
             }
             setupUserTrack();
@@ -194,8 +189,13 @@ public class UserOnMapViewModel extends AbstractViewModel {
     }
 
     private void setupUserTrack() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
+
         if (mSelectedUser == null) {
-            Timber.v("Selected user==null, can't show track");
+            Timber.v(mContext.getString(R.string.ex_selected_user_is_null));
             return;
         }
 
@@ -255,27 +255,41 @@ public class UserOnMapViewModel extends AbstractViewModel {
     }
 
     public void startNewZone() {
-        zoneName.set("New Zone");
+        zoneName.set(mContext.getString(R.string.new_zone_name));
         zoneRadius.set(Zone.DEFAULT_RADIUS);
         zoneEditMode.set(EM_NEW);
+        for (UserListItemViewModel item : viewModels) {
+            item.checked.set(false);
+        }
     }
 
     public void saveZone() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
+
+        if (mCurrentUser.getActiveMembership() != null &&
+                mCurrentUser.getActiveMembership().getRoleId() != Membership.ROLE_ADMIN) {
+            snackbarText.set(mContext.getString(R.string.admins_only_message));
+            return;
+        }
+
         if (zoneCenterLatitude.get() == 0 && zoneCenterLongitude.get() == 0) {
-            mNavigator.showPopupDialog("Saving geofence",
-                    "Please select a point on map to specify geofence center");
+            mNavigator.showPopupDialog(mContext.getString(R.string.saving_geofence_dialog_title),
+                    mContext.getString(R.string.msg_select_a_point));
             return;
         }
 
         if (zoneName.get().equals("")) {
-            mNavigator.showPopupDialog("Saving geofence",
-                    "Please specify geofence name");
+            mNavigator.showPopupDialog(mContext.getString(R.string.saving_geofence_dialog_title),
+                    mContext.getString(R.string.msg_specify_geofence_name));
             return;
         }
 
         if (zoneRadius.get() == 0) {
-            mNavigator.showPopupDialog("Saving geofence",
-                    "Please specify geofence radius (should be >0)");
+            mNavigator.showPopupDialog(mContext.getString(R.string.saving_geofence_dialog_title),
+                    mContext.getString(R.string.msg_specify_zone_radius));
             return;
         }
 
@@ -288,7 +302,7 @@ public class UserOnMapViewModel extends AbstractViewModel {
                     zone, new FamilyTrackDataSource.CreateZoneCallback() {
                 @Override
                 public void onCreateZoneCompleted(FirebaseResult<String> result) {
-                    snackbarText.set("Zone created");
+                    snackbarText.set(mContext.getString(R.string.msg_zone_created));
                     zoneEditMode.set(EM_NONE);
                     updateZonesList();
                     zoneDbOpCompleted.set(!zoneDbOpCompleted.get());
@@ -299,14 +313,14 @@ public class UserOnMapViewModel extends AbstractViewModel {
                     zone, new FamilyTrackDataSource.UpdateZoneCallback() {
                         @Override
                         public void onUpdateZoneCompleted(FirebaseResult<String> result) {
-                            snackbarText.set("Zone updated");
+                            snackbarText.set(mContext.getString(R.string.msg_zone_updated));
                             zoneEditMode.set(EM_NONE);
                             updateZonesList();
                             zoneDbOpCompleted.set(!zoneDbOpCompleted.get());
                         }
                     });
         } else {
-            Timber.v("Attempt to save zone in unknown mode");
+            Timber.v(mContext.getString(R.string.ex_saving_zone_in_unknown_mode));
         }
     }
 
@@ -326,8 +340,13 @@ public class UserOnMapViewModel extends AbstractViewModel {
     }
 
     public void removeZone() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
+
         if (zoneEditMode.get() != EM_EDIT || mEditZoneUuid.equals("")) {
-            Timber.v("Zone key is empty or mode != EM_EDIT. Unable to remove zone");
+            Timber.v(mContext.getString(R.string.ex_zone_key_is_empty));
             return;
         }
 
@@ -335,7 +354,7 @@ public class UserOnMapViewModel extends AbstractViewModel {
                 new FamilyTrackDataSource.RemoveZoneCallback() {
                     @Override
                     public void onRemoveZoneCompleted(FirebaseResult<String> result) {
-                        snackbarText.set("Zone removed");
+                        snackbarText.set(mContext.getString(R.string.msg_zone_removed));
                         updateZonesList();
                         zoneEditMode.set(EM_NONE);
                         zoneDbOpCompleted.set(!zoneDbOpCompleted.get());

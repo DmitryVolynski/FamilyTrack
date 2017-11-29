@@ -18,10 +18,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!-- TODO заменить ключ на переменную -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyC-Kmoin4s3zyqqgu5NHmDjJxROE_bxWhs" />
+            android:value="AIzaSyBo0FyiHD8YQ9D1yj0AD9GPil0slCPGsOw" />
 
         <activity android:name=".views.LoginActivity">
             <intent-filter>

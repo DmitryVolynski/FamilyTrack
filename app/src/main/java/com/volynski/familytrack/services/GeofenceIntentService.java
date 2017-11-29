@@ -16,6 +16,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
@@ -50,7 +51,7 @@ public class GeofenceIntentService extends IntentService {
         String command = intent.getAction();
         if (command != null) {
             if (!intent.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
-                Timber.v("Start intent doesn't contain CURRENT_USER_UUID_KEY. Can't start settings listener service");
+                Timber.v(getString(R.string.ex_no_user_uuid_in_intent));
                 return;
             }
 
@@ -66,18 +67,14 @@ public class GeofenceIntentService extends IntentService {
                 return;
             }
 
-            Timber.e("Intent contains unknown command: " + command);
+            Timber.e(getString(R.string.ex_intent_unknown_command) + command);
             return;
         }
 
         // otherwise try to parse geofence events
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
         if (geofencingEvent.hasError()) {
-/*
-            String errorMessage = GeofenceErrorMessages.getErrorString(this,
-                    geofencingEvent.getErrorCode());
-*/
-            Timber.e("Error getting geofence event. Code=" + geofencingEvent.getErrorCode());
+            Timber.e(getString(R.string.ex_geofence_event_error) + geofencingEvent.getErrorCode());
             return;
         }
 
@@ -97,12 +94,12 @@ public class GeofenceIntentService extends IntentService {
             User currentUser = SharedPrefsUtil.getCurrentUser(this);
 
             if (zones == null || currentUser == null) {
-                Timber.v("Geofence event triggered but no zones or current user data found in shared preferences");
+                Timber.v(getString(R.string.ex_geofence_error));
                 return;
             }
 
             if (currentUser.getActiveMembership() == null) {
-                Timber.v("No active membership found. Geofence notification not created");
+                Timber.v(getString(R.string.ex_no_active_membership_no_geofence));
                 return;
             }
 
@@ -120,7 +117,7 @@ public class GeofenceIntentService extends IntentService {
             }
         } else {
             // Log the error.
-            Timber.e("unknown geofenceTransition=" + geofenceTransition);
+            Timber.e(getString(R.string.ex_unknown_geofence_transition) + geofenceTransition);
         }
 
     }
@@ -136,13 +133,13 @@ public class GeofenceIntentService extends IntentService {
 
         Settings settings = SharedPrefsUtil.getSettings(this);
         if (settings == null) {
-            Timber.v("No settings found in shared preferences. Can't create geofences");
+            Timber.v(getString(R.string.ex_no_settings_found));
             unregisterGeofences();
             return;
         }
 
         if (settings.getIsSimulationOn() || !settings.getIsTrackingOn()) {
-            Timber.v("Simulation is on or tracking is off. No geofences created");
+            Timber.v(getString(R.string.ex_no_geofence_in_simulation_mode));
             unregisterGeofences();
             return;
         }
@@ -162,7 +159,7 @@ public class GeofenceIntentService extends IntentService {
                         .addOnFailureListener(new OnFailureListener() {
                             @Override
                             public void onFailure(@NonNull Exception e) {
-                                int i = 0;
+                                Timber.e(getString(R.string.ex_check_location_mode));
                             }
                         });
             } else {
@@ -170,7 +167,7 @@ public class GeofenceIntentService extends IntentService {
                 unregisterGeofences();
             }
         } else {
-            Timber.v("ACCESS_FINE_LOCATION not granted. Unable to use geofences");
+            Timber.v(getString(R.string.no_access_fine_location));
         }
     }
     /**
@@ -179,8 +176,6 @@ public class GeofenceIntentService extends IntentService {
      * @return
      */
     private GeofencingRequest getGeofencingRequest(String currentUserUuid, Map<String, Zone> zones) {
-        //String currentUserUuid = SharedPrefsUtil.getCurrentUserUuid(this);
-
         GeofencingRequest result = null;
         if (zones != null) {
             List<Geofence> geofences = new ArrayList<>();
@@ -215,37 +210,12 @@ public class GeofenceIntentService extends IntentService {
         GeofencingClient geofencingClient =
                 LocationServices.getGeofencingClient(this);
         geofencingClient.removeGeofences(getGeofencePendingIntent());
-
-/*
-        if (mGeofencingClient != null) {
-            mGeofencingClient.removeGeofences(getGeofencePendingIntent());
-        }
-*/
-/*
-        LocationServices.GeofencingApi.removeGeofences(mGoogleApiClient,
-                getGeofencePendingIntent());
-*/
     }
 
     private PendingIntent getGeofencePendingIntent() {
-        // Reuse the PendingIntent if we already have it.
-/*
-        if (mGeofencePendingIntent != null) {
-            return mGeofencePendingIntent;
-        }
-*/
-
         Intent intent = new Intent(this, GeofenceIntentService.class);
-        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
-        // calling addGeofences() and removeGeofences().
-/*
-        mGeofencePendingIntent = PendingIntent.getService(this, 0, intent, PendingIntent.
-                FLAG_UPDATE_CURRENT);
-*/
         return PendingIntent.getService(this, 0, intent, PendingIntent.
                 FLAG_UPDATE_CURRENT);
-
-        //return mGeofencePendingIntent;
     }
 
 

@@ -19,15 +19,19 @@
           "client_type": 3
         },
         {
-          "client_id": "994450542296-eh0e82efe8ghlrnhb0rug3tsch4j07l0.apps.googleusercontent.com",
-          "client_type": 3
-        },
-        {
-          "client_id": "994450542296-n127l0a7la62hqe2m8t682ap7ls2mssd.apps.googleusercontent.com",
+          "client_id": "994450542296-jr9lbm3adeolc3bages3jck22629ckh4.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.volynski.familytrack",
             "certificate_hash": "12dd54a0a206fd7ecf561f7c6d46eb167ec2fc01"
+          }
+        },
+        {
+          "client_id": "994450542296-s20r5sbkigfhrtm5p6v25cok8rktjmg1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.volynski.familytrack",
+            "certificate_hash": "35b9dd11950700d1ad0421b40d6d2c8148f1c9a0"
           }
         }
       ],

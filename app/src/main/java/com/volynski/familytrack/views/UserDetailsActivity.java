@@ -19,6 +19,7 @@ import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.databinding.ActivityUserDetailsBinding;
 import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.utils.IntentUtil;
+import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.UserDetailsViewModel;
 import com.volynski.familytrack.views.navigators.UserDetailsNavigator;
 
@@ -54,6 +55,13 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
     }
 
     private void setupListeners() {
+        mViewModel.snackbarText.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+            SnackbarUtil.showSnackbar(mBinding.coordinatorlayoutUserdetails, mViewModel.snackbarText.get());
+            }
+        });
+
         mViewModel.familyNameError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
             @Override
             public void onPropertyChanged(Observable sender, int propertyId) {
@@ -118,7 +126,7 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
                     scrollRange = appBarLayout.getTotalScrollRange();
                 }
                 if (scrollRange + verticalOffset == 0) {
-                    collapsingToolbarLayout.setTitle("User details");
+                    collapsingToolbarLayout.setTitle(getString(R.string.user_details_toolbar_title));
                     isShow = true;
                 } else if(isShow) {
                     collapsingToolbarLayout.setTitle(" ");
@@ -163,10 +171,11 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
     private void startRemoveUser() {
         final SimpleDialogFragment confirmDialog =
                 new SimpleDialogFragment();
-        confirmDialog.setParms("Removing user",
-                String.format("Are you sure you want to remove user '%1$s' from group '%2$s' ?\nIn order to join this group later user should be invited again",
+        confirmDialog.setParms(getString(R.string.remove_user_dialog_title),
+                String.format(getString(R.string.remove_user_dialog_message),
                         mViewModel.user.get().getDisplayName(), mViewModel.activeGroup.get()),
-                "Ok", "Cancel",
+                getString(R.string.label_button_ok),
+                getString(R.string.button_cancel_label),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -179,7 +188,7 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
                         confirmDialog.dismiss();
                     }
                 });
-        confirmDialog.show(getFragmentManager(), "dialog");
+        confirmDialog.show(getFragmentManager(), getString(R.string.dialog_tag));
     }
 
     private void setupBindings() {
@@ -190,11 +199,6 @@ public class UserDetailsActivity extends AppCompatActivity implements UserDetail
                 null);
         mViewModel.setUserUuid(mUserUuid);
         mViewModel.setNavigator(this);
-/*
-        mViewModel = new UserDetailsViewModel(this, mCurrentUserUuid, mUserUuid,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(this), this),
-                this);
-*/
         mBinding.setViewmodel(mViewModel);
     }
 

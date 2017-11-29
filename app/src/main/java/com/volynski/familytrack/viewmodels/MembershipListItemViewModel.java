@@ -47,7 +47,7 @@ public class MembershipListItemViewModel extends BaseObservable
     public void onClick(int itemId, View v) {
         // item click goes to detail screen
         //mNavigator.userClicked(55.994017, 37.195024);
-        Timber.v("Item " + itemId + " clicked");
+        //Timber.v("Item " + itemId + " clicked");
     }
 
     @Override

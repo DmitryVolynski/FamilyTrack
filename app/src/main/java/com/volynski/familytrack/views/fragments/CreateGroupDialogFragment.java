@@ -38,18 +38,19 @@ public class CreateGroupDialogFragment extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         builder.setView(inflater.inflate(R.layout.dialog_create_group, null))
                 // Add action buttons
-                .setPositiveButton("CREATE", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.button_create_label, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
                         mGroupName = (EditText)CreateGroupDialogFragment.this.getDialog().findViewById(R.id.edittext_dialogcreategroup_groupname);
                         if (mGroupName.getText().toString().equals("")) {
-                            showPopupDialog("Create group", "Please specify a name for new group");
+                            showPopupDialog(getString(R.string.create_new_group_dialog_title),
+                                    getString(R.string.please_specify_group_name));
                         } else {
                             mButtonClickListener.createNewGroupCommand(mGroupName.getText().toString());
                         }
                     }
                 })
-                .setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.button_cancel_label, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         CreateGroupDialogFragment.this.getDialog().cancel();
                         mButtonClickListener.createNewGroupCanceled();
@@ -72,13 +73,13 @@ public class CreateGroupDialogFragment extends DialogFragment {
 
     private void showPopupDialog(String title, String message) {
         final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
-        confirmDialog.setParms(title, message, "Ok",
+        confirmDialog.setParms(title, message, getString(R.string.label_button_ok),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         confirmDialog.dismiss();
                     }
                 });
-        confirmDialog.show(getActivity().getFragmentManager(), "dialog");
+        confirmDialog.show(getActivity().getFragmentManager(), getString(R.string.dialog_tag));
     }
 }

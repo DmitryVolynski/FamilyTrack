@@ -66,7 +66,7 @@ public class UserListItemViewModel extends BaseObservable
     @Override
     public void menuCommand(MenuItem item, View rootView) {
         if (mNavigator == null) {
-            Timber.e("mNavigator is null. Navigation is not available");
+            Timber.e(mContext.getString(R.string.ex_navigator_is_null));
             return;
         }
         switch (item.getItemId()) {
@@ -92,8 +92,6 @@ public class UserListItemViewModel extends BaseObservable
         List<UserListItemViewModel> result = new ArrayList<>();
         if (users != null) {
             // TODO need to review this code
-            // Here I did silent navigator assignment, this is not good for common cases
-            //UserListNavigator navigator = (UserListNavigator)context;
             for (User user : users) {
                 result.add(new UserListItemViewModel(context, user, null /*navigator*/, uiContext));
             }

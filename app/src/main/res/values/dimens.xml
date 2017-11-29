@@ -60,4 +60,7 @@ http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     <dimen name="padding_small">8dp</dimen>
     <dimen name="widget_margin_end">32dp</dimen>
     <dimen name="widget_margin_top">38dp</dimen>
+    <dimen name="button_height">36dp</dimen>
+    <dimen name="first_time_user_dialog_width">400dp</dimen>
+    <dimen name="first_time_user_dialog_height">600dp</dimen>
 </resources>

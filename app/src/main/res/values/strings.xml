@@ -1,13 +1,13 @@
 <resources>
     <string name="app_name">FamilyTrack</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="popup_menu_item_user_details">Details</string>
-    <string name="popup_menu_item_show_on_map">Show on map</string>
-    <string name="popup_menu_item_remove">Remove</string>
+    <string name="popup_menu_item_user_details" translatable="true" >Details</string>
+    <string name="popup_menu_item_show_on_map" translatable="true" >Show on map</string>
+    <string name="popup_menu_item_remove" translatable="true" >Remove</string>
 
-    <string name="E1001">Group with specified uuid not found</string>
-    <string name="E1002">User with specified uuid not found</string>
-    <string name="E1003">Remove user failed</string>
+    <string name="E1001" translatable="true" >Group with specified uuid not found</string>
+    <string name="E1002" translatable="true" >User with specified uuid not found</string>
+    <string name="E1003" translatable="true" >Remove user failed</string>
 
     <string name="title_activity_main2">Main2Activity</string>
 
@@ -15,105 +15,196 @@
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="navigation_drawer_open" translatable="true" >Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="true" >Close navigation drawer</string>
 
-    <string name="action_example">Example action</string>
+    <string name="action_example" translatable="true" >Example action</string>
 
-    <string name="action_settings">Settings</string>
-    <string name="action_save">Save</string>
-    <string name="action_exclude">Remove</string>
-    <string name="textview_tracking_mode">Tracking mode is</string>
-    <string name="text_view_tracking_mode_description">Set tracking mode to on or off</string>
+    <string name="action_settings" translatable="true" >Settings</string>
+    <string name="action_save" translatable="true" >Save</string>
+    <string name="action_exclude" translatable="true" >Remove</string>
+    <string name="textview_tracking_mode" translatable="true" >Tracking mode is</string>
+    <string name="text_view_tracking_mode_description" translatable="true" >Set tracking mode to on or off</string>
     <array name="spinnerEntries">
         <item>Admin</item>
         <item>Member</item>
     </array>
     <string name="appwidget_text">EXAMPLE</string>
-    <string name="add_widget">Add widget</string>
+    <string name="add_widget" translatable="true" >Add widget</string>
 
     <string name="ROLE_1">Admin</string>
     <string name="ROLE_2">Member</string>
     <string name="ROLE_3">Undefined</string>
 
-    <string name="toolbar_title_user_list">User list</string>
-    <string name="toolbar_title_history_chart">History chart</string>
-    <string name="toolbar_title_map">Map</string>
-    <string name="toolbar_title_geofence_events">Geofence events</string>
-    <string name="toolbar_title_membership">Memberships</string>
+    <string name="toolbar_title_user_list" translatable="true" >User list</string>
+    <string name="toolbar_title_history_chart" translatable="true" >History chart</string>
+    <string name="toolbar_title_map" translatable="true" >Map</string>
+    <string name="toolbar_title_geofence_events" translatable="true" >Geofence events</string>
+    <string name="toolbar_title_membership" translatable="true" >Memberships</string>
 
-    <string name="content_descr_application_logo">Application logotype</string>
-    <string name="content_descr_application_symbol">Application symbol</string>
-    <string name="content_descr_sign_in_button">Sign in button</string>
-    <string name="content_descr_floating_action_button">Floating action button</string>
-    <string name="content_descr_switch_tracking_mode">Switch to turn tracking mode on or off</string>
+    <string name="ex_no_user_uuid_in_intent" translatable="true" >Current user uuid expected but not found in intent</string>
+    <string name="ex_unsupported_content_id" translatable="true" >Unsupported content id=</string>
+    <string name="ex_null_intent" translatable="true" >Intent is null</string>
 
-    <string name="label_update_interval">Update interval</string>
-    <string name="label_update_interval_descr">Location update frequency in minutes</string>
-    <string name="label_settings_update_interval">Settings update interval</string>
-    <string name="label_settings_update_interval_descr">Settings update frequency in minutes</string>
-    <string name="label_location_accuracy">Location accuracy</string>
-    <string name="label_location_accuracy_descr">Location accuracy is set to maximum</string>
-    <string name="label_simulation_mode">Simulation mode is</string>
-    <string name="label_simulation_mode_descr">Allow to turn on moving simulation</string>
-    <string name="content_descr_location_update_interval">Location update interval in minutes</string>
-    <string name="content_descr_settings_update_interval">Settings update interval in minutes</string>
-    <string name="content_descr_location_accuracy_level">Location accuracy level</string>
-    <string name="content_descr_switch_simulation_mode">Switch to turn simulation mode on or off</string>
-    <string name="test_user_display_name">Dmitry Volynski</string>
-    <string name="hint_family_name">Family name</string>
-    <string name="hint_given_name">Given name</string>
-    <string name="hint_display_name">Display name</string>
-    <string name="hint_phone">Phone</string>
-    <string name="test_email">volynski@hotmail.com</string>
-    <string name="label_group">Group</string>
-    <string name="test_group_name">Group name</string>
-    <string name="content_descr_user_family_name_icon">User family name icon</string>
-    <string name="content_descr_user_phone_number_icon">User phone number icon</string>
-    <string name="content_descr_user_email_icon">User email icon</string>
-    <string name="content_descr_user_group_name_icon">User group name icon</string>
-    <string name="content_descr_user_location_icon">User last know location icon</string>
-    <string name="content_descr_user_photo">User photo</string>
-    <string name="ex_user_uuid_not_found">Current user uuid expected but not found in intent</string>
-    <string name="er_unsupported_content_id">Unsupported content id=</string>
-    <string name="er_null_intent">Intent is null</string>
-    <string name="hint_group_name">Group name</string>
-    <string name="create_group_dialog_text">Please specify a name for a new group\n\nAfter creation you will be an Admin for newly created group. Your Admin role for the current group will be lost</string>
-    <string name="hint_phone_number">Enter your phone number</string>
-    <string name="label_welcome_to_familytrack">Welcome to FamilyTrack!\n\nIn order to start using app please provide your phone number</string>
-    <string name="label_now_decide_how">Now decide how you want to start app\n\nYou could create new group, join existing group or decide anytime later</string>
-    <string name="label_radio_create">CREATE</string>
-    <string name="label_radio_join">JOIN</string>
-    <string name="label_radio_later">LATER</string>
-    <string name="label_button_next">NEXT</string>
-    <string name="hint_new_group_name">Enter new group name</string>
-    <string name="label_no_groups_available">No groups available to join now</string>
-    <string name="label_new_group_details">You will create new group and become an Admin of this group. You\'ll be able to manage users and control some options</string>
-    <string name="label_button_decide">DECIDE</string>
-    <string name="hint_enter_search_string">Start enter name/email/phone number</string>
-    <string name="label_button_invite">Invite</string>
-    <string name="label_button_cancel">Cancel</string>
-    <string name="content_descr_chart">User history chart</string>
-    <string name="content_descr_time_period_is_off">Time period is off</string>
-    <string name="content_descr_time_period_is_one_hour">Time period is one hour</string>
-    <string name="content_descr_time_period_is_eight_hours">Time period is eight hours</string>
-    <string name="content_descr_time_period_is_one_day">Time period is one day</string>
-    <string name="content_descr_time_period_is_one_week">Time period is one week</string>
+    <string name="label_test_user_display_name">Dmitry Volynski</string>
+    <string name="label_test_email">volynski@hotmail.com</string>
+    <string name="label_update_interval" translatable="true" >Update interval</string>
+    <string name="label_update_interval_descr" translatable="true" >Location update frequency in minutes</string>
+    <string name="label_settings_update_interval" translatable="true" >Settings update interval</string>
+    <string name="label_settings_update_interval_descr" translatable="true" >Settings update frequency in minutes</string>
+    <string name="label_location_accuracy" translatable="true" >Location accuracy</string>
+    <string name="label_location_accuracy_descr" translatable="true" >Location accuracy is set to maximum</string>
+    <string name="label_simulation_mode" translatable="true" >Simulation mode is</string>
+    <string name="label_simulation_mode_descr" translatable="true" >Allow to turn on moving simulation</string>
+    <string name="label_group" translatable="true" >Group</string>
+    <string name="label_test_group_name" translatable="true" >Group name</string>
+    <string name="label_create_group_dialog_text" translatable="true" >Please specify a name for a new group\n\nAfter creation you will be an Admin for newly created group. Your Admin role for the current group will be lost</string>
+    <string name="label_welcome_to_familytrack" translatable="true" >Welcome to FamilyTrack!\n\nIn order to start using app please provide your phone number</string>
+    <string name="label_now_decide_how" translatable="true" >Now decide how you want to start app\n\nYou could create new group, join existing group or decide anytime later</string>
+    <string name="label_radio_create" translatable="true" >CREATE</string>
+    <string name="label_radio_join" translatable="true" >JOIN</string>
+    <string name="label_radio_later" translatable="true" >LATER</string>
+    <string name="label_button_next" translatable="true" >NEXT</string>
+    <string name="label_no_groups_available" translatable="true" >No groups available to join now</string>
+    <string name="label_new_group_details" translatable="true" >You will create new group and become an Admin of this group. You\'ll be able to manage users and control some options</string>
+    <string name="label_button_decide" translatable="true" >DECIDE</string>
+    <string name="label_button_invite" translatable="true" >Invite</string>
+    <string name="label_button_cancel" translatable="true" >Cancel</string>
+    <string name="label_edit_geofence_data" translatable="true" >Edit geofence data</string>
+    <string name="label_button_save" translatable="true" >SAVE</string>
+    <string name="label_lat_long">Lat/Long</string>
+    <string name="label_user_not_a_member_of_any_group" translatable="true" >User not a member of any group</string>
+
+    <string name="hint_family_name" translatable="true" >Family name</string>
+    <string name="hint_given_name" translatable="true" >Given name</string>
+    <string name="hint_display_name" translatable="true" >Display name</string>
+    <string name="hint_phone" translatable="true" >Phone</string>
+    <string name="hint_group_name" translatable="true" >Group name</string>
+    <string name="hint_phone_number" translatable="true" >Enter your phone number</string>
+    <string name="hint_new_group_name" translatable="true" >Enter new group name</string>
+    <string name="hint_enter_search_string" translatable="true" >Start enter name/email/phone number</string>
+    <string name="hint_geofence_name" translatable="true" >Geofence name</string>
+
+    <string name="content_descr_application_logo" translatable="true" >Application logotype</string>
+    <string name="content_descr_application_symbol" translatable="true" >Application symbol</string>
+    <string name="content_descr_sign_in_button" translatable="true" >Sign in button</string>
+    <string name="content_descr_floating_action_button" translatable="true" >Floating action button</string>
+    <string name="content_descr_switch_tracking_mode" translatable="true" >Switch to turn tracking mode on or off</string>
+    <string name="content_descr_location_update_interval" translatable="true" >Location update interval in minutes</string>
+    <string name="content_descr_settings_update_interval" translatable="true" >Settings update interval in minutes</string>
+    <string name="content_descr_location_accuracy_level" translatable="true" >Location accuracy level</string>
+    <string name="content_descr_switch_simulation_mode" translatable="true" >Switch to turn simulation mode on or off</string>
+    <string name="content_descr_user_family_name_icon" translatable="true" >User family name icon</string>
+    <string name="content_descr_user_phone_number_icon" translatable="true" >User phone number icon</string>
+    <string name="content_descr_user_email_icon" translatable="true" >User email icon</string>
+    <string name="content_descr_user_group_name_icon" translatable="true" >User group name icon</string>
+    <string name="content_descr_user_location_icon" translatable="true" >User last know location icon</string>
+    <string name="content_descr_user_photo" translatable="true" >User photo</string>
+    <string name="content_descr_chart" translatable="true" >User history chart</string>
+    <string name="content_descr_time_period_is_off" translatable="true" >Time period is off</string>
+    <string name="content_descr_time_period_is_one_hour" translatable="true" >Time period is one hour</string>
+    <string name="content_descr_time_period_is_eight_hours" translatable="true" >Time period is eight hours</string>
+    <string name="content_descr_time_period_is_one_day" translatable="true" >Time period is one day</string>
+    <string name="content_descr_time_period_is_one_week" translatable="true" >Time period is one week</string>
+    <string name="content_descr_button_to_leave_or_join_group" translatable="true" >Button to leave or join group</string>
+    <string name="content_descr_image_for_contact_visualisation" translatable="true" >Image for contact visualisation</string>
+    <string name="content_descr_image_for_group_visualization" translatable="true" >Image for group visualization</string>
+    <string name="content_descr_options_menu_expander_symbol" translatable="true" >Options menu expander symbol</string>
+    <string name="content_descr_geofence_event_switch" translatable="true" >Switch to include or exclude user for geofence event notifications</string>
+
     <string name="toggle_button_off">OFF</string>
     <string name="toggle_button_1h">1H</string>
     <string name="toggle_button_8h">8H</string>
     <string name="toggle_button_1d">1D</string>
     <string name="toggle_button_1w">1W</string>
-    <string name="label_edit_geofence_data">Edit geofence data</string>
-    <string name="hint_geofence_name">Geofence name</string>
-    <string name="label_button_save">SAVE</string>
-    <string name="label_lat_long">Lat/Long</string>
-    <string name="delete_current_geofence">Delete current geofence</string>
-    <string name="content_descr_button_to_leave_or_join_group">Button to leave or join group</string>
-    <string name="content_descr_image_for_contact_visualisation">Image for contact visualisation</string>
-    <string name="content_descr_image_for_group_visualization">Image for group visualization</string>
-    <string name="content_descr_options_menu_expander_symbol">Options menu expander symbol</string>
-    <string name="content_descr_geofence_event_switch">Switch to include or exclude user for geofence event notifications</string>
-    <string name="label_user_not_a_member_of_any_group">User not a member of any group</string>
+
+    <string name="delete_current_geofence" translatable="true" >Delete current geofence</string>
     <string name="transition_name">userPhoto</string>
+    <string name="msg_settings_updated" translatable="true" >Settings updated</string>
+    <string name="ex_cant_cast_to_popupmenulistener" translatable="true" >List Item ViewModel couldn\'t be casted to PopupMenuListener, event lost</string>
+    <string name="ex_group_with_uuid_not_found" translatable="true" >Group %1$s not found. Unable to return valid list of available contacts</string>
+    <string name="new_simulated_location" translatable="true">New simulated location is %1$f/%2$f(\'%3$s\')</string>
+    <string name="unknown_address" translatable="true">Unknown address</string>
+    <string name="unknown_location" translatable="true">Unknown location</string>
+    <string name="ex_no_current_user_uuid_key" translatable="true">Start intent doesn\'t contain CURRENT_USER_UUID_KEY. Can\'t start settings listener service</string>
+    <string name="ex_user_not_found" translatable="true">User \'%1$s\' not found. Settings cleared</string>
+    <string name="ex_group_uuid_is_empty" translatable="true">groupUuid is empty. No group listener was created</string>
+    <string name="ex_connection_cancelled" translatable="true">Connection canceled:</string>
+    <string name="ex_null_settings_received" translatable="true">Unexpected error: null settings received for group</string>
+    <string name="ex_no_settings_found" translatable="true">No settings found in shared preferences. Can\'t create geofences</string>
+    <string name="ex_no_geofence_in_simulation_mode" translatable="true">Simulation is on or tracking is off. No geofences created</string>
+    <string name="no_access_fine_location" translatable="true">ACCESS_FINE_LOCATION not granted. Unable to use geofences</string>
+    <string name="ex_unknown_geofence_transition" translatable="true">unknown geofenceTransition=</string>
+    <string name="ex_no_active_membership_no_geofence" translatable="true">No active membership found. Geofence notification not created</string>
+    <string name="ex_geofence_error" translatable="true">Geofence event triggered but no zones or current user data found in shared preferences</string>
+    <string name="ex_intent_unknown_command" translatable="true">Intent contains unknown command:</string>
+    <string name="ex_geofence_event_error" translatable="true">Error getting geofence event. Code=</string>
+    <string name="ex_null_settings" translatable="true">Null settings. Can\'t start location service</string>
+    <string name="geofence_notification_label" translatable="true">Geofence notification</string>
+    <string name="events_count" translatable="true">event(s)</string>
+    <string name="geofence_notification_format_string"><![CDATA[%1$s -> \'%2$s\' %3$tD %3$tT]]></string>
+    <string name="phone_number_dialog_title" translatable="true">Phone number</string>
+    <string name="phone_number_dialog_message" translatable="true">To continue please specify a phone number</string>
+    <string name="create_new_group_dialog_title" translatable="true">Create group</string>
+    <string name="create_new_group_dialog_message" translatable="true">In order to create new group please specify name</string>
+    <string name="join_group_dialog_title" translatable="true">Join existing group</string>
+    <string name="join_group_dialog_message" translatable="true">In order to join any group please one from list</string>
+    <string name="ex_user_with_uuid_not_found" translatable="true">User with uuid %1$s not found</string>
+    <string name="geofence_events_deleted" translatable="true">Events deleted</string>
+    <string name="geofence_event_deleted" translatable="true">Event deleted</string>
+    <string name="ex_useruuid_is_empty" translatable="true">Can\'t start viewmodel. UserUuid is empty</string>
+    <string name="ex_null_user_or_no_group" translatable="true">Current user is null or not a member of any group</string>
+    <string name="msg_user_details_updated" translatable="true">User details updated</string>
+    <string name="msg_first_name_is_empty" translatable="true">First name cannot be empty</string>
+    <string name="msg_given_name_is_empty" translatable="true">Given name cannot be empty</string>
+    <string name="msg_display_name_is_empty" translatable="true">Display name cannot be empty</string>
+    <string name="msg_phone_is_empty" translatable="true">Phone cannot be empty</string>
+    <string name="group_not_set" translatable="true">Not set</string>
+    <string name="ex_selected_user_is_null" translatable="true">Selected user is null, can\'t show track</string>
+    <string name="ex_navigator_is_null" translatable="true">mNavigator is null. Navigation is not available</string>
+    <string name="msg_not_a_member" translatable="true">Not joined any group</string>
+    <string name="msg_you_cant_exclude_yourself" translatable="true">You can\'t exclude yourself</string>
+    <string name="unable_to_exclude_user" translatable="true">Unable to exclude user</string>
+    <string name="ex_active_group_for_user_is_null" translatable="true">Active group for %1$s == null. Expected value</string>
+    <string name="msg_user_excluded" translatable="true">User excluded from group</string>
+    <string name="msg_group_changed" translatable="true">Group changed from \'%1$s\' to \'%2$s\'</string>
+    <string name="msg_group_created" translatable="true">Group \'%1$s\' created</string>
+    <string name="ex_no_active_group_for_useruuid" translatable="true">Unexpected error. User %1$s should have active group to perform \'startChangeMembership\' action</string>
+    <string name="ex_group_uuid_not_found" translatable="true">Unexpected error. Group %1$s not found</string>
+    <string name="new_zone_name" translatable="true">New Zone</string>
+    <string name="saving_geofence_dialog_title" translatable="true">Saving geofence</string>
+    <string name="ex_saving_zone_in_unknown_mode" translatable="true">Attempt to save zone in unknown mode</string>
+    <string name="msg_select_a_point" translatable="true">Please select a point on map to specify geofence center</string>
+    <string name="msg_specify_geofence_name" translatable="true">Please specify geofence name</string>
+    <string name="msg_specify_zone_radius" translatable="true"><![CDATA[Please specify geofence radius (should be >0)]]></string>
+    <string name="msg_zone_created" translatable="true">Zone created</string>
+    <string name="msg_zone_updated" translatable="true">Zone updated</string>
+    <string name="ex_zone_key_is_empty" translatable="true">Zone key is empty or mode != EM_EDIT. Unable to remove zone</string>
+    <string name="msg_zone_removed" translatable="true">Zone removed</string>
+    <string name="please_specify_group_name">Please specify a name for new group</string>
+    <string name="label_button_ok">Ok</string>
+    <string name="dialog_tag">dialog</string>
+    <string name="button_create_label">CREATE</string>
+    <string name="button_cancel_label">CANCEL</string>
+    <string name="select_users_dialog_title">Select users to invite</string>
+    <string name="other_chart_label">Other</string>
+    <string name="most_visited_places_label">Most visited places</string>
+    <string name="leave_group_dialog_title">Leaving group</string>
+    <string name="leave_group_dialog_message">Please note that you are the one and only admin in group.\n\nDelegate admin role to somebody else before leaving this group</string>
+    <string name="remove_zone_dialog_title">Removing zone</string>
+    <string name="remove_zone_dialog_mesage">Are you sure you want to remove zone \'%1$s\'?</string>
+    <string name="sign_in_failed_message">Sign in failed</string>
+    <string name="admins_only_message">ADMINS ONLY</string>
+    <string name="own_details_only_message">You could edit own details only</string>
+    <string name="ex_unsupported_menu_id">Unsupported menu id=</string>
+    <string name="settings_toolbar_title">Settings</string>
+    <string name="user_details_toolbar_title">User details</string>
+    <string name="remove_user_dialog_title">Removing user</string>
+    <string name="remove_user_dialog_message">Are you sure you want to remove user \'%1$s\' from group \'%2$s\' ? In order to join this group later user should be invited again</string>
+    <string name="google_api_client_connection_failed">Google Api Client connection failed</string>
+    <string name="ex_check_web_client_id">CHECK WEB CLIENT ID. ID TOKEN = NULL</string>
+    <string name="warning_dialog_title">Warning</string>
+    <string name="network_not_available">NETWORK NOT AVAILABLE</string>
+    <string name="ex_check_location_mode">Unable to use geofences. Check location settings on phone, should be High accuracy mode</string>
+    <string name="ex_non_null_data_expected">non-null data expected</string>
 </resources>

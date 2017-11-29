@@ -16,6 +16,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.GenericTypeIndicator;
 import com.google.firebase.database.ValueEventListener;
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackDbRefsHelper;
@@ -127,8 +128,7 @@ public class FirebaseListenersService
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return null;
     }
 
     @Override
@@ -142,7 +142,7 @@ public class FirebaseListenersService
         }
 
         if (mCurrentUserUuid.equals("")) {
-            Timber.v("Start intent doesn't contain CURRENT_USER_UUID_KEY. Can't start settings listener service");
+            Timber.v(getString(R.string.ex_no_current_user_uuid_key));
             return result;
         }
 
@@ -158,7 +158,7 @@ public class FirebaseListenersService
                     initGoogleApiClient();
                 } else {
                     // remove settings if user not found or doesn't exist as member of any group
-                    Timber.v(String.format("User '%1$s' not found. Settings cleared", mCurrentUserUuid));
+                    Timber.v(String.format(getString(R.string.ex_user_not_found), mCurrentUserUuid));
                     SharedPrefsUtil.removeActiveGroup(FirebaseListenersService.this);
                 }
             }
@@ -167,8 +167,8 @@ public class FirebaseListenersService
     }
 
     /**
-     *
-     * @param groupUuid
+     * Creates listener for geofence events of specifyed group
+     * @param groupUuid - group key to observe events
      */
     private void createGroupGeofencesListener(String groupUuid) {
         if (mGroupGeofencesListener != null) {
@@ -241,7 +241,7 @@ public class FirebaseListenersService
                         }
                     }
                 } else {
-                    Timber.v("Unexpected error: null user received for key " + userUuid);
+                    Timber.v(String.format(getString(R.string.ex_user_not_found),userUuid));
                 }
             }
 
@@ -264,7 +264,7 @@ public class FirebaseListenersService
         }
 
         if (groupUuid == null || groupUuid.equals("")) {
-            Timber.v("groupUuid is empty. No group listener was created");
+            Timber.v(getString(R.string.ex_group_uuid_is_empty));
             SharedPrefsUtil.removeActiveGroup(FirebaseListenersService.this);
             notifyWidgets();
             return;
@@ -303,7 +303,7 @@ public class FirebaseListenersService
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Timber.e("Connection canceled: " + databaseError.getMessage());
+                Timber.e(getString(R.string.ex_connection_cancelled) + databaseError.getMessage());
             }
         };
 
@@ -336,7 +336,7 @@ public class FirebaseListenersService
                 result = dataSnapshot.getValue(genericTypeIndicator);
 
                 if (result != null) {
-                    Timber.v("Creating notifications for " + result.size() + " events ");
+                    //Timber.v("Creating notifications for " + result.size() + " events ");
                     NotificationUtil.createNotifications(FirebaseListenersService.this,
                             mCurrentUserUuid, result);
                 }
@@ -374,19 +374,10 @@ public class FirebaseListenersService
                 Settings oldSettings = SharedPrefsUtil.getSettings(FirebaseListenersService.this);
                 Settings settings = dataSnapshot.getValue(Settings.class);
                 updateTrackingServiceState(oldSettings, settings);
-/*
-                if (oldSettings != null &&
-                        !oldSettings.getIsTrackingOn() &&
-                        settings.getIsTrackingOn()) {
-                    // if tracking mode was off and now is on - we need to place
-                    // group geofences into shared preferences to recreate them
-                    createGeofencesInSharedPrefs(activeGroupUuid);
-                }
-*/
                 if (settings != null) {
                     SharedPrefsUtil.setSettings(FirebaseListenersService.this, settings);
                 } else {
-                    Timber.v("Unexpected error: null settings received for group " + activeGroupUuid);
+                    Timber.v(getString(R.string.ex_null_settings_received) + activeGroupUuid);
                 }
             }
 
@@ -427,57 +418,6 @@ public class FirebaseListenersService
                         0, 5);
             }
         }
-/*
-
-        if (oldSettings == null) {
-            if (settings.getIsTrackingOn()) {
-                if (settings.getIsSimulationOn()) {
-                    TrackingJobService.startJobService(this, mCurrentUserUuid,
-                            0, 5);
-                } else {
-                    runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
-                            TrackingService.COMMAND_START, mCurrentUserUuid);
-                }
-            }
-            return;
-        }
-
-        if (oldSettings.getIsTrackingOn() && !settings.getIsTrackingOn()) {
-            // stop tracking services
-            TrackingJobService.stopJobService(this);
-            runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
-                    TrackingService.COMMAND_STOP, mCurrentUserUuid);
-            return;
-        }
-
-        if (!oldSettings.getIsTrackingOn() && settings.getIsTrackingOn()) {
-            if (settings.getIsSimulationOn()) {
-                TrackingJobService.startJobService(this, mCurrentUserUuid,
-                        0, 5);
-            } else {
-                runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
-                        TrackingService.COMMAND_START, mCurrentUserUuid);
-            }
-            return;
-        }
-
-        if (oldSettings.getIsTrackingOn() && settings.getIsTrackingOn()) {
-            if (oldSettings.getIsSimulationOn() && !settings.getIsSimulationOn()) {
-                // switch from simulation tracking mode to real tracking mode
-                TrackingJobService.stopJobService(this);
-                runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
-                        TrackingService.COMMAND_START, mCurrentUserUuid);
-            } else {
-                if (!oldSettings.getIsSimulationOn() && settings.getIsSimulationOn()) {
-                    // switch from real tracking mode to simulation tracking mode
-                    runGeofenceIntentServiceCommand(new Intent(this, TrackingService.class),
-                            TrackingService.COMMAND_STOP, mCurrentUserUuid);
-                    TrackingJobService.startJobService(this, mCurrentUserUuid,
-                            0, 5);
-                }
-            }
-        }
-*/
     }
 
     private void stopTrackingService(String currentUserUuid) {
@@ -502,26 +442,6 @@ public class FirebaseListenersService
         this.startService(intent);
     }
 
-/*
-    */
-/**
-     * Reads list of geofences from specified group and stores them in shared preferences
-     * @param groupUuid - group uuid which geofences should be read
-     *//*
-
-    private void createGeofencesInSharedPrefs(String groupUuid) {
-        mDataSource.getGroupByUuid(groupUuid, false,
-                new FamilyTrackDataSource.GetGroupByUuidCallback() {
-            @Override
-            public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
-                if (result.getData() != null) {
-                    SharedPrefsUtil.setGeofences(FirebaseListenersService.this,
-                            result.getData().getGeofences());
-                }
-            }
-        });
-    }
-*/
 
     /**
      * Notify widgets to update list of users

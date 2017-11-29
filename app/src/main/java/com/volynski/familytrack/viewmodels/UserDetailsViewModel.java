@@ -14,6 +14,7 @@ import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Membership;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.views.navigators.UserDetailsNavigator;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
@@ -50,23 +51,7 @@ public class UserDetailsViewModel extends AbstractViewModel {
                                 String currentUserUuid,
                                 FamilyTrackDataSource dataSource) {
         super(context, currentUserUuid, dataSource);
-        /*
-        mUserUuid = userUuid;
-        mCurrentUserUuid = currentUserUuid;
-        mContext = context.getApplicationContext();
-        mRepository = dataSource;
-        mNavigator = navigator;
-*/
-
         setupSpinnerEntries();
-/*
-        userRole.addOnPropertyChangedCallback(new OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(android.databinding.Observable sender, int propertyId) {
-                int i = 0;
-            }
-        });
-*/
     }
 
     private void setupSpinnerEntries() {
@@ -79,7 +64,7 @@ public class UserDetailsViewModel extends AbstractViewModel {
      */
     public void start() {
         if (mUserUuid.equals("")) {
-            Timber.e("Can't start viewmodel. UserUuid is empty");
+            Timber.e(mContext.getString(R.string.ex_useruuid_is_empty));
             return;
         }
 
@@ -94,7 +79,7 @@ public class UserDetailsViewModel extends AbstractViewModel {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
                 if (result.getData() == null) {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                     isDataLoading.set(false);
                     return;
                 }
@@ -108,7 +93,7 @@ public class UserDetailsViewModel extends AbstractViewModel {
                         isDataLoading.set(false);
                         User u = result.getData();
                         if (u == null) {
-                            Timber.v("User with uuid=" + mUserUuid + " not found ");
+                            Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mUserUuid));
                             return;
                         }
                         if (u.getActiveMembership() != null) {
@@ -116,7 +101,7 @@ public class UserDetailsViewModel extends AbstractViewModel {
                             mActiveGroupUuid = u.getActiveMembership().getGroupUuid();
                             userRole.set(u.getActiveMembership().getRoleName());
                         } else {
-                            activeGroup.set("Not set");
+                            activeGroup.set(mContext.getString(R.string.group_not_set));
                         }
                         user.set(u);
                         distance.set(Location.getDistance(mCurrentUser, u));
@@ -127,13 +112,18 @@ public class UserDetailsViewModel extends AbstractViewModel {
     }
 
     public void updateUser() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
+
         if (!validateUserData()) {
             return;
         }
         mRepository.updateUser(user.get(), new FamilyTrackDataSource.UpdateUserCallback() {
             @Override
             public void onUpdateUserCompleted(FirebaseResult<String> result) {
-                mNavigator.dbopCompleted(result.getData(), "User details updated");
+                mNavigator.dbopCompleted(result.getData(), mContext.getString(R.string.msg_user_details_updated));
             }
         });
     }
@@ -144,25 +134,25 @@ public class UserDetailsViewModel extends AbstractViewModel {
             return true;
         }
         if (user.get().getFamilyName().equals("")) {
-            familyNameError.set("First name cannot be empty");
+            familyNameError.set(mContext.getString(R.string.msg_first_name_is_empty));
             nErrors++;
         } else {
             familyNameError.set(null);
         }
         if (user.get().getGivenName().equals("")) {
-            givenNameError.set("Given name cannot be empty");
+            givenNameError.set(mContext.getString(R.string.msg_given_name_is_empty));
             nErrors++;
         } else {
             givenNameError.set(null);
         }
         if (user.get().getDisplayName().equals("")) {
-            displayNameError.set("Display name cannot be empty");
+            displayNameError.set(mContext.getString(R.string.msg_display_name_is_empty));
             nErrors++;
         } else {
             displayNameError.set(null);
         }
         if (user.get().getPhone().equals("")) {
-            phoneError.set("Phone cannot be empty");
+            phoneError.set(mContext.getString(R.string.msg_phone_is_empty));
             nErrors++;
         } else {
             phoneError.set(null);

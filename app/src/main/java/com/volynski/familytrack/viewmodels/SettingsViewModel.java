@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.BaseObservable;
 import android.databinding.ObservableField;
 
+import com.github.mikephil.charting.utils.Utils;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
@@ -11,6 +12,7 @@ import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.Location;
 import com.volynski.familytrack.data.models.firebase.Settings;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.views.navigators.SettingsNavigator;
 import com.volynski.familytrack.views.navigators.UserDetailsNavigator;
 
@@ -74,6 +76,10 @@ public class SettingsViewModel extends AbstractViewModel {
     }
 
     public void updateSettings() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
         if (mCurrentUser.getActiveMembership() != null) {
             String groupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
             mRepository.updateSettingsByGroupUuid(groupUuid, settings.get(),

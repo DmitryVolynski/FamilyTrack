@@ -27,9 +27,9 @@ public class TrackingJobService extends JobService {
 
     @Override
     public boolean onStartJob(final JobParameters job) {
-        Timber.v("onStartJob");
+        //Timber.v("onStartJob");
         if (mIsStarted) {
-            Timber.v("Already started");
+            //Timber.v("Already started");
             return true;
         }
 
@@ -40,7 +40,7 @@ public class TrackingJobService extends JobService {
             public void onTaskCompleted(int newInterval) {
                 // reschedule service if new interval > 0
                 if (newInterval > 0) {
-                    Timber.v("Rescheduling service with new interval=" + newInterval);
+                    //Timber.v("Rescheduling service with new interval=" + newInterval);
                     SharedPrefsUtil.setTrackingInterval(TrackingJobService.this, newInterval);
                     rescheduleService(userUuid, newInterval);
                 }
@@ -62,7 +62,7 @@ public class TrackingJobService extends JobService {
 
     @Override
     public boolean onStopJob(JobParameters job) {
-        Timber.v("onStopJob");
+        //Timber.v("onStopJob");
         FirebaseJobDispatcher dispatcher =
                 new FirebaseJobDispatcher(new GooglePlayDriver(this));
         dispatcher.cancel(TrackingJobService.TAG);

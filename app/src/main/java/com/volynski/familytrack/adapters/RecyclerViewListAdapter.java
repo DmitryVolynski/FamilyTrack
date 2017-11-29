@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.viewmodels.PopupMenuListener;
 
 import java.util.List;
@@ -147,7 +148,7 @@ public class RecyclerViewListAdapter<T>
             if (listener != null) {
                 listener.menuCommand(item, binding.getRoot());
             } else {
-                Timber.e("List Item ViewModel couldn't be casted to PopupMenuListener, event lost");
+                Timber.e(mContext.getString(R.string.ex_cant_cast_to_popupmenulistener));
             }
             return false;
         }

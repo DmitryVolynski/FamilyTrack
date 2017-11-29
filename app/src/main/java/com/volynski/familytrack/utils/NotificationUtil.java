@@ -35,9 +35,9 @@ public class NotificationUtil {
                                            Map<String, GeofenceEvent> events) {
         NotificationCompat.InboxStyle inboxStyle =
                 new NotificationCompat.InboxStyle();
-        inboxStyle.setBigContentTitle("Geofence notification");
+        inboxStyle.setBigContentTitle(context.getString(R.string.geofence_notification_label));
         if (events.size() > 0) {
-            inboxStyle.setSummaryText(events.size() + " event(s)");
+            inboxStyle.setSummaryText(events.size() + context.getString(R.string.events_count));
         }
 
         Intent intent = new Intent(context, MainActivity.class);
@@ -53,7 +53,7 @@ public class NotificationUtil {
             GeofenceEvent event = events.get(key);
             Calendar ts = Calendar.getInstance();
             ts.setTimeInMillis(event.getTimestamp());
-            inboxStyle.addLine(String.format("%1$s entered '%2$s' %3$tD %3$tT",
+            inboxStyle.addLine(String.format(context.getString(R.string.geofence_notification_format_string),
                     event.getDisplayName(), event.getZone().getName(), ts));
         }
 
@@ -64,7 +64,7 @@ public class NotificationUtil {
                         .setGroup(NOTIFICATION_GROUP_KEY)
                         .setStyle(inboxStyle)
                         .addAction(new NotificationCompat.Action(R.mipmap.ic_no_user_photo, "VIEW", pIntent))
-                        .setContentTitle("Geofence notification");
+                        .setContentTitle(context.getString(R.string.geofence_notification_label));
 
         // Creates an explicit intent for an Activity in your app
         Intent resultIntent = new Intent(context, MainActivity.class);

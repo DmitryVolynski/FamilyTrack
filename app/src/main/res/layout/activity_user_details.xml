@@ -61,7 +61,7 @@
                         android:text="@{viewmodel.user.displayName}"
                         android:textAppearance="@style/TextAppearance.AppCompat.Display1"
                         android:transitionName="userName"
-                        tools:text="@string/test_user_display_name" />
+                        tools:text="@string/label_test_user_display_name" />
 
                 </LinearLayout>
                 <android.support.v7.widget.Toolbar
@@ -191,7 +191,7 @@
                         android:layout_gravity="center_vertical"
                         android:layout_marginEnd="@dimen/user_details_edit_field_side_margin"
                         android:layout_marginStart="@dimen/user_details_edit_field_side_margin"
-                        tools:text="@string/test_email"
+                        tools:text="@string/label_test_email"
                         android:text="@={viewmodel.user.email}" />
                 </FrameLayout>
                 <FrameLayout
@@ -233,7 +233,7 @@
                         android:layout_height="wrap_content"
                         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                         android:text="@{viewmodel.activeGroup}"
-                        tools:text="@string/test_group_name" />
+                        tools:text="@string/label_test_group_name" />
                 </FrameLayout>
                 <FrameLayout style="@style/UserDetails.ItemFrameLayout">
                     <ImageView

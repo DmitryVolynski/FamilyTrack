@@ -11,16 +11,19 @@ import timber.log.Timber;
  */
 
 public class IntentUtil {
+    private final static String KEY_NOT_FOUND = "String with key %1$s not found";
+    private final static String NULL_INTENT = "Can't extract key %1$s from null intent";
+
     public static String extractValueFromIntent(Intent intent, String key) {
         String result = "";
         if (intent != null) {
             if (intent.hasExtra(key)) {
                 result = intent.getStringExtra(key);
             } else {
-                Timber.e("String with key=" + key + " not found in intent");
+                Timber.e(String.format(KEY_NOT_FOUND, key));
             }
         } else {
-            Timber.e("Can't extract key=" + key + " from null intent");
+            Timber.e(String.format(NULL_INTENT, key));
         }
         return result;
     }
@@ -31,10 +34,10 @@ public class IntentUtil {
             if (bundle.containsKey(key)) {
                 result = bundle.getString(key);
             } else {
-                Timber.e("String with key=" + key + " not found in intent");
+                Timber.e(String.format(KEY_NOT_FOUND, key));
             }
         } else {
-            Timber.e("Can't extract key=" + key + " from null bundle");
+            Timber.e(String.format(NULL_INTENT, key));
         }
         return result;
     }

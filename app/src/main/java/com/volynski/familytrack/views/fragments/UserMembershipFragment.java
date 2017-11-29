@@ -65,17 +65,6 @@ public class UserMembershipFragment extends Fragment {
         return result;
     }
 
-/*    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (mInviteUsersDialog != null &&
-                mInviteUsersDialog.getDialog() != null &&
-                mInviteUsersDialog.getDialog().isShowing()) {
-            // if invite dialog is visible - save the state of dialog & data
-            mInviteUsersDialog.onSaveInstanceState(outState);
-        }
-    }*/
-
     public void setViewModel(UserMembershipViewModel viewModel) {
         this.mViewModel = viewModel;
     }
@@ -86,7 +75,6 @@ public class UserMembershipFragment extends Fragment {
         if (savedInstanceState != null &&
                 savedInstanceState.containsKey(StringKeys.NEW_GROUP_DIALOG_VISIBILITY_KEY) &&
                 savedInstanceState.getBoolean(StringKeys.NEW_GROUP_DIALOG_VISIBILITY_KEY)) {
-            //mGroupName = savedInstanceState.getString(StringKeys.NEW_GROUP_NAME_KEY);
             mIsPopupViewVisible = true;
             mCreateGroupDialog = (CreateGroupDialogFragment) getActivity()
                     .getSupportFragmentManager()
@@ -161,8 +149,6 @@ public class UserMembershipFragment extends Fragment {
         mAdapter = new RecyclerViewListAdapter(this.getContext(), mViewModel.viewModels,
                 new GroupsAndUsersItemType(), BR.viewmodel);
 
-        //mAdapter.enablePopupMenu(R.menu.user_popup_menu, R.id.imageview_userslistitem_popupsymbol);
-
         mBinding.recyclerviewFragmentusermembership.setAdapter(mAdapter);
         mBinding.setViewmodel(mViewModel);
 
@@ -187,16 +173,15 @@ public class UserMembershipFragment extends Fragment {
 
     private void showLeaveGroupWarningDialog() {
         final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
-        confirmDialog.setParms("Leaving group",
-                "Please note that you are the one and only admin in group.\n\n" +
-                "Delegate admin role to somebody else before leaving this group",
-                "Ok", new DialogInterface.OnClickListener() {
+        confirmDialog.setParms(getString(R.string.leave_group_dialog_title),
+                getString(R.string.leave_group_dialog_message),
+                getString(R.string.label_button_ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         confirmDialog.dismiss();
                     }
                 });
-        confirmDialog.show(getActivity().getFragmentManager(), "dialog");
+        confirmDialog.show(getActivity().getFragmentManager(), getString(R.string.dialog_tag));
     }
 
     public void createNewGroupDialog(String groupName) {

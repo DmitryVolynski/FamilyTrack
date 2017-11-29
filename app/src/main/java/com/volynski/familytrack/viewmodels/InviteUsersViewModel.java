@@ -11,10 +11,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.lang.reflect.Array;
@@ -87,12 +89,16 @@ public class InviteUsersViewModel
     }
 
     public void doInvite() {
-        Timber.v("Do invite command");
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
+
         mRepository.inviteUsers(mCurrentUser.getActiveMembership().getGroupUuid(),
                 getUsersFromViewModels(viewModels), new FamilyTrackDataSource.InviteUsersCallback() {
                     @Override
                     public void onInviteUsersCompleted(FirebaseResult<String> result) {
-                        Timber.v("Invite done");
+                        //Timber.v("Invite done");
                         mNavigator.inviteCompleted();
                         loadUsersList();
                     }
@@ -131,7 +137,7 @@ public class InviteUsersViewModel
     public void start(String currentUserUuid) {
         mCurrentUserUuid = currentUserUuid;
         if (mCurrentUserUuid.equals("")) {
-            Timber.e("Can't start viewmodel. UserUuid is empty");
+            Timber.e(mContext.getString(R.string.ex_useruuid_is_empty));
             return;
         }
 
@@ -143,7 +149,7 @@ public class InviteUsersViewModel
                     mCurrentUser = result.getData();
                     loadUsersList();
                 } else {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                 }
             }
         });
@@ -161,7 +167,7 @@ public class InviteUsersViewModel
                 }
             });
         } else {
-            Timber.v("mCurrentUser == null || mCurrentUser.getActiveMembership() == null");
+            Timber.v(mContext.getString(R.string.ex_null_user_or_no_group));
         }
     }
 

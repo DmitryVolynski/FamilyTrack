@@ -7,6 +7,7 @@ import android.databinding.ObservableArrayMap;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableList;
 
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.Group;
@@ -70,7 +71,7 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
     public void start() {
 
         if (mCurrentUserUuid.equals("")) {
-            Timber.e("Can't start viewmodel. UserUuid is empty");
+            Timber.e(mContext.getString(R.string.ex_useruuid_is_empty));
             return;
         }
 
@@ -86,7 +87,7 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
                         isDataLoading.set(false);
                     }
                 } else {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                     isDataLoading.set(false);
                 }
             }
@@ -147,19 +148,21 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
 
     public void selectUser(User user) {
         mSelectedUser = user;
+        for (UserListItemViewModel vm : viewModels) {
+            vm.checked.set(vm.getUser().getUserUuid().equals(user.getUserUuid()));
+        }
         setupChart();
     }
 
     private void setupChart() {
         if (mSelectedUser == null) {
-            Timber.v("Selected user==null, can't show track");
+            Timber.v(mContext.getString(R.string.ex_selected_user_is_null));
             return;
         }
 
-        Calendar now = Calendar.getInstance();
-        Calendar start = Calendar.getInstance();
-        start.add(Calendar.DATE, -20);
-        mRepository.getUserTrack(mSelectedUser.getUserUuid(), start.getTimeInMillis(), now.getTimeInMillis(),
+        long now = Calendar.getInstance().getTimeInMillis();
+        long start = getTrackPeriodStart();
+        mRepository.getUserTrack(mSelectedUser.getUserUuid(), start, now,
                 new FamilyTrackDataSource.GetUserTrackCallback() {
                     @Override
                     public void onGetUserTrackCompleted(FirebaseResult<List<Location>> result) {
@@ -180,7 +183,7 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
         userStatistic.clear();
         HashMap<String, Integer> tmp = new HashMap<>();
         if (data == null) {
-            Timber.v("prepareChartData: non-null data expected");
+            Timber.v(mContext.getString(R.string.ex_non_null_data_expected));
             return;
         }
         for (Location loc : data) {
@@ -199,5 +202,40 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
         }
         int i = 0;
     }
+
+    private long getTrackPeriodStart() {
+        String key = "";
+
+        for (String k : toggleButtons.keySet()) {
+            if (toggleButtons.get(k)) {
+                key = k;
+                break;
+            }
+        }
+
+        long result = -1;
+        Calendar now = Calendar.getInstance();
+        switch (key) {
+            case "OFF":
+                result = 0;
+                break;
+            case "1H":
+                now.add(Calendar.HOUR, -1); ;
+                break;
+            case "8H":
+                now.add(Calendar.HOUR, -8); ;
+                break;
+            case "1D":
+                now.add(Calendar.DATE, -1); ;
+                break;
+            case "1W":
+                now.add(Calendar.DATE, -7); ;
+                break;
+            default:
+                result = 0;
+        }
+        return (result < 0 ? now.getTimeInMillis() : 0);
+    }
+
 
 }

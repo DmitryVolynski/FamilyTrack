@@ -44,7 +44,6 @@ public class UserListFragment
 
     private UserListViewModel mViewModel;
     private String mCurrentUserUuid;
-    //private UserListNavigator mUserListNavigator;
     private GridLayoutManager mLayoutManager;
 
     FragmentUserListBinding mBinding;
@@ -67,7 +66,7 @@ public class UserListFragment
         super.onResume();
         ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_user_list);
         if (getArguments() == null) {
-            Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
+            Timber.e(getString(R.string.ex_no_user_uuid_in_intent));
             return;
         }
         mCurrentUserUuid = getArguments().getString(StringKeys.CURRENT_USER_UUID_KEY);
@@ -191,6 +190,7 @@ public class UserListFragment
                         mCurrentUserUuid,
                         mViewModel.getNavigator());
 
+        viewModel.snackbarText.addOnPropertyChangedCallback(mSnackbarCallback);
         viewModel.setNavigator(mViewModel.getNavigator());
         mInviteUsersDialog = (InviteUsersDialogFragment) getActivity()
                 .getSupportFragmentManager()
@@ -204,16 +204,6 @@ public class UserListFragment
         } else {
             mInviteUsersDialog.setViewModel(viewModel);
         }
-        //mInviteUsersDialog.show();
-
-/*
-        InviteUsersViewModel viewModel = new InviteUsersViewModel(
-                getContext(),
-                mCurrentUserUuid,
-                new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(getContext()), getContext()),
-                mViewModel.getNavigator());
-*/
-
     }
 
     public void dismissInviteUsersDialog() {
@@ -229,14 +219,4 @@ public class UserListFragment
     public void setCurrentUserUuid(String currentUserUuid) {
         this.mCurrentUserUuid = currentUserUuid;
     }
-
-/*
-    public UserListNavigator getNavigator() {
-        return mUserListNavigator;
-    }
-
-    public void setNavigator(UserListNavigator userListNavigator) {
-        this.mUserListNavigator = userListNavigator;
-    }
-*/
 }

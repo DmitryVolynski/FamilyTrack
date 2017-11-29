@@ -75,11 +75,6 @@ public class FirstTimeUserDialogFragment
         outState.putBoolean(StringKeys.FIRST_TIME_USER_DIALOG_KEY, true);
     }
 
-/*    @Override
-    public void onClick(int itemId, View v) {
-        mViewModel.selectGroup(itemId);
-    }*/
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
@@ -95,21 +90,17 @@ public class FirstTimeUserDialogFragment
     public static FirstTimeUserDialogFragment newInstance() {
 
         FirstTimeUserDialogFragment result = new FirstTimeUserDialogFragment();
-
-/*
-        FirstTimeUserViewModel viewModel =
-                new FirstTimeUserViewModel(context, signInAccount,
-                        new FamilyTrackRepository(SharedPrefsUtil.getGoogleAccountIdToken(context), context));
-        viewModel.phoneNumber.set(phoneNumber);
-        viewModel.setNavigator(navigator);
-        result.setViewModel(viewModel);
-*/
         return result;
     }
 
     @Override
     public void onResume() {
         super.onResume();
+
+        int width = getResources().getDimensionPixelSize(R.dimen.first_time_user_dialog_width);
+        int height = getResources().getDimensionPixelSize(R.dimen.first_time_user_dialog_height);
+        getDialog().getWindow().setLayout(width, height);
+
         mViewModel.start();
     }
 

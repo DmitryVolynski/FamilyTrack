@@ -14,13 +14,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 //import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 //import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.credentials.Credential;
 import com.google.android.gms.auth.api.credentials.HintRequest;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
@@ -30,12 +33,14 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.volynski.familytrack.BuildConfig;
 import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
@@ -45,6 +50,7 @@ import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.dialogs.SimpleDialogFragment;
 import com.volynski.familytrack.services.FirebaseListenersService;
 import com.volynski.familytrack.utils.MyDebugTree;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.viewmodels.FirstTimeUserViewModel;
 import com.volynski.familytrack.views.fragments.FirstTimeUserDialogFragment;
@@ -54,8 +60,8 @@ import com.volynski.familytrack.views.navigators.LoginNavigator;
 import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity implements
-        ConnectionCallbacks,
-        OnConnectionFailedListener,
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener,
         LoginNavigator,
         FamilyTrackDataSource.GetUserByEmailCallback {
@@ -80,6 +86,7 @@ public class LoginActivity extends AppCompatActivity implements
     private GoogleSignInAccount mGoogleSignInAccount;
     private boolean phoneHintStarted;
     private boolean mOrientationChanged;
+    private GoogleSignInClient mGoogleSignInClient;
 
 
     @Override
@@ -95,26 +102,27 @@ public class LoginActivity extends AppCompatActivity implements
         mSignInButton.setOnClickListener(this);
         mSignInButton.setSize(SignInButton.SIZE_STANDARD);
 
+        if (!NetworkUtil.networkUp(this)) {
+            Toast.makeText(this, getString(R.string.network_not_available), Toast.LENGTH_LONG).show();
+            finish();
+        }
+
         GoogleSignInOptions gso = new
                 GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("994450542296-cnp3qee96s737dbggug542af6dssih2m.apps.googleusercontent.com")
+                .requestIdToken(BuildConfig.WEB_CLIENT_ID_KEY)
                 .requestEmail()
                 .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .enableAutoManage(this, this )
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .addApi(Auth.CREDENTIALS_API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
                 .build();
+        mGoogleApiClient.connect();
         mOrientationChanged = (savedInstanceState != null);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        getLocationPermission();
-        checkIfAlreadySignedIn();
     }
 
     private void checkIfAlreadySignedIn() {
@@ -145,6 +153,7 @@ public class LoginActivity extends AppCompatActivity implements
 
         }
     }
+
     // Construct a request for phone numbers and show the picker
     private void requestHint() {
         if (phoneHintStarted) return;
@@ -165,12 +174,15 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        getLocationPermission();
+        checkIfAlreadySignedIn();
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        int i = 0;
+        Toast.makeText(this, R.string.google_api_client_connection_failed,
+                Toast.LENGTH_LONG).show();
+        finish();
     }
 
     @Override
@@ -179,41 +191,49 @@ public class LoginActivity extends AppCompatActivity implements
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             mSignInButton.setEnabled(false);
             mGoogleSignInAccount = result.getSignInAccount();
-
-            String idToken = mGoogleSignInAccount.getIdToken();
-            SharedPrefsUtil.setGoogleAccountIdToken(this, idToken);
-
-            Timber.v("firebaseAuthWithGooogle:" + idToken);
-            AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-            mFirebaseAuth = FirebaseAuth.getInstance();
-            if (mFirebaseAuth.getCurrentUser() == null) {
-                mFirebaseAuth.signInWithCredential(credential)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                Timber.v(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-                                startMainActivity();
-                                // If sign in fails, display a message to the user. If sign in succeeds
-                                // the auth state listener will be notified and logic to handle the
-                                // signed in user can be handled in the listener.
-                                if (!task.isSuccessful()) {
-                                    Log.w(TAG, "signInWithCredential", task.getException());
-                                }
-                            }
-                        });
-            } else {
-                startMainActivity();
-            }
+            loginToFirebase();
         } else {
             // Signed out, show unauthenticated UI.
-            //updateUI(false);
-            //mStatus.setText("Sign in failed");
-            int i = 0;
+            Toast.makeText(this, R.string.sign_in_failed_message, Toast.LENGTH_LONG).show();
+            finish();
+        }
+    }
+
+    private void loginToFirebase() {
+        String idToken = mGoogleSignInAccount.getIdToken();
+        if (idToken == null) {
+            Toast.makeText(this, R.string.ex_check_web_client_id, Toast.LENGTH_LONG).show();
+            finish();
+            return;
+        }
+
+        SharedPrefsUtil.setGoogleAccountIdToken(this, idToken);
+
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        if (mFirebaseAuth.getCurrentUser() == null) {
+            mFirebaseAuth.signInWithCredential(credential)
+                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            //Timber.v(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
+                            startMainActivity();
+                            // If sign in fails, display a message to the user. If sign in succeeds
+                            // the auth state listener will be notified and logic to handle the
+                            // signed in user can be handled in the listener.
+                            if (!task.isSuccessful()) {
+                                Timber.e("signInWithCredential", task.getException());
+                                Toast.makeText(LoginActivity.this, "Login to Firebase failed", Toast.LENGTH_LONG).show();
+                                finish();
+                            }
+                        }
+                    });
+        } else {
+            startMainActivity();
         }
     }
 
@@ -321,7 +341,6 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
-        // TODO: проверить необходимость закомментированного условия
         if (result.getData() == null || result.getData().getPhotoUrl().equals(StringKeys.CREATED_FROM_CONTACTS_KEY)) {
             if (mOrientationChanged) {
                 showFirstTimeUserDialog("");
@@ -381,13 +400,13 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void showPopupDialog(String title, String message) {
         final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
-        confirmDialog.setParms(title, message, "Ok",
+        confirmDialog.setParms(title, message, getString(R.string.label_button_ok),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         confirmDialog.dismiss();
                     }
                 });
-        confirmDialog.show(getFragmentManager(), "dialog");
+        confirmDialog.show(getFragmentManager(), getString(R.string.dialog_tag));
     }
 }

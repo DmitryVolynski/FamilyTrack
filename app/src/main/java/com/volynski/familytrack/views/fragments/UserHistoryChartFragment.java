@@ -79,7 +79,9 @@ public class UserHistoryChartFragment extends Fragment implements View.OnClickLi
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_history_chart,
                 container,
@@ -90,7 +92,8 @@ public class UserHistoryChartFragment extends Fragment implements View.OnClickLi
 
         boolean isLandscape = getResources().getBoolean(R.bool.is_landscape);
         mLayoutManager = new LinearLayoutManager(getContext(),
-                (isLandscape ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL), false);
+                (isLandscape ? LinearLayoutManager.VERTICAL : LinearLayoutManager.HORIZONTAL),
+                false);
 
         mBinding.recyclerviewFrguserhistorychart.setLayoutManager(mLayoutManager);
 
@@ -134,17 +137,15 @@ public class UserHistoryChartFragment extends Fragment implements View.OnClickLi
         }
 
         if (c > maxSeparateValues) {
-            entries.add(new PieEntry(otherPlacesCount, "Other"));
+            entries.add(new PieEntry(otherPlacesCount, getString(R.string.other_chart_label)));
         }
 
-        PieDataSet set = new PieDataSet(entries, "Most visited places");
+        PieDataSet set = new PieDataSet(entries, getString(R.string.most_visited_places_label));
         set.setColors(ColorTemplate.MATERIAL_COLORS);
         PieData data = new PieData(set);
 
         mBinding.chartFrguserhistorychart.setData(data);
         mBinding.chartFrguserhistorychart.getLegend().setEnabled(false);
-        //legend.setOrientation(Legend.LegendOrientation.VERTICAL);
-        //legend.setPosition(Legend.LegendPosition.RIGHT_OF_CHART);
         mBinding.chartFrguserhistorychart.animateY(2000);
     }
 

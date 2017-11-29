@@ -157,7 +157,6 @@ public class UserOnMapFragment
     private void setupMapFragment() {
         mGeoDataClient = Places.getGeoDataClient(this.getActivity(), null);
         mPlaceDetectionClient = Places.getPlaceDetectionClient(this.getActivity(), null);
-        //mMapView.getMapAsync(this);
 
         mMapFragment = SupportMapFragment.newInstance();
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
@@ -166,21 +165,11 @@ public class UserOnMapFragment
         mMapFragment.getMapAsync(this);
     }
 
-/*
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(StringKeys.FRAGMENT_ALREADY_CREATED_KEY, true);
-    }
-*/
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        //mCurrentUserUuid = SharedPrefsUtil.getCurrentUserUuid(getContext());
-
         mBinding = DataBindingUtil.inflate(inflater,
                 R.layout.fragment_user_on_map,
                 container,
@@ -286,8 +275,6 @@ public class UserOnMapFragment
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-
-        //getFragmentManager().beginTransaction().remove(mMapFragment).commit();
     }
 
     @Override
@@ -384,9 +371,7 @@ public class UserOnMapFragment
         if (mViewModel.path == null) {
             return;
         }
-        //redrawMarkers();
         PolylineOptions options = new PolylineOptions();
-        User user = mViewModel.getSelectedUser();
         for (Location location : mViewModel.path) {
             options.add(location.getLatLng());
         }
@@ -419,6 +404,7 @@ public class UserOnMapFragment
             if (location != null) {
                 Float markerColor = BitmapDescriptorFactory.HUE_AZURE;
                 if (mViewModel.getSelectedUser() != null &&
+                        mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_NONE &&
                         mViewModel.getSelectedUser().getUserUuid().equals(user.getUserUuid())) {
                     markerColor = BitmapDescriptorFactory.HUE_ORANGE;
                     newCameraPos = location.getLatLng();
@@ -431,14 +417,15 @@ public class UserOnMapFragment
                 mMarkers.put(user.getUserUuid(), mMap.addMarker(markerOptions));
             }
         }
+
         if (newCameraPos != null) {
-            if (!mMap.getProjection().getVisibleRegion().latLngBounds.contains(newCameraPos)) {
+            if (!mMap.getProjection().getVisibleRegion().latLngBounds.contains(newCameraPos) ||
+                    mMap.getCameraPosition().zoom < 2.1 ) {
                 // if marker of selected user is out of bounds - center map to
                 // appropriate coordinates (current location of selected user)
                 moveCameraTo(newCameraPos);
             }
         }
-        //redrawPath();
     }
 
     /**
@@ -486,7 +473,6 @@ public class UserOnMapFragment
         if (ContextCompat.checkSelfPermission(getActivity().getApplicationContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            //mLocationPermissionGranted = true;
         } else {
             ActivityCompat.requestPermissions(this.getActivity(),
                     new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
@@ -658,8 +644,10 @@ public class UserOnMapFragment
      */
     private void startRemoveZone() {
         final SimpleDialogFragment confirmDialog = new SimpleDialogFragment();
-        confirmDialog.setParms("Removing zone", "Are you sure you want to remove zone '" + mViewModel.zoneName.get() + "'?",
-                "Ok", "Cancel",
+        confirmDialog.setParms(getString(R.string.remove_zone_dialog_title),
+                String.format(getString(R.string.remove_zone_dialog_mesage), mViewModel.zoneName.get()),
+                getString(R.string.label_button_ok),
+                getString(R.string.button_cancel_label),
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -672,7 +660,7 @@ public class UserOnMapFragment
                         confirmDialog.dismiss();
                     }
                 });
-        confirmDialog.show(getActivity().getFragmentManager(), "dialog");
+        confirmDialog.show(getActivity().getFragmentManager(), getString(R.string.dialog_tag));
     }
 
 
@@ -692,6 +680,4 @@ public class UserOnMapFragment
     public UserOnMapViewModel getViewModel() {
         return mViewModel;
     }
-
-
 }

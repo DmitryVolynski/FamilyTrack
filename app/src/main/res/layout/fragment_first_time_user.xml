@@ -9,16 +9,13 @@
         <import type="android.view.View"/>
     </data>
     <android.support.constraint.ConstraintLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="?attr/colorButtonNormal">
-        <View
-            android:layout_width="600dp"
-            android:layout_height="900dp"/>
 
         <TextView
             android:id="@+id/textView3"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/first_time_user_side_margin"
             android:layout_marginEnd="@dimen/first_time_user_side_margin"
@@ -48,6 +45,7 @@
             android:id="@+id/button_dialogfirsttime_next"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
             android:layout_width="wrap_content"
+            android:layout_height="@dimen/dialog_button_height"
             android:text="@string/label_button_next"
             android:onClick="@{()->viewmodel.goStepTwo()}"
             app:layout_constraintRight_toRightOf="parent"
@@ -68,7 +66,7 @@
             <TextView
                 android:id="@+id/textView5"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginEnd="@dimen/first_time_user_side_margin"
                 android:layout_marginStart="@dimen/first_time_user_side_margin"
                 android:text="@string/label_now_decide_how"
@@ -169,7 +167,7 @@
                 android:id="@+id/button_dialogfirsttimeuser_done"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/dialog_button_height"
                 android:onClick="@{() -> viewmodel.decide()}"
                 android:text="@string/label_button_decide"
                 app:layout_constraintBottom_toBottomOf="parent"

@@ -2,6 +2,7 @@ package com.volynski.familytrack.views;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
+import android.databinding.Observable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.databinding.ActivitySettingsBinding;
 import com.volynski.familytrack.utils.IntentUtil;
+import com.volynski.familytrack.utils.SnackbarUtil;
 import com.volynski.familytrack.viewmodels.SettingsViewModel;
 import com.volynski.familytrack.views.navigators.SettingsNavigator;
 
@@ -31,7 +33,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
     public void updateCompleted(String result) {
         Intent intent = new Intent();
         intent.putExtra(StringKeys.SETTINGS_UPDATE_RESULT_KEY, result);
-        intent.putExtra(StringKeys.SNACKBAR_TEXT_KEY, "Settings updated");
+        intent.putExtra(StringKeys.SNACKBAR_TEXT_KEY, getString(R.string.msg_settings_updated));
         setResult(RESULT_OK, intent);
         finish();
     }
@@ -43,44 +45,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
         readIntentData();
         setupBindings();
         setupToolbar();
-        //setupListeners();
     }
-
-/*
-    private void setupListeners() {
-        mViewModel.familyNameError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                mBinding.tilUserdetailsFamilyname.setError(mViewModel.familyNameError.get());
-            }
-        });
-        mViewModel.givenNameError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                mBinding.tilUserdetailsGivenname.setError(mViewModel.givenNameError.get());
-            }
-        });
-        mViewModel.displayNameError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                mBinding.tilUserdetailsDisplayname.setError(mViewModel.displayNameError.get());
-            }
-        });
-        mViewModel.phoneError.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
-            @Override
-            public void onPropertyChanged(Observable sender, int propertyId) {
-                mBinding.tilUserdetailsPhone.setError(mViewModel.phoneError.get());
-            }
-        });
-
-        mBinding.etUserdetailsFamilyName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                mViewModel.validateUserData();
-            }
-        });
-    }
-*/
 
     private void setupToolbar() {
         Toolbar toolbar = mBinding.toolbarSettings;
@@ -89,7 +54,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
         // Get a support ActionBar corresponding to this toolbar
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        toolbar.setTitle("Settings");
+        toolbar.setTitle(R.string.settings_toolbar_title);
     }
 
 
@@ -132,6 +97,12 @@ public class SettingsActivity extends AppCompatActivity implements SettingsNavig
                 mCurrentUserUuid,
                 null);
         mViewModel.setNavigator(this);
+        mViewModel.snackbarText.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override
+            public void onPropertyChanged(Observable observable, int i) {
+                SnackbarUtil.showSnackbar(mBinding.coordinatorlayoutSettings, mViewModel.snackbarText.get());
+            }
+        });
         mBinding.setViewmodel(mViewModel);
     }
 

@@ -61,10 +61,6 @@ public class GeofenceEventsFragment extends Fragment
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
     private GeofenceEventsViewModel mViewModel;
-/*
-    private String mCurrentUserUuid;
-    private UserListNavigator mUserListNavigator;
-*/
     private LinearLayoutManager mLayoutManager;
     private Circle mCurrentGeofence;
     private Observable.OnPropertyChangedCallback mSnackbarCallback;
@@ -73,7 +69,6 @@ public class GeofenceEventsFragment extends Fragment
     private RecyclerViewListAdapter mAdapter;
 
     public static GeofenceEventsFragment newInstance(String currentUserUuid) {
-
         Bundle args = new Bundle();
         args.putString(StringKeys.CURRENT_USER_UUID_KEY, currentUserUuid);
 
@@ -88,7 +83,7 @@ public class GeofenceEventsFragment extends Fragment
         super.onResume();
         ((MainActivity)getActivity()).getSupportActionBar().setTitle(R.string.toolbar_title_geofence_events);
         if (getArguments() == null) {
-            Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
+            Timber.e(getString(R.string.ex_no_user_uuid_in_intent));
             return;
         }
         if (mViewModel.isCreatedFromViewHolder()) {
@@ -236,25 +231,6 @@ public class GeofenceEventsFragment extends Fragment
     public void setViewModel(GeofenceEventsViewModel mViewModel) {
         this.mViewModel = mViewModel;
     }
-
-
-/*
-    public void refreshList() {
-        mViewModel.start();
-    }
-
-    public void setCurrentUserUuid(String currentUserUuid) {
-        this.mCurrentUserUuid = currentUserUuid;
-    }
-
-    public UserListNavigator getNavigator() {
-        return mUserListNavigator;
-    }
-
-    public void setNavigator(UserListNavigator userListNavigator) {
-        this.mUserListNavigator = userListNavigator;
-    }
-*/
 
     public void eventClicked(GeofenceEvent event) {
         mViewModel.selectEvent(event);

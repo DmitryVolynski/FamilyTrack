@@ -30,12 +30,10 @@ import timber.log.Timber;
 
 public class InviteUsersDialogFragment extends DialogFragment {
     private InviteUsersViewModel mViewModel;
-    private User mCurrentUser;
     private GridLayoutManager mLayoutManager;
     private View mRootView;
     FragmentInviteUsersBinding mBinding;
     private RecyclerViewListAdapter mAdapter;
-    private boolean mOrientationChanged = false;
 
     @Nullable
     @Override
@@ -68,7 +66,8 @@ public class InviteUsersDialogFragment extends DialogFragment {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null &&
                 savedInstanceState.containsKey(StringKeys.INVITE_USERS_LAYOUT_POSITION_KEY)) {
-            mLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(StringKeys.INVITE_USERS_LAYOUT_POSITION_KEY));
+            mLayoutManager.onRestoreInstanceState(savedInstanceState
+                    .getParcelable(StringKeys.INVITE_USERS_LAYOUT_POSITION_KEY));
         }
     }
 
@@ -76,15 +75,16 @@ public class InviteUsersDialogFragment extends DialogFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(StringKeys.INVITE_USERS_DIALOG_SHOW_KEY, true);
-        outState.putParcelable(StringKeys.INVITE_USERS_LAYOUT_POSITION_KEY, mLayoutManager.onSaveInstanceState());
-        outState.putBundle(StringKeys.INVITE_USERS_VIEWMODEL_BUNDLE_KEY, mViewModel.saveToBundle());
+        outState.putParcelable(StringKeys.INVITE_USERS_LAYOUT_POSITION_KEY,
+                mLayoutManager.onSaveInstanceState());
+        outState.putBundle(StringKeys.INVITE_USERS_VIEWMODEL_BUNDLE_KEY,
+                mViewModel.saveToBundle());
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.setTitle("Select users to invite");
-        //dialog.requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+        dialog.setTitle(R.string.select_users_dialog_title);
         return dialog;
     }
 
@@ -101,7 +101,7 @@ public class InviteUsersDialogFragment extends DialogFragment {
     public void onResume() {
         super.onResume();
         if (getArguments() == null) {
-            Timber.e("No arguments found. Expected " + StringKeys.CURRENT_USER_UUID_KEY);
+            Timber.e(getString(R.string.ex_no_user_uuid_in_intent));
             return;
         }
         if (!mViewModel.isCreatedFromViewHolder()) {

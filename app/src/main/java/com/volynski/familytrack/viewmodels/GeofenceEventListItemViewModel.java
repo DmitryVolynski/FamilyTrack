@@ -47,28 +47,6 @@ public class GeofenceEventListItemViewModel extends BaseObservable
         mNavigator.eventClicked(event.get(), mUiContext);
     }
 
-/*
-    @Override
-    public void menuCommand(MenuItem item, View rootView) {
-        if (mNavigator == null) {
-            Timber.e("mNavigator is null. Navigation is not available");
-            return;
-        }
-        switch (item.getItemId()) {
-            case R.id.menuitem_userpopupmenu_remove:
-                mNavigator.removeUser(mUser.getUserUuid());
-                break;
-            case R.id.menuitem_userpopupmenu_showonmap:
-                //mNavigator.userClicked(mUser.getUserUuid());
-                //break;
-            case R.id.menuitem_userpopupmenu_userdetails:
-                mNavigator.editUserDetails(mUser.getUserUuid(), rootView);
-                break;
-        }
-    }
-
-*/
-
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
     }

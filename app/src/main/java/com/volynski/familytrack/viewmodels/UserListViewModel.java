@@ -20,6 +20,7 @@ import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
 import com.volynski.familytrack.services.locators.SimulatedLocationProvider;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
@@ -63,7 +64,7 @@ public class UserListViewModel
     public void start(String currentUserUuid) {
         mCurrentUserUuid = currentUserUuid;
         if (mCurrentUserUuid.equals("")) {
-            Timber.e("Can't start viewmodel. UserUuid is empty");
+            Timber.e(mContext.getString(R.string.ex_useruuid_is_empty));
             return;
         }
 
@@ -75,7 +76,7 @@ public class UserListViewModel
                     mCurrentUser = result.getData();
                     loadUsersList();
                 } else {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                     isDataLoading.set(false);
                 }
             }
@@ -96,7 +97,7 @@ public class UserListViewModel
                         }
                     });
         } else {
-            groupName.set("Not joined any group");
+            groupName.set(mContext.getString(R.string.msg_not_a_member));
         }
     }
 
@@ -116,28 +117,6 @@ public class UserListViewModel
         }
     }
 
-    public void createGeofenceEvent() {
-        Zone zone = new Zone("-Kjhgfjdgh", "Test zone", SimulatedLocationProvider.RED_SQUARE_LOCATION, 200, null);
-
-        GeofenceEvent event = new GeofenceEvent(mCurrentUser.getUserUuid(), mCurrentUser.getDisplayName(),
-                mCurrentUser.getFamilyName(), mCurrentUser.getGivenName(), zone, 1);
-
-        mRepository.createGeofenceEvent(mCurrentUser.getActiveMembership().getGroupUuid(), event,
-                new FamilyTrackDataSource.CreateGeofenceEventCallback() {
-                    @Override
-                    public void onCreateGeofenceEventCompleted(FirebaseResult<String> result) {
-                        int i = 0;
-                    }
-                });
-        mRepository.createGeofenceEvent(mCurrentUser.getActiveMembership().getGroupUuid(), event,
-                new FamilyTrackDataSource.CreateGeofenceEventCallback() {
-                    @Override
-                    public void onCreateGeofenceEventCompleted(FirebaseResult<String> result) {
-                        int i = 0;
-                    }
-                });
-    }
-
     public void setNavigator(UserListNavigator mNavigator) {
         this.mNavigator = mNavigator;
         if (viewModels != null) {
@@ -152,16 +131,23 @@ public class UserListViewModel
     }
 
     public void excludeUser(final String userUuid) {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set("");
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            notifyChange();
+            return;
+        }
+
         if (userUuid.equals(mCurrentUserUuid)) {
             snackbarText.set("");
-            snackbarText.set("You can't exclude yourself");
+            snackbarText.set(mContext.getString(R.string.msg_you_cant_exclude_yourself));
             notifyChange();
             return;
         }
 
         if (mCurrentUser.getActiveMembership() == null) {
-            Timber.v("Active group for " + userUuid + " == null. Expected value");
-            snackbarText.set("Unable to exclude user");
+            Timber.v(String.format(mContext.getString(R.string.ex_active_group_for_user_is_null), userUuid));
+            snackbarText.set(mContext.getString(R.string.unable_to_exclude_user));
             return;
         }
 
@@ -171,10 +157,10 @@ public class UserListViewModel
             public void onRemoveUserFromGroupCompleted(FirebaseResult<String> result) {
                 if (result.getData().equals(FirebaseResult.RESULT_OK)) {
                     snackbarText.set("");
-                    snackbarText.set("User excluded from group");
+                    snackbarText.set(mContext.getString(R.string.msg_user_excluded));
                     loadUsersList();
                 } else {
-                    snackbarText.set("Unable to exclude user " + userUuid);
+                    snackbarText.set(mContext.getString(R.string.unable_to_exclude_user) + userUuid);
                 }
             }
         });

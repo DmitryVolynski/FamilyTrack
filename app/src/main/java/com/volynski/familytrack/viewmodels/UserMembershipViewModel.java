@@ -9,12 +9,14 @@ import android.databinding.ObservableList;
 import android.util.Log;
 import android.view.View;
 
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.MembershipListItem;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.utils.SharedPrefsUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
@@ -38,7 +40,6 @@ public class UserMembershipViewModel
             new ObservableBoolean(false);
     public final ObservableList<MembershipListItemViewModel> viewModels =
             new ObservableArrayList<>();
-    //public ObservableField<String> snackbarText = new ObservableField<>();
 
     public UserMembershipViewModel(Context context,
                              String currentUserUuid,
@@ -57,7 +58,6 @@ public class UserMembershipViewModel
      * If user select one, he will be joined to selected group
      */
     private void joinGroup() {
-        Log.v(TAG, "joinGroup started");
         notifyChange();
     }
 
@@ -66,9 +66,13 @@ public class UserMembershipViewModel
      * ViewModel will populate the view if current user is member of any group
      */
     public void start() {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
 
         if (mCurrentUserUuid.equals("")) {
-            Timber.e("Can't start viewmodel. UserUuid is empty");
+            Timber.e(mContext.getString(R.string.ex_useruuid_is_empty));
             return;
         }
 
@@ -84,7 +88,7 @@ public class UserMembershipViewModel
                     mCurrentUser = result.getData();
                     createViewModels();
                 } else {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                     isDataLoading.set(false);
                 }
             }
@@ -132,10 +136,15 @@ public class UserMembershipViewModel
      * @param membershipListItemViewModel - viewmodel of appropriate group
      */
     public void startChangeMembership(final MembershipListItemViewModel membershipListItemViewModel) {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
+
         // check the user if he is one and only admin in current group
         if (mCurrentUser.getActiveMembership() == null && membershipListItemViewModel.isActive.get()) {
-            Timber.e("Unexpected error. User " + mCurrentUser.getUserUuid() +
-                    " should have active group to perform 'startChangeMembership' action");
+            Timber.e(String.format(mContext.getString(R.string.ex_no_active_group_for_useruuid),
+                    mCurrentUser.getUserUuid()));
             return;
         }
         if (mCurrentUser.getActiveMembership() != null) {
@@ -147,7 +156,8 @@ public class UserMembershipViewModel
                         public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                             Group group = result.getData();
                             if (group == null) {
-                                Timber.e("Unexpected error. Group " + activeGroupUuid + " not found");
+                                Timber.e(String.format(mContext.getString(R.string.ex_group_uuid_not_found),
+                                        activeGroupUuid));
                                 return;
                             }
                             if (group.getAdminsCount(mCurrentUser.getUserUuid()) == 0 && group.getMembers().size() > 1) {
@@ -180,7 +190,8 @@ public class UserMembershipViewModel
                     @Override
                     public void onChangeUserMembershipCompleted(FirebaseResult<String> result) {
                         if (result.getData().equals(FirebaseResult.RESULT_OK)) {
-                            snackbarText.set(String.format("Group changed from '%1$s' to '%2$s'", fromGroupName, toGroupName));
+                            snackbarText.set(String.format(mContext.getString(R.string.msg_group_changed),
+                                    fromGroupName, toGroupName));
                             start();
                         }
                     }
@@ -189,7 +200,10 @@ public class UserMembershipViewModel
     }
 
     public void createNewGroup(final String groupName) {
-        Timber.v("Create group: " + groupName);
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
 
         if (mCurrentUser.getActiveMembership() != null) {
             final String activeGroupUuid = mCurrentUser.getActiveMembership().getGroupUuid();
@@ -199,7 +213,8 @@ public class UserMembershipViewModel
                         public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                             Group group = result.getData();
                             if (group == null) {
-                                Timber.e("Unexpected error. Group " + activeGroupUuid + " not found");
+                                Timber.e(String.format(mContext.getString(R.string.ex_group_uuid_not_found),
+                                        activeGroupUuid));
                                 return;
                             }
                             if (group.getAdminsCount(mCurrentUser.getUserUuid()) == 0 && group.getMembers().size() > 1) {
@@ -213,7 +228,8 @@ public class UserMembershipViewModel
                                             @Override
                                             public void onCreateGroupCompleted(FirebaseResult<Group> result) {
                                                 if (result.getData() != null) {
-                                                    snackbarText.set("Group '" + groupName + "' created");
+                                                    snackbarText.set(String
+                                                            .format(mContext.getString(R.string.msg_group_created), groupName));
                                                     start();
                                                 }
                                             }
@@ -227,7 +243,7 @@ public class UserMembershipViewModel
                         @Override
                         public void onCreateGroupCompleted(FirebaseResult<Group> result) {
                             if (result.getData() != null) {
-                                snackbarText.set("Group '" + groupName + "' created");
+                                snackbarText.set(String.format(mContext.getString(R.string.msg_group_created), groupName));
                                 start();
                             }
                         }

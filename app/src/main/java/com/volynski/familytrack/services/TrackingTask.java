@@ -92,41 +92,15 @@ public class TrackingTask
             }
         });
     }
-/*
-    private void updateUserLocation(String userUuid,
-                                    android.location.Location loc,
-                                    PlaceLikelihood placeLikelihood) {
-        IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        Intent batteryStatus = mContext.registerReceiver(null, ifilter);
-
-        int level = batteryStatus.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryStatus.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-        int batteryPct = Math.round((level / (float)scale) * 100);
-
-        Location userLocation = new Location(loc.getLongitude(),
-                loc.getLatitude(),
-                placeLikelihood.getPlace().getName().toString(),
-                placeLikelihood.getPlace().getAddress().toString(),
-                batteryPct);
-
-        mDataSource.updateUserLocation(userUuid, userLocation, new FamilyTrackDataSource.UpdateUserLocationCallback() {
-            @Override
-            public void onUpdateUserLocationCompleted(FirebaseResult<String> result) {
-                mCallback.onTaskCompleted(mRescheduleFlag);
-            }
-        });
-    }
-*/
 
     @Override
     public void onConnectionSuspended(int i) {
-        Timber.v("onConnectionSuspended i=" + i);
+        //Timber.v("onConnectionSuspended i=" + i);
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Timber.v("onConnected");
+        //Timber.v("onConnected");
         doWork();
     }
 
@@ -138,11 +112,11 @@ public class TrackingTask
 
     // do location detection when GoogleApi is ready
     private void doWork() {
-        Timber.v("doWork started");
+        //Timber.v("doWork started");
 
         if (!mGoogleApiClient.isConnected()) {
             // if google api client not ready - do nothing
-            Timber.v("mGoogleApiClient not connected");
+            //Timber.v("mGoogleApiClient not connected");
             mCallback.onTaskCompleted(mRescheduleFlag);
             return;
         }
@@ -150,35 +124,30 @@ public class TrackingTask
         if (mSettings == null) {
             // user is not a member of any group - do track user & remove any geofences
             // or current settings not loaded into shared preferences
-            Timber.v("mSettings is null. TrackingTask will not run");
+            //Timber.v("mSettings is null. TrackingTask will not run");
             removeGeofences();
             mCallback.onTaskCompleted(0);
             return;
         }
 
-        Timber.v("=== Current settings=" + (new Gson()).toJson(mSettings));
+        //Timber.v("=== Current settings=" + (new Gson()).toJson(mSettings));
 
         // checking for reschedule tracking task
         int currentInterval = SharedPrefsUtil.getTrackingInterval(mContext);
         int newInterval = mSettings.getLocationUpdateInterval();
-        Timber.v(String.format("Checking old and new intervals: %1$d/%2$d", currentInterval, newInterval));
+        //Timber.v(String.format("Checking old and new intervals: %1$d/%2$d", currentInterval, newInterval));
         mRescheduleFlag = (currentInterval != newInterval ? newInterval : 0);
 
         if (!mSettings.getIsTrackingOn()) {
             // tracking is off - do nothing
-            Timber.v("Tracking is off. Idle...");
+            //Timber.v("Tracking is off. Idle...");
             removeGeofences();
             mCallback.onTaskCompleted(mRescheduleFlag);
             return;
         }
 
-        //setGeofences(SharedPrefsUtil.getGeofences(mContext));
-
         // create appropriate location provider
         LocationProvider locationProvider = new SimulatedLocationProvider();
-        //LocationProvider locationProvider = (mSettings.getIsSimulationOn() ?
-        //    new SimulatedLocationProvider() :
-        //    new RealLocationProvider());
 
         // get location from provider and save it
         locationProvider.getCurrentLocation(mContext,
@@ -199,7 +168,7 @@ public class TrackingTask
 
     @Override
     protected void finalize() throws Throwable {
-        Timber.v("finalize");
+        //Timber.v("finalize");
         super.finalize();
         if (mGoogleApiClient != null) {
             mGoogleApiClient.disconnect();

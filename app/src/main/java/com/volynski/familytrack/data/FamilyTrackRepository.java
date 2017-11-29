@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -19,6 +18,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
@@ -43,16 +43,6 @@ import timber.log.Timber;
 public class FamilyTrackRepository implements FamilyTrackDataSource {
     private static final String TAG = FamilyTrackRepository.class.getSimpleName();
 
-    // column list for the contacts provider
-    /**
-    private final static String[] CONTACTS_PROJECTION = {
-            ContactsContract.Contacts.DISPLAY_NAME_PRIMARY,
-            ContactsContract.Contacts.PHOTO_THUMBNAIL_URI,
-            ContactsContract.Contacts.PHOTO_URI,
-            ContactsContract.Contacts.
-    };
-     */
-
     private FirebaseDatabase mFirebaseDatabase;
     private String mGoogleAccountIdToken;
     private FirebaseAuth mFirebaseAuth;
@@ -60,13 +50,11 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     // TODO проверить необходимость передачи GoogleSignInAccount в конструктор
     public FamilyTrackRepository(String googleAccountIdToken, Context context) {
-        Timber.v("FamilyTrackRepository created with idToken=" + googleAccountIdToken);
         mGoogleAccountIdToken = googleAccountIdToken;
         mContext = context.getApplicationContext();
     }
 
     private void firebaseAuthWithGoogle(String idToken) {
-        Timber.v("firebaseAuthWithGooogle:" + idToken);
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         mFirebaseAuth = FirebaseAuth.getInstance();
         if (mFirebaseAuth.getCurrentUser() == null) {
@@ -75,12 +63,11 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             Timber.v(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-
                             // If sign in fails, display a message to the user. If sign in succeeds
                             // the auth state listener will be notified and logic to handle the
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
-                                Log.w(TAG, "signInWithCredential", task.getException());
+                                Timber.e("signInWithCredential failed", task.getException());
                             }
                         }
                     });
@@ -92,21 +79,20 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         if (mFirebaseDatabase == null) {
             firebaseAuthWithGoogle(mGoogleAccountIdToken);
             mFirebaseDatabase = FirebaseDatabase.getInstance();
+
         }
         return mFirebaseDatabase;
     }
 
     @Override
     public void createUser(@NonNull User user, final CreateUserCallback callback) {
-
         DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
         DatabaseReference newUserRef = ref.push();
 
         newUserRef.setValue(user);
         if (callback != null) {
-            // TODO Check this. Don't like it
             user.setUserUuid(newUserRef.getKey());
-            callback.onCreateUserCompleted(new FirebaseResult<User>(user));
+            callback.onCreateUserCompleted(new FirebaseResult<>(user));
         }
     }
 
@@ -121,7 +107,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
                 if (result.getData() != null) {
                     for (Group group : result.getData()) {
-                        childUpdates.put(FamilyTrackDbRefsHelper.userOfGroupRef(group.getGroupUuid(), user.getUserUuid()),
+                        childUpdates.put(FamilyTrackDbRefsHelper
+                                        .userOfGroupRef(group.getGroupUuid(), user.getUserUuid()),
                                 user.cloneForGroupNode(group.getGroupUuid()));
                     }
                 }
@@ -132,7 +119,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (callback != null) {
-                                    callback.onUpdateUserCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                                    callback.onUpdateUserCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
                                 }
                             }
                         });
@@ -141,7 +128,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     }
 
     @Override
-    public void changeUserStatus(@NonNull String userUuid, @NonNull int newStatus) {
+    public void changeUserStatus(@NonNull String userUuid, int newStatus) {
 
     }
 
@@ -156,8 +143,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 User user = null;
                 if (dataSnapshot.getChildrenCount() > 0) {
                     user = FirebaseUtil.getUserFromSnapshot(dataSnapshot.getChildren().iterator().next());
-                };
-                callback.onGetUserByUuidCompleted(new FirebaseResult<User>(user));
+                }
+                callback.onGetUserByUuidCompleted(new FirebaseResult<>(user));
             }
 
             @Override
@@ -171,7 +158,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     public void getUserByEmail(@NonNull String userEmail, @NonNull final GetUserByEmailCallback callback) {
         DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
 
-        Query query = ref.orderByChild("email").equalTo(userEmail).limitToFirst(1);
+        Query query = ref.orderByChild(User.FIELD_EMAIL).equalTo(userEmail).limitToFirst(1);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
 
@@ -180,8 +167,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 User user = null;
                 if (dataSnapshot.getChildrenCount() > 0) {
                     user = FirebaseUtil.getUserFromSnapshot(dataSnapshot.getChildren().iterator().next());
-                };
-                callback.onGetUserByEmailCompleted(new FirebaseResult<User>(user));
+                }
+                callback.onGetUserByEmailCompleted(new FirebaseResult<>(user));
             }
 
             @Override
@@ -194,7 +181,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     @Override
     public void getUserByPhone(@NonNull String userPhone, @NonNull final GetUserByPhoneCallback callback) {
         DatabaseReference ref = getFirebaseConnection().getReference(Group.REGISTERED_USERS_GROUP_KEY);
-        Query query = ref.orderByChild("phone").equalTo(userPhone).limitToFirst(1);
+        Query query = ref.orderByChild(User.FIELD_PHONE).equalTo(userPhone).limitToFirst(1);
 
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -203,7 +190,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 if (dataSnapshot.getChildrenCount() > 0) {
                     user = FirebaseUtil.getUserFromSnapshot(dataSnapshot.getChildren().iterator().next());
                 }
-                callback.onGetUserByPhoneCompleted(new FirebaseResult<User>(user));
+                callback.onGetUserByPhoneCompleted(new FirebaseResult<>(user));
             }
 
             @Override
@@ -271,13 +258,12 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (callback != null) {
-                                        callback.onCreateGroupCompleted(new FirebaseResult<Group>(group));
+                                        callback.onCreateGroupCompleted(new FirebaseResult<>(group));
                                     }
                                 }
                             });
 
                 } else {
-                    Timber.v("null");
                     if (callback != null) {
                         callback.onCreateGroupCompleted(
                                 new FirebaseResult<Group>(FamilyTrackException.getInstance(mContext,
@@ -310,7 +296,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (callback != null) {
-                            callback.onRemoveUserFromGroupCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                            callback.onRemoveUserFromGroupCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
                         }
                     }
                 })
@@ -341,7 +327,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // get Group object with all members
                 Group group = FirebaseUtil.getGroupFromSnapshot(dataSnapshot);
-                callback.onGetGroupByUuidCompleted(new FirebaseResult<Group>(group));
+                callback.onGetGroupByUuidCompleted(new FirebaseResult<>(group));
             }
 
             @Override
@@ -357,24 +343,19 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         }
     }
 
-    /**
-     * just to debug anonymous methods
-     * @param o
-     */
-    private void checkObject(Object o) {
-        int i = 0;
-    }
-
     @Override
     public void getContactsToInvite(@NonNull final String groupUuid,
                                     @NonNull final GetContactsToInviteCallback callback) {
-        User user = null;
+        User user;
         // read contacts from ContactsContract.Data.CONTENT_URI
         Cursor cursor = mContext.getContentResolver().query(
                 ContactsContract.Data.CONTENT_URI,
                 null,
-                ContactsContract.Data.HAS_PHONE_NUMBER + "!=0 AND (" + ContactsContract.Data.MIMETYPE + "=? OR " + ContactsContract.Data.MIMETYPE + "=?)",
-                new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
+                ContactsContract.Data.HAS_PHONE_NUMBER + "!=0 AND (" +
+                        ContactsContract.Data.MIMETYPE + "=? OR " +
+                        ContactsContract.Data.MIMETYPE + "=?)",
+                new String[]{ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE,
+                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE},
                 ContactsContract.Data.CONTACT_ID);
 
         // merge same contacts with emails & phone numbers
@@ -385,13 +366,14 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
             if (isNew) {
                 String givenName = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME));
-                user = new User(key, "", "", cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)),
+                user = new User(key, "", "",
+                        cursor.getString(cursor.getColumnIndex(ContactsContract.Data.DISPLAY_NAME)),
                         StringKeys.CREATED_FROM_CONTACTS_KEY, "", "", null, null);
             } else {
                 user = contacts.get(key);
             }
 
-            Timber.v(user.getDisplayName() + "/" + cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE)));
+            //Timber.v(user.getDisplayName() + "/" + cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE)));
 
             String mimeType = cursor.getString(cursor.getColumnIndex(ContactsContract.Data.MIMETYPE));
 
@@ -410,11 +392,8 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     contacts.put(key, user);
                 }
             } catch (Exception e) {
-                Timber.v("Exception!");
-                Timber.v(e.getMessage());
+                Timber.e(e);
             }
-
-
         }
 
         cursor.close();
@@ -424,7 +403,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
             public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                 List<User> users = new ArrayList<>();
                 if (result.getData() == null) {
-                    Timber.v("Group '" + groupUuid + "' not found. Unable to return valid list of available contacts");
+                    Timber.v(String.format(mContext.getString(R.string.ex_group_with_uuid_not_found), groupUuid));
                     callback.onGetContactsToInviteCompleted(new FirebaseResult<List<User>>(users));
                 }
 
@@ -529,7 +508,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                             public void onComplete(@NonNull Task<Void> task) {
                                 countDownLatch.countDown();
                                 if (countDownLatch.getCount() == 0 && callback != null) {
-                                    callback.onInviteUsersCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                                    callback.onInviteUsersCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
                                 }
                             }
                         });
@@ -569,7 +548,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 final List<Group> groups = new ArrayList<Group>();
 
                 if (result.getData() != null && result.getData().getMemberships() != null) {
-                    Timber.v("Starting for, number of groups=" + result.getData().getMemberships().size());
+                    //Timber.v("Starting for, number of groups=" + result.getData().getMemberships().size());
 
                     final CountDownLatch doneSignal =
                             new CountDownLatch(result.getData().getMemberships().size());
@@ -577,18 +556,17 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     for (String key : result.getData().getMemberships().keySet()) {
                         Membership membership = result.getData().getMemberships().get(key);
                         // now read data of each group in list
-                        Timber.v("Call getGroupByUuid for " + membership.getGroupUuid());
+                        //Timber.v("Call getGroupByUuid for " + membership.getGroupUuid());
                         getGroupByUuid(membership.getGroupUuid(), false, new GetGroupByUuidCallback() {
                             @Override
                             public synchronized void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
-                                Timber.v("onGetGroupByUuidCompleted");
+                                //Timber.v("onGetGroupByUuidCompleted");
                                 if (result.getData() != null) {
                                     groups.add(result.getData());
                                 }
                                 doneSignal.countDown();
                                 if (doneSignal.getCount() == 0) {
                                     // all requests completed, should call callback
-                                    //groups.add(new Group("fjhgfkjgf", "Fake group"));
                                     callback.onGetUserGroupsCompleted(new FirebaseResult<List<Group>>(groups));
                                 }
                             }
@@ -694,7 +672,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     public void updateUserLocation(@NonNull final String userUuid,
                                    @NonNull final Location location,
                                    @NonNull final UpdateUserLocationCallback callback) {
-        Timber.v("Started");
+        //Timber.v("Started");
         getUserByUuid(userUuid, new GetUserByUuidCallback() {
             @Override
             public void onGetUserByUuidCompleted(FirebaseResult<User> result) {
@@ -741,23 +719,23 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
     @Override
     public void getUserTrack(@NonNull String userUuid,
-                             @NonNull long periodStart,
-                             @NonNull long periodEnd,
+                             long periodStart,
+                             long periodEnd,
                              final @NonNull GetUserTrackCallback callback) {
         String historyItemPath = FamilyTrackDbRefsHelper.userHistory(userUuid);
         DatabaseReference ref = getFirebaseConnection().getReference(historyItemPath);
 
-        Query query = ref.orderByChild("timestamp").startAt(periodStart).endAt(periodEnd);
+        Query query = ref.orderByChild(Location.FIELD_TIMESTAMP).startAt(periodStart).endAt(periodEnd);
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<Location> locations = new ArrayList<Location>();
+                List<Location> locations = new ArrayList<>();
                 if (dataSnapshot.getChildren() != null) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         locations.add(FirebaseUtil.getLocationFromSnapshot(snapshot));
                     }
                 }
-                callback.onGetUserTrackCompleted(new FirebaseResult<List<Location>>(locations));
+                callback.onGetUserTrackCompleted(new FirebaseResult<>(locations));
             }
 
             @Override
@@ -784,7 +762,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
         newRec.setValue(zone);
         if (callback != null) {
-            callback.onCreateZoneCompleted(new FirebaseResult<String>(newRec.getKey()));
+            callback.onCreateZoneCompleted(new FirebaseResult<>(newRec.getKey()));
         }
 
     }
@@ -798,7 +776,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
         ref.setValue(zone);
         if (callback != null) {
-            callback.onUpdateZoneCompleted(new FirebaseResult<String>(zone.getUuid()));
+            callback.onUpdateZoneCompleted(new FirebaseResult<>(zone.getUuid()));
         }
     }
 
@@ -815,7 +793,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                     if (databaseError != null) {
                         callback.onRemoveZoneCompleted(new FirebaseResult<String>(databaseError));
                     } else {
-                        callback.onRemoveZoneCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                        callback.onRemoveZoneCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
                     }
                 }
             }
@@ -835,7 +813,7 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                 if (dataSnapshot.getChildrenCount() > 0) {
                     s = dataSnapshot.getValue(Settings.class);
                 }
-                callback.onGetSettingsByGroupUuidCompleted(new FirebaseResult<Settings>(s));
+                callback.onGetSettingsByGroupUuidCompleted(new FirebaseResult<>(s));
             }
 
             @Override
@@ -854,30 +832,30 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
 
         ref.setValue(settings);
         if (callback != null) {
-            callback.onUpdateSettingsByGroupUuidCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+            callback.onUpdateSettingsByGroupUuidCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
         }
     }
 
     @Override
-    public void deleteGeofenceEvent(String userUuid, String eventUuid,
+    public void deleteGeofenceEvent(@NonNull String userUuid, @NonNull String eventUuid,
                                     DeleteGeofenceEventsCallback callback) {
         DatabaseReference ref = getFirebaseConnection()
                 .getReference(FamilyTrackDbRefsHelper.geofenceEventRef(userUuid, eventUuid));
 
         ref.setValue(null);
         if (callback != null) {
-            callback.onDeleteGeofenceEventsCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+            callback.onDeleteGeofenceEventsCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
         }
     }
 
     @Override
-    public void deleteGeofenceEvents(String userUuid, DeleteGeofenceEventsCallback callback) {
+    public void deleteGeofenceEvents(@NonNull String userUuid, DeleteGeofenceEventsCallback callback) {
         DatabaseReference ref = getFirebaseConnection()
                 .getReference(FamilyTrackDbRefsHelper.geofenceEventsRef(userUuid));
 
         ref.setValue(null);
         if (callback != null) {
-            callback.onDeleteGeofenceEventsCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+            callback.onDeleteGeofenceEventsCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
         }
     }
 
@@ -887,20 +865,18 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
     // каждый администратор получает уведомление об изменении прослушиваемого узла, читает эти данные,
     // формирует сообщение и удаляет их
     @Override
-    public void createGeofenceEvent(final String groupUuid, final GeofenceEvent geofenceEvent,
+    public void createGeofenceEvent(@NonNull final String groupUuid, final GeofenceEvent geofenceEvent,
                                     final CreateGeofenceEventCallback callback) {
         getGroupByUuid(groupUuid, false, new GetGroupByUuidCallback() {
             @Override
             public void onGetGroupByUuidCompleted(FirebaseResult<Group> result) {
                 if (result.getData() == null) {
-                    Timber.v("Group with key ='" + groupUuid + "' not found");
+                    //Timber.v("Group with key ='" + groupUuid + "' not found");
                     if (callback != null) {
-                        callback.onCreateGeofenceEventCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_FAILED));
+                        callback.onCreateGeofenceEventCompleted(new FirebaseResult<>(FirebaseResult.RESULT_FAILED));
                     }
                     return;
                 }
-
-                Map<String, Object> childUpdates = new HashMap<>();
 
                 for (String key : result.getData().getMembers().keySet()) {
                     User user = result.getData().getMembers().get(key);
@@ -908,33 +884,15 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
                         if (user.getActiveMembership().getStatusId() == Membership.USER_JOINED &&
                                 user.getActiveMembership().getRoleId() == Membership.ROLE_ADMIN) {
                             String path = FamilyTrackDbRefsHelper.geofenceEventsRef(user.getUserUuid());
-                            //DatabaseReference ref = getFirebaseConnection().getReference(path);
                             String newKey = getFirebaseConnection().getReference(path).push().getKey();
                             geofenceEvent.setEventUuid(newKey);
                             getFirebaseConnection().getReference(path + newKey).setValue(geofenceEvent);
-                            //String newKey = ref.push().getKey();
-                            //childUpdates.put(ref + newKey, geofenceEvent);
                         }
                     }
                 }
                 if (callback != null) {
-                    callback.onCreateGeofenceEventCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
+                    callback.onCreateGeofenceEventCompleted(new FirebaseResult<>(FirebaseResult.RESULT_OK));
                 }
-
-
-/*
-                mFirebaseDatabase.getReference()
-                        .updateChildren(childUpdates)
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                                if (callback != null) {
-                                    callback.onCreateGeofenceEventCompleted(new FirebaseResult<String>(FirebaseResult.RESULT_OK));
-                                }
-                            }
-                        });
-*/
-
             }
         });
     }
@@ -948,13 +906,13 @@ public class FamilyTrackRepository implements FamilyTrackDataSource {
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                List<GeofenceEvent> events = new ArrayList<GeofenceEvent>();
+                List<GeofenceEvent> events = new ArrayList<>();
                 if (dataSnapshot.getChildren() != null) {
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                         events.add(FirebaseUtil.getGeofenceEventFromSnapshot(snapshot));
                     }
                 }
-                callback.onGetGeofenceEventsByUserUuidCompleted(new FirebaseResult<List<GeofenceEvent>>(events));
+                callback.onGetGeofenceEventsByUserUuidCompleted(new FirebaseResult<>(events));
             }
 
             @Override

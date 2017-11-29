@@ -9,12 +9,14 @@ import android.databinding.ObservableField;
 import android.databinding.ObservableList;
 import android.util.Log;
 
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FirebaseResult;
 import com.volynski.familytrack.data.models.firebase.GeofenceEvent;
 import com.volynski.familytrack.data.models.firebase.Group;
 import com.volynski.familytrack.data.models.firebase.User;
 import com.volynski.familytrack.data.models.firebase.Zone;
+import com.volynski.familytrack.utils.NetworkUtil;
 import com.volynski.familytrack.views.navigators.UserListNavigator;
 
 import java.util.ArrayList;
@@ -53,6 +55,10 @@ public class GeofenceEventsViewModel extends AbstractViewModel {
      * ViewModel will populate the view if current user is member of any group
      */
     public void start(String currentUserUuid) {
+        if (!NetworkUtil.networkUp(mContext)) {
+            snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
 
         if (mCurrentUserUuid.equals("")) {
             Timber.e("Can't start viewmodel. UserUuid is empty");
@@ -71,7 +77,7 @@ public class GeofenceEventsViewModel extends AbstractViewModel {
                     mCurrentUser = result.getData();
                     loadEventsList();
                 } else {
-                    Timber.v("User with uuid=" + mCurrentUserUuid + " not found ");
+                    Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
                     isDataLoading.set(false);
                 }
             }
@@ -141,7 +147,7 @@ public class GeofenceEventsViewModel extends AbstractViewModel {
             @Override
             public void onDeleteGeofenceEventsCompleted(FirebaseResult<String> result) {
                 if (result.getData().equals(FirebaseResult.RESULT_OK)) {
-                    snackbarText.set("Events deleted");
+                    snackbarText.set(mContext.getString(R.string.geofence_events_deleted));
                     loadEventsList();
                 }
             }
@@ -154,7 +160,7 @@ public class GeofenceEventsViewModel extends AbstractViewModel {
                     @Override
                     public void onDeleteGeofenceEventsCompleted(FirebaseResult<String> result) {
                         if (result.getData().equals(FirebaseResult.RESULT_OK)) {
-                            snackbarText.set("Event deleted");
+                            snackbarText.set(mContext.getString(R.string.geofence_event_deleted));
                             loadEventsList();
                         }
                     }

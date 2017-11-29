@@ -18,7 +18,7 @@ public class GroupsAndUsersItemType implements ItemTypesResolver {
     @Override
     public int getItemViewType(Object o) {
         if (!(o instanceof MembershipListItemViewModel)) {
-            Timber.v("Invalid item class: " + o.getClass().getSimpleName() + ". Expected ObservableField");
+            Timber.v("Invalid item class: " + o.getClass().getSimpleName() + ". Expected MembershipListItemViewModel");
             return -1;
         }
         return ((MembershipListItemViewModel)o).item.get().getType();

@@ -36,6 +36,7 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.volynski.familytrack.R;
 import com.volynski.familytrack.StringKeys;
 import com.volynski.familytrack.data.FamilyTrackDataSource;
 import com.volynski.familytrack.data.FamilyTrackRepository;
@@ -106,7 +107,7 @@ public class TrackingService
     }
 
     private void reconfigTracking(Settings newSettings) {
-        Timber.v("Not implemented yet");
+        //Timber.v("Not implemented yet");
     }
 
     @Override
@@ -118,7 +119,7 @@ public class TrackingService
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         if (mIntentToHandle == null) {
-            Timber.v("Null intent received");
+            //Timber.v("Null intent received");
             return;
         }
 
@@ -130,7 +131,7 @@ public class TrackingService
         }
 
         if (!mIntentToHandle.hasExtra(StringKeys.CURRENT_USER_UUID_KEY)) {
-            Timber.v("Current user uuid was expected but not found. Can't start tracking service");
+            //Timber.v("Current user uuid was expected but not found. Can't start tracking service");
             return;
         }
 
@@ -190,7 +191,7 @@ public class TrackingService
     private void startTracking() {
         Settings settings = SharedPrefsUtil.getSettings(this);
         if (settings == null) {
-            Timber.v("Null settings. Can't start location service");
+            Timber.v(getString(R.string.ex_null_settings));
             return;
         }
 
@@ -224,7 +225,7 @@ public class TrackingService
                             mLocationCallback, null);
                     //reconfigGeofences();
                 } else {
-                    Timber.e("android.Manifest.permission.ACCESS_FINE_LOCATION not granted");
+                    Timber.e(getString(R.string.no_access_fine_location));
                 }
             }
         });
@@ -234,7 +235,7 @@ public class TrackingService
         if (ContextCompat.checkSelfPermission(TrackingService.this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            Timber.e("android.Manifest.permission.ACCESS_FINE_LOCATION not granted");
+            Timber.e(getString(R.string.no_access_fine_location));
             return;
         }
 
@@ -246,8 +247,8 @@ public class TrackingService
                 //mGoogleApiClient.disconnect();
                 if (placeLikelihoods.getStatus().isSuccess() &&
                         placeLikelihoods.getCount() > 0) {
-                    Timber.v("Place is: " + placeLikelihoods.get(0).getPlace().getName().toString());
-                    Timber.v("Address is: " + placeLikelihoods.get(0).getPlace().getAddress().toString());
+                    //Timber.v("Place is: " + placeLikelihoods.get(0).getPlace().getName().toString());
+                    //Timber.v("Address is: " + placeLikelihoods.get(0).getPlace().getAddress().toString());
                     updateUserLocationInDb(mCurrentUserUuid,
                             locationResult,
                             placeLikelihoods.get(0));

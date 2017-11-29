@@ -15,9 +15,11 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+<!--
+        android:onClick="@{() -> viewmodel.createGeofenceEvent()}"
+-->
         <TextView
             style="@style/Base.TextAppearance.AppCompat.Headline"
-            android:onClick="@{() -> viewmodel.createGeofenceEvent()}"
             android:fontFamily="sans-serif-condensed"
             tools:text="My group"
             android:gravity="center_vertical"
