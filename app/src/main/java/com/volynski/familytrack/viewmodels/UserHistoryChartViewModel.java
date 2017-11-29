@@ -140,6 +140,7 @@ public class UserHistoryChartViewModel extends AbstractViewModel {
         for (String buttonKey : toggleButtons.keySet()) {
             toggleButtons.put(buttonKey, period.equals(buttonKey));
         }
+        setupChart();
     }
 
     public User getSelectedUser() {
