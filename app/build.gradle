@@ -41,12 +41,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            //manifestPlaceholders = [GOOGLE_MAP_KEY: keystoreProperties['GoogleMapKey']]
             signingConfig signingConfigs.config
         }
 
         debug {
-            //manifestPlaceholders = [GOOGLE_MAP_KEY: keystoreProperties['GoogleMapKey']]
             signingConfig signingConfigs.config
         }
 

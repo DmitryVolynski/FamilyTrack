@@ -76,10 +76,6 @@ public class UserMembershipViewModel
             return;
         }
 
-        if (isCreatedFromViewHolder()) {
-            return;
-        }
-
         isDataLoading.set(true);
         mRepository.getUserByUuid(mCurrentUserUuid, new FamilyTrackDataSource.GetUserByUuidCallback() {
             @Override

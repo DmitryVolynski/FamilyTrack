@@ -90,7 +90,15 @@ public class InviteUsersViewModel
 
     public void doInvite() {
         if (!NetworkUtil.networkUp(mContext)) {
+            mNavigator.inviteCompleted();
             snackbarText.set(mContext.getString(R.string.network_not_available));
+            return;
+        }
+
+        if (mCurrentUser.getActiveMembership() == null) {
+            mNavigator.inviteCompleted();
+            mNavigator.showPopupDialog(mContext.getString(R.string.dialog_title_invite_users),
+                    mContext.getString(R.string.message_create_or_join_group));
             return;
         }
 

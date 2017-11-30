@@ -134,6 +134,7 @@ public class UserOnMapFragment
                     mViewModel.zoneEditMode.get() == UserOnMapViewModel.EM_NEW) {
                 changeUiLayout(true);
             }
+            mViewModel.start();
         } else {
             mViewModel.start();
         }

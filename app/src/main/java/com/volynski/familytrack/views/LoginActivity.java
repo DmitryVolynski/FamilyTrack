@@ -66,9 +66,6 @@ public class LoginActivity extends AppCompatActivity implements
         LoginNavigator,
         FamilyTrackDataSource.GetUserByEmailCallback {
 
-    private static final int SIGNED_IN = 0;
-    private static final int STATE_SIGNING_IN = 1;
-    private static final int STATE_IN_PROGRESS = 2;
     private static final int RC_SIGN_IN = 0;
     private static final int RC_PHONE_NUMBER = 12;
 
@@ -142,7 +139,6 @@ public class LoginActivity extends AppCompatActivity implements
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
                 public void onResult(GoogleSignInResult googleSignInResult) {
-                    //hideProgressDialog();
                     if (googleSignInResult.isSuccess()) {
                         handleSignInResult(googleSignInResult);
                     } else {
@@ -199,7 +195,7 @@ public class LoginActivity extends AppCompatActivity implements
         } else {
             // Signed out, show unauthenticated UI.
             Toast.makeText(this, R.string.sign_in_failed_message, Toast.LENGTH_LONG).show();
-            finish();
+            //finish();
         }
     }
 
@@ -227,7 +223,7 @@ public class LoginActivity extends AppCompatActivity implements
                             // signed in user can be handled in the listener.
                             if (!task.isSuccessful()) {
                                 Timber.e("signInWithCredential", task.getException());
-                                Toast.makeText(LoginActivity.this, "Login to Firebase failed", Toast.LENGTH_LONG).show();
+                                Toast.makeText(LoginActivity.this, R.string.login_to_firebase_failed, Toast.LENGTH_LONG).show();
                                 finish();
                             }
                         }
@@ -287,21 +283,6 @@ public class LoginActivity extends AppCompatActivity implements
         dataSource.getUserByEmail(mGoogleSignInAccount.getEmail(), this);
     }
 
-/*
-    private void signOut() {
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        if (status.isSuccess()) {
-                            mStatus.setText("Signed out");
-                            mSignInButton.setEnabled(true);
-                        }
-                    }
-                });
-    }
-*/
-
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
@@ -312,7 +293,6 @@ public class LoginActivity extends AppCompatActivity implements
          * Request location permission, so that we can get the location of the
          * device. The result of the permission request is handled by a callback,
          * onRequestPermissionsResult.
-
          */
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
@@ -341,7 +321,8 @@ public class LoginActivity extends AppCompatActivity implements
 
     @Override
     public void onGetUserByEmailCompleted(FirebaseResult<User> result) {
-        if (result.getData() == null || result.getData().getPhotoUrl().equals(StringKeys.CREATED_FROM_CONTACTS_KEY)) {
+        if (result.getData() == null ||
+                result.getData().getPhotoUrl().equals(StringKeys.CREATED_FROM_CONTACTS_KEY)) {
             if (mOrientationChanged) {
                 showFirstTimeUserDialog("");
             } else {
@@ -366,7 +347,7 @@ public class LoginActivity extends AppCompatActivity implements
         mFirstTimeUserViewModel.setNavigator(this);
         mFirstTimeDialog.setViewModel(mFirstTimeUserViewModel);
 
-        mFirstTimeDialog.show(getSupportFragmentManager(), "aa");
+        mFirstTimeDialog.show(getSupportFragmentManager(), getString(R.string.dialog_tag));
     }
 
     public FirstTimeUserViewModel findOrCreateViewModel() {

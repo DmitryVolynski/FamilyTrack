@@ -5,33 +5,33 @@
         <item
             android:id="@+id/drawer_nav_map"
             android:icon="@drawable/ic_map"
-            android:title="Map" />
+            android:title="@string/menu_title_map" />
         <item
             android:id="@+id/drawer_nav_users"
             android:icon="@drawable/ic_person"
-            android:title="Users" />
+            android:title="@string/menu_title_users" />
         <item
             android:id="@+id/drawer_nav_membership"
             android:icon="@drawable/ic_menu_membership"
-            android:title="Membership" />
+            android:title="@string/menu_title_membership" />
         <item
             android:id="@+id/drawer_nav_geofences"
             android:icon="@drawable/ic_menu_geofences"
-            android:title="Geofence events" />
+            android:title="@string/menu_title_geofence_events" />
         <item
             android:id="@+id/drawer_nav_chart"
             android:icon="@drawable/ic_chart"
-            android:title="Charts" />
+            android:title="@string/menu_title_charts" />
     </group>
 
     <group android:id="@+id/g1" android:checkableBehavior="none">
         <item
             android:id="@+id/drawer_nav_settings"
-            android:title="Settings" />
+            android:title="@string/menu_title_settings" />
         <item
             android:id="@+id/drawer_nav_about"
             android:icon="@drawable/ic_menu_about"
-            android:title="About" />
+            android:title="@string/menu_title_about" />
     </group>
 
 </menu>

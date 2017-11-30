@@ -181,30 +181,40 @@
     <string name="msg_zone_updated" translatable="true">Zone updated</string>
     <string name="ex_zone_key_is_empty" translatable="true">Zone key is empty or mode != EM_EDIT. Unable to remove zone</string>
     <string name="msg_zone_removed" translatable="true">Zone removed</string>
-    <string name="please_specify_group_name">Please specify a name for new group</string>
+    <string name="please_specify_group_name" translatable="true">Please specify a name for new group</string>
     <string name="label_button_ok">Ok</string>
     <string name="dialog_tag">dialog</string>
     <string name="button_create_label">CREATE</string>
     <string name="button_cancel_label">CANCEL</string>
-    <string name="select_users_dialog_title">Select users to invite</string>
-    <string name="other_chart_label">Other</string>
-    <string name="most_visited_places_label">Most visited places</string>
-    <string name="leave_group_dialog_title">Leaving group</string>
-    <string name="leave_group_dialog_message">Please note that you are the one and only admin in group.\n\nDelegate admin role to somebody else before leaving this group</string>
-    <string name="remove_zone_dialog_title">Removing zone</string>
-    <string name="remove_zone_dialog_mesage">Are you sure you want to remove zone \'%1$s\'?</string>
-    <string name="sign_in_failed_message">Sign in failed</string>
-    <string name="admins_only_message">ADMINS ONLY</string>
-    <string name="own_details_only_message">You could edit own details only</string>
-    <string name="ex_unsupported_menu_id">Unsupported menu id=</string>
-    <string name="settings_toolbar_title">Settings</string>
-    <string name="user_details_toolbar_title">User details</string>
-    <string name="remove_user_dialog_title">Removing user</string>
-    <string name="remove_user_dialog_message">Are you sure you want to remove user \'%1$s\' from group \'%2$s\' ? In order to join this group later user should be invited again</string>
-    <string name="google_api_client_connection_failed">Google Api Client connection failed</string>
-    <string name="ex_check_web_client_id">CHECK WEB CLIENT ID. ID TOKEN = NULL</string>
-    <string name="warning_dialog_title">Warning</string>
-    <string name="network_not_available">NETWORK NOT AVAILABLE</string>
-    <string name="ex_check_location_mode">Unable to use geofences. Check location settings on phone, should be High accuracy mode</string>
-    <string name="ex_non_null_data_expected">non-null data expected</string>
+    <string name="select_users_dialog_title" translatable="true">Select users to invite</string>
+    <string name="other_chart_label" translatable="true">Other</string>
+    <string name="most_visited_places_label" translatable="true">Most visited places</string>
+    <string name="leave_group_dialog_title" translatable="true">Leaving group</string>
+    <string name="leave_group_dialog_message" translatable="true">Please note that you are the one and only admin in group.\n\nDelegate admin role to somebody else before leaving this group</string>
+    <string name="remove_zone_dialog_title" translatable="true">Removing zone</string>
+    <string name="remove_zone_dialog_mesage" translatable="true">Are you sure you want to remove zone \'%1$s\'?</string>
+    <string name="sign_in_failed_message" translatable="true">Sign in failed</string>
+    <string name="admins_only_message" translatable="true">ADMINS ONLY</string>
+    <string name="own_details_only_message" translatable="true">You could edit own details only</string>
+    <string name="ex_unsupported_menu_id" translatable="true">Unsupported menu id=</string>
+    <string name="settings_toolbar_title" translatable="true">Settings</string>
+    <string name="user_details_toolbar_title" translatable="true">User details</string>
+    <string name="remove_user_dialog_title" translatable="true">Removing user</string>
+    <string name="remove_user_dialog_message" translatable="true">Are you sure you want to remove user \'%1$s\' from group \'%2$s\' ? In order to join this group later user should be invited again</string>
+    <string name="google_api_client_connection_failed" translatable="true">Google Api Client connection failed</string>
+    <string name="ex_check_web_client_id" translatable="true">CHECK WEB CLIENT ID. ID TOKEN = NULL</string>
+    <string name="warning_dialog_title" translatable="true">Warning</string>
+    <string name="network_not_available" translatable="true">NETWORK NOT AVAILABLE</string>
+    <string name="ex_check_location_mode" translatable="true">Unable to use geofences. Check location settings on phone, should be High accuracy mode</string>
+    <string name="ex_non_null_data_expected" translatable="true">non-null data expected</string>
+    <string name="menu_title_map" translatable="true">Map</string>
+    <string name="menu_title_users" translatable="true">Users</string>
+    <string name="menu_title_membership" translatable="true">Membership</string>
+    <string name="menu_title_geofence_events" translatable="true">Geofence events</string>
+    <string name="menu_title_charts" translatable="true">Charts</string>
+    <string name="menu_title_settings" translatable="true">Settings</string>
+    <string name="menu_title_about" translatable="true">About</string>
+    <string name="login_to_firebase_failed" translatable="true">Login to Firebase failed</string>
+    <string name="message_create_or_join_group" translatable="true">In order to invite users your should be a member of a group</string>
+    <string name="dialog_title_invite_users">Invite users</string>
 </resources>

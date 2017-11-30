@@ -112,6 +112,9 @@ public class UserOnMapViewModel extends AbstractViewModel {
                     mCurrentUser = result.getData();
                     if (mCurrentUser.getActiveMembership() != null) {
                         populateObservables(mCurrentUser.getActiveMembership().getGroupUuid());
+                    } else {
+                        // user is not a member of any group
+                        clearViewData();
                     }
                 } else {
                     Timber.v(String.format(mContext.getString(R.string.ex_user_with_uuid_not_found), mCurrentUserUuid));
@@ -119,6 +122,13 @@ public class UserOnMapViewModel extends AbstractViewModel {
             }
         });
 
+    }
+
+    private void clearViewData() {
+        users.clear();
+        viewModels.clear();
+        zones.clear();
+        path.clear();
     }
 
     /**
