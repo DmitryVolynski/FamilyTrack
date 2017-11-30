@@ -75,7 +75,7 @@ public class StringKeys {
 // === функционал
 
 // === UI
-// TODO: добавить индикатор ожидания при загрузке данных
-// TODO: тестирование
+// добавить индикатор ожидания при загрузке данных
+// тестирование
 
 // License: Linkware (Backlink to http://www.alienvalley.com required)
